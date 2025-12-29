@@ -352,7 +352,7 @@ pub mod pallet {
                 // In production, sender provides a change stealth hash
                 log::debug!(
                     target: "runtime::confidential-transfer",
-                    "Change of {} returned (simplified in MVP)",
+                    "Change of {:?} returned (simplified in MVP)",
                     change
                 );
             }
