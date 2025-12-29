@@ -215,17 +215,20 @@ export default function SendScreen() {
   };
 
   // Helper to check if form is ready (for button state)
+  // Using state variables for stability during render
   const isFormReady = (): boolean => {
     try {
-      const hasWallet = !!wallet?.address;
-      const hasRecipient = !!recipient;
-      // Use direct validation instead of state to avoid race conditions
-      const hasValidAddress = checkAddressValid(recipient);
-      const hasAmount = !!amount && parseFloat(amount) > 0;
-      const hasBalance = !!balance;
-      const hasNonZeroBalance = hasBalance && balance.free && !new BN(balance.free).isZero();
+      if (!wallet?.address) return false;
+      if (!recipient) return false;
+      if (!isValidAddress) return false;
+      if (!amount || parseFloat(amount) <= 0) return false;
+      if (!balance || !balance.free) return false;
       
-      return hasWallet && hasRecipient && hasValidAddress && hasAmount && hasNonZeroBalance;
+      // Check balance is not zero
+      const balanceBN = new BN(balance.free);
+      if (balanceBN.isZero()) return false;
+      
+      return true;
     } catch (error) {
       console.error('[Send] isFormReady error:', error);
       return false;
@@ -234,18 +237,21 @@ export default function SendScreen() {
 
   // Get button text based on current state
   const getButtonText = (): string => {
-    if (!wallet?.address) return 'Connect Wallet';
-    if (!recipient) return 'Enter Recipient';
-    // Use direct validation instead of state
-    if (!checkAddressValid(recipient)) return 'Invalid Address';
-    if (!amount || parseFloat(amount) <= 0) return 'Enter Amount';
-    if (!balance) return 'Loading...';
     try {
-      if (new BN(balance.free).isZero()) return 'No Balance';
-    } catch {
-      return 'Balance Error';
+      if (!wallet?.address) return 'Connect Wallet';
+      if (!recipient) return 'Enter Recipient';
+      if (!isValidAddress) return 'Invalid Address';
+      if (!amount || parseFloat(amount) <= 0) return 'Enter Amount';
+      if (!balance || !balance.free) return 'Loading...';
+      
+      const balanceBN = new BN(balance.free);
+      if (balanceBN.isZero()) return 'No Balance';
+      
+      return 'Review Send';
+    } catch (error) {
+      console.error('[Send] getButtonText error:', error);
+      return 'Error';
     }
-    return 'Review Send';
   };
 
   const handleReview = () => {
