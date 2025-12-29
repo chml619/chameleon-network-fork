@@ -348,6 +348,41 @@ After extensive troubleshooting of Cargo.lock dependency conflicts (sc-network-t
 - **Block Production:** ✅ Active (~6 sec blocks)
 - **Commit:** 72c6a14
 
+**Key Technical Decisions:**
+- Cargo.lock backed up to `/root/Cargo.lock.4-pallets-working`
+- Tagged as `baseline-4-pallets-v1` on GitHub
+- Emissions: 10% yearly reduction (65M CHML over 20 years)
+- Year 1: 1.407 CHML/block (7.4M CHML total)
+
+---
+
+### ✅ WEEK 7: COMPLETE (Dec 23-27, 2025)
+
+**Status:** ✅ COMPLETE (with known limitations)
+
+**MEV Protection Pallet:**
+- Integrated in runtime (pallet index 8)
+- Extrinsics: submit_protected_tx, execute_protected_tx, cancel_protected_tx
+- ⚠️ Manual execution required (on_finalize auto-execution pending)
+
+**Mobile App Features Delivered:**
+- Transaction success screen, explorer links, copy-to-clipboard
+- Transaction history (AsyncStorage per wallet)
+- Local notifications (tx sent/confirmed/received/failed)
+- Multi-wallet persistence and switching
+- DEVNET badge, pull-to-refresh, Mock View banners
+
+**Infrastructure:**
+- Genesis: Alice 100, Bob 150, Charlie 200, Dave 250, Eve 300 CHML
+- Custom chain spec (chameleon_testnet) deployed
+- Node stable at ws://64.23.233.36:9944
+
+**Known Limitations:**
+| Issue | Workaround | Priority |
+|-------|------------|----------|
+| MEV auto-execution | Call execute_protected_tx manually | Medium |
+| Explorer HTTPS→WS | Copy hash manually | Low |
+
 ---
 
 **Last Updated:** December 29, 2025  
