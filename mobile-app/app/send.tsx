@@ -177,41 +177,45 @@ export default function SendScreen() {
   };
 
   const validateTransaction = (): string | null => {
-    if (!wallet?.address) {
-      return 'No wallet connected';
-    }
-    if (!recipient) {
-      return 'Please enter recipient address';
-    }
-    // Use direct validation instead of state to avoid race conditions
-    if (!checkAddressValid(recipient)) {
-      return 'Invalid recipient address';
-    }
-    if (!amount || parseFloat(amount) <= 0) {
-      return 'Please enter a valid amount';
-    }
-    if (!balance) {
-      return 'Loading balance...';
-    }
-    
-    // Check if user has any balance
-    const balanceBN = new BN(balance.free);
-    if (balanceBN.isZero()) {
-      return 'Insufficient balance';
-    }
-    
-    // Check against fee if available
-    if (feeEstimate) {
-      const amountBN = transactionService.parseAmount(amount);
-      const feeBN = new BN(feeEstimate.partialFee);
-      const totalBN = amountBN.add(feeBN);
-      
-      if (totalBN.gt(balanceBN)) {
-        return 'Insufficient balance (including fees)';
+    try {
+      if (!wallet?.address) {
+        return 'No wallet connected';
       }
+      if (!recipient) {
+        return 'Please enter recipient address';
+      }
+      if (!isValidAddress) {
+        return 'Invalid recipient address';
+      }
+      if (!amount || parseFloat(amount) <= 0) {
+        return 'Please enter a valid amount';
+      }
+      if (!balance || !balance.free) {
+        return 'Loading balance...';
+      }
+      
+      // Check if user has any balance
+      const balanceBN = new BN(balance.free);
+      if (balanceBN.isZero()) {
+        return 'Insufficient balance';
+      }
+      
+      // Check against fee if available
+      if (feeEstimate && feeEstimate.partialFee) {
+        const amountBN = transactionService.parseAmount(amount);
+        const feeBN = new BN(feeEstimate.partialFee);
+        const totalBN = amountBN.add(feeBN);
+        
+        if (totalBN.gt(balanceBN)) {
+          return 'Insufficient balance (including fees)';
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('[Send] validateTransaction error:', error);
+      return 'Validation error';
     }
-    
-    return null;
   };
 
   // Helper to check if form is ready (for button state)
