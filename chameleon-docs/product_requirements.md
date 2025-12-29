@@ -127,8 +127,33 @@ Build a privacy-preserving blockchain that protects retail users from MEV exploi
 
 ## 🔒 PRIVACY REQUIREMENTS
 
-### zkSNARK Integration (From Manta)
-**Objective:** Inherit Manta's battle-tested privacy primitives
+### Privacy Architecture (Updated Dec 2025)
+
+**Core Principle:** Privacy is MANDATORY on-chain, not optional.
+
+**Privacy Layers:**
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Sender Privacy | Ring Signatures (curve25519-dalek) | Hide which address sent transaction |
+| Receiver Privacy | Stealth Addresses (ECDH pattern) | Hide which address receives funds |
+| Amount Privacy | Pedersen Commitments (Phase 2) | Hide transfer amounts |
+
+**Implementation:**
+1. **pallet-ring-signatures:** Ring signature verification for sender anonymity
+2. **pallet-stealth-addresses:** One-time address generation for receiver privacy
+3. **pallet-confidential-transfer:** Combined private transfers
+
+**Key Design Decisions:**
+- All on-chain transactions use Ring Signatures by default
+- All receiving addresses are Stealth Addresses
+- Privacy is mandatory, not an optional toggle
+- External visibility only at bridge entry/exit points (shield/unshield)
+- No transaction graph analysis possible for on-chain transfers
+
+---
+
+### zkSNARK Integration (From Manta) - Future Phase
+**Objective:** Inherit Manta's battle-tested privacy primitives (Phase 2+)
 
 **Requirements:**
 1. **Shielded Transactions:**
