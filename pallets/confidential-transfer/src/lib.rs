@@ -51,10 +51,11 @@ mod tests;
 mod benchmarking;
 
 pub mod weights;
-pub use weights::*;
+pub use weights::WeightInfo;
 
 #[frame_support::pallet]
 pub mod pallet {
+    use super::*;
     use frame_support::{
         pallet_prelude::*,
         traits::{Currency, ExistenceRequirement, WithdrawReasons},
