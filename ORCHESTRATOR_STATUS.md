@@ -324,6 +324,32 @@ curl -H "Content-Type: application/json" \
 
 ---
 
+## 📋 PRIOR WEEKS
+
+### ✅ WEEK 8: COMPLETE (Dec 28-29, 2025)
+
+**Status:** ✅ COMPLETE - Fresh Template Migration + 4 Pallets Deployed
+
+**Major Achievement:** Template Migration
+After extensive troubleshooting of Cargo.lock dependency conflicts (sc-network-types v0.15.5 vs v0.15.3), we migrated to a fresh `polkadot-sdk-solochain-template` with a working baseline.
+
+**Pallets Integrated into Runtime:**
+| Pallet | Index | Status | Notes |
+|--------|-------|--------|-------|
+| MEV Protection | 8 | ✅ Active | Executing on every block |
+| Emissions | 9 | ✅ Active | Minting 1.407 CHML/block |
+| Staking | 10 | ✅ Integrated | Ready for testing |
+| Bridge | 11 | ✅ Integrated | Ready for testing |
+| pDEX | - | ⏸️ Deferred | Needs pallet-assets version alignment |
+
+**Devnet Deployment:**
+- **Endpoint:** ws://64.23.233.36:9944
+- **Binary:** solochain-template-node v0.1.0
+- **Block Production:** ✅ Active (~6 sec blocks)
+- **Commit:** 72c6a14
+
+---
+
 **Last Updated:** December 29, 2025  
 **Updated By:** Orchestrator Agent  
 **Next Update:** After Week 9 Privacy Layer completion
