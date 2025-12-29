@@ -163,38 +163,26 @@ export default function SendScreen() {
   };
 
   const validateTransaction = (): string | null => {
-    console.log('[Send] Validating transaction...');
-    console.log('[Send] wallet?.address:', wallet?.address);
-    console.log('[Send] recipient:', recipient);
-    console.log('[Send] isValidAddress:', isValidAddress);
-    console.log('[Send] amount:', amount);
-    console.log('[Send] balance:', balance);
-    
     if (!wallet?.address) {
-      console.log('[Send] Validation failed: No wallet');
       return 'No wallet connected';
     }
     if (!recipient) {
-      console.log('[Send] Validation failed: No recipient');
       return 'Please enter recipient address';
     }
-    if (!isValidAddress) {
-      console.log('[Send] Validation failed: Invalid address');
+    // Use direct validation instead of state to avoid race conditions
+    if (!checkAddressValid(recipient)) {
       return 'Invalid recipient address';
     }
     if (!amount || parseFloat(amount) <= 0) {
-      console.log('[Send] Validation failed: Invalid amount');
       return 'Please enter a valid amount';
     }
     if (!balance) {
-      console.log('[Send] Validation failed: No balance loaded');
       return 'Loading balance...';
     }
     
     // Check if user has any balance
     const balanceBN = new BN(balance.free);
     if (balanceBN.isZero()) {
-      console.log('[Send] Validation failed: Zero balance');
       return 'Insufficient balance';
     }
     
@@ -205,12 +193,10 @@ export default function SendScreen() {
       const totalBN = amountBN.add(feeBN);
       
       if (totalBN.gt(balanceBN)) {
-        console.log('[Send] Validation failed: Insufficient balance for amount + fee');
         return 'Insufficient balance (including fees)';
       }
     }
     
-    console.log('[Send] Validation passed!');
     return null;
   };
 
