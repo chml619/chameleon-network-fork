@@ -226,9 +226,9 @@ curl -H "Content-Type: application/json" \
 | Week | Milestone | Status |
 |------|-----------|--------|
 | 7 | MEV pallet + Mobile enhancements | ✅ **COMPLETE** |
-| 8 | pDEX pallet development | 🟡 **STARTING** |
-| 9 | Bridge pallet development | ⏳ Pending |
-| 10 | Staking improvements pallet | ⏳ Pending |
+| 8 | Emissions, Staking, Bridge pallets | ✅ **COMPLETE** |
+| 9 | pDEX integration + Privacy planning | 🟡 **STARTING** |
+| 10 | Integration testing + Mobile UI | ⏳ Pending |
 
 ### Phase 3: Testnet Prep (Weeks 11-14) ⏳
 ### Phase 4: Public Testnet (Week 15+) 🎯 Target
