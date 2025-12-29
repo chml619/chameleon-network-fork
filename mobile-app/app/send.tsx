@@ -97,7 +97,13 @@ export default function SendScreen() {
     console.log('[Send] MEV protection:', value ? 'enabled' : 'disabled');
   };
 
-  // Validate recipient address
+  // Validate address directly (not relying on state which may have race conditions)
+  const checkAddressValid = useCallback((addr: string): boolean => {
+    if (!addr || addr.length === 0) return false;
+    return transactionService.validateAddress(addr);
+  }, []);
+
+  // Validate recipient address (for UI feedback only)
   useEffect(() => {
     if (recipient.length > 0) {
       const valid = transactionService.validateAddress(recipient);
