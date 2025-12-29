@@ -185,6 +185,13 @@ export default function SendScreen() {
       Alert.alert('Transaction Error', error);
       return;
     }
+    
+    // Check fee estimate before showing confirmation
+    if (!feeEstimate) {
+      Alert.alert('Please Wait', 'Fee estimate is still loading. Please try again in a moment.');
+      return;
+    }
+    
     setShowConfirmation(true);
   };
 
