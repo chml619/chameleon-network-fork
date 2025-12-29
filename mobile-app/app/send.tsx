@@ -156,27 +156,69 @@ export default function SendScreen() {
     }
   };
 
-  const validateTransaction = () => {
-    if (!wallet?.address) return 'No wallet connected';
-    if (!recipient) return 'Please enter recipient address';
-    if (!isValidAddress) return 'Invalid recipient address';
-    if (!amount || parseFloat(amount) <= 0) return 'Please enter a valid amount';
-    if (!balance) return 'Unable to check balance';
+  const validateTransaction = (): string | null => {
+    console.log('[Send] Validating transaction...');
+    console.log('[Send] wallet?.address:', wallet?.address);
+    console.log('[Send] recipient:', recipient);
+    console.log('[Send] isValidAddress:', isValidAddress);
+    console.log('[Send] amount:', amount);
+    console.log('[Send] balance:', balance);
     
-    // Allow proceeding even if fee estimate is still loading
-    // The fee will be checked before final confirmation
+    if (!wallet?.address) {
+      console.log('[Send] Validation failed: No wallet');
+      return 'No wallet connected';
+    }
+    if (!recipient) {
+      console.log('[Send] Validation failed: No recipient');
+      return 'Please enter recipient address';
+    }
+    if (!isValidAddress) {
+      console.log('[Send] Validation failed: Invalid address');
+      return 'Invalid recipient address';
+    }
+    if (!amount || parseFloat(amount) <= 0) {
+      console.log('[Send] Validation failed: Invalid amount');
+      return 'Please enter a valid amount';
+    }
+    if (!balance) {
+      console.log('[Send] Validation failed: No balance loaded');
+      return 'Loading balance...';
+    }
+    
+    // Check if user has any balance
+    const balanceBN = new BN(balance.free);
+    if (balanceBN.isZero()) {
+      console.log('[Send] Validation failed: Zero balance');
+      return 'Insufficient balance';
+    }
+    
+    // Check against fee if available
     if (feeEstimate) {
       const amountBN = transactionService.parseAmount(amount);
       const feeBN = new BN(feeEstimate.partialFee);
       const totalBN = amountBN.add(feeBN);
-      const balanceBN = new BN(balance.free);
       
       if (totalBN.gt(balanceBN)) {
+        console.log('[Send] Validation failed: Insufficient balance for amount + fee');
         return 'Insufficient balance (including fees)';
       }
     }
     
+    console.log('[Send] Validation passed!');
     return null;
+  };
+
+  // Helper to check if form is ready (for button state)
+  const isFormReady = (): boolean => {
+    return !!(
+      wallet?.address &&
+      recipient &&
+      isValidAddress &&
+      amount &&
+      parseFloat(amount) > 0 &&
+      balance &&
+      !new BN(balance.free).isZero()
+    );
   };
 
   const handleReview = () => {
