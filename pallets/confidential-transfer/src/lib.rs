@@ -401,7 +401,7 @@ pub mod pallet {
         /// - `InsufficientShieldedBalance`: Note has less than requested amount.
         /// - `InvalidRingSignature`: Signature verification failed.
         #[pallet::call_index(2)]
-        #[pallet::weight(T::WeightInfo::unshield())]
+        #[pallet::weight(T::ConfidentialWeightInfo::unshield())]
         pub fn unshield(
             origin: OriginFor<T>,
             stealth_hash: [u8; 32],
