@@ -258,7 +258,7 @@ pub mod pallet {
             TotalShieldOperations::<T>::mutate(|count| *count = count.saturating_add(1));
 
             Self::deposit_event(Event::Shielded {
-                who,
+                who: who.clone(),
                 amount,
                 stealth_hash,
             });
@@ -266,7 +266,7 @@ pub mod pallet {
             log::info!(
                 target: "runtime::confidential-transfer",
                 "Shield: {:?} shielded {:?} tokens to stealth hash {:?}",
-                who, amount, stealth_hash
+                &who, amount, stealth_hash
             );
 
             Ok(())
