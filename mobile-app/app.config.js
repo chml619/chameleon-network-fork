@@ -1,0 +1,74 @@
+export default {
+  expo: {
+    sdkVersion: "54.0.0",
+    name: "Chameleon Wallet",
+    slug: "chameleon-wallet-spronline",
+    version: "0.1.0",
+    orientation: "portrait",
+    icon: "./assets/images/CHAMELEON.png",
+    scheme: "chameleon",
+    userInterfaceStyle: "light",
+    newArchEnabled: true,
+    splash: {
+      image: "./assets/images/CHAMELEON.png",
+      imageWidth: 400,
+      resizeMode: "contain",
+      backgroundColor: "#E8F5E9"
+    },
+    androidNavigationBar: {
+      visible: "sticky-immersive",
+      backgroundColor: "#FFFFFF"
+    },
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: "network.chml.wallet",
+      newArchEnabled: true
+    },
+    android: {
+      package: "network.chml.wallet",
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/icon.png",
+        backgroundColor: "#22B958"
+      },
+      permissions: [
+        "INTERNET"
+      ],
+      newArchEnabled: true,
+      softwareKeyboardLayoutMode: "pan"
+    },
+    web: {
+      bundler: "metro",
+      output: "static",
+      favicon: "./assets/images/Logo.png"
+    },
+    plugins: [
+      "expo-router",
+      "expo-secure-store",
+      "expo-dev-client",
+      [
+        "expo-build-properties",
+        {
+          android: {
+            usesCleartextTraffic: true
+          }
+        }
+      ]
+    ],
+    experiments: {
+      typedRoutes: true
+    },
+    extra: {
+      router: {
+        origin: false
+      },
+      eas: {
+        projectId: "df137d68-ff1c-4b64-9267-857b1a904023"
+      },
+      rpcEndpoint: "ws://64.23.233.36:9944",
+      rpcHttpEndpoint: "http://64.23.233.36:9944",
+      networkName: "Chameleon Devnet",
+      tokenSymbol: "CHML",
+      tokenDecimals: 18
+    }
+  }
+};

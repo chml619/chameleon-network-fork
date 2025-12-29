@@ -27,6 +27,10 @@ pallet-balances.workspace = true
 pallet-grandpa.workspace = true
 pallet-sudo.workspace = true
 pallet-template.workspace = true
+pallet-mev-protection.workspace = true
+pallet-emissions.workspace = true
+pallet-staking.workspace = true
+pallet-bridge.workspace = true
 pallet-timestamp.workspace = true
 pallet-transaction-payment-rpc-runtime-api.workspace = true
 pallet-transaction-payment.workspace = true
@@ -67,6 +71,10 @@ std = [
 	"pallet-grandpa/std",
 	"pallet-sudo/std",
 	"pallet-template/std",
+        "pallet-mev-protection/std",
+        "pallet-emissions/std",
+        "pallet-staking/std",
+        "pallet-bridge/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",

@@ -42,7 +42,7 @@ use sp_version::RuntimeVersion;
 use super::{
 	AccountId, Aura, Balance, Balances, Block, BlockNumber, Hash, Nonce, PalletInfo, Runtime,
 	RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask,
-	System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION,
+	System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION, UNIT,
 };
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
@@ -162,3 +162,76 @@ impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
 }
+
+
+// Imports for custom pallets
+use frame_support::PalletId;
+use sp_runtime::Permill;
+
+// Parameter types for custom pallets
+parameter_types! {
+    // MEV Protection
+    pub const MevMinDelay: BlockNumber = 1;
+    pub const MevMaxDelay: BlockNumber = 100;
+    pub const MevMaxCallLength: u32 = 1024;
+    
+    // Emissions - 1.407 CHML per block = 1_407_000_000_000 (12 decimals)
+    pub const InitialEmissionRate: Balance = 1_407_000_000_000;
+    pub const EmissionsPalletId: PalletId = PalletId(*b"emission");
+    pub const BlocksPerYear: BlockNumber = 5_259_600; // ~6 sec blocks
+    
+    // pDEX
+    pub const PdexPalletId: PalletId = PalletId(*b"pdex/amm");
+    pub const MaxPools: u32 = 100;
+    pub const MinimumLiquidity: Balance = 1_000_000_000_000; // 1 CHML
+    pub const SwapFee: Permill = Permill::from_parts(3000); // 0.3%
+    
+    // Staking - 1,750 CHML minimum
+    pub const MinimumStake: Balance = 1_750_000_000_000_000; // 1750 CHML
+    pub const RewardsPalletId: PalletId = PalletId(*b"staking!");
+    
+    // Bridge
+    pub const MinimumDeposit: Balance = 1_000_000_000_000; // 1 CHML
+    pub const MaximumWithdrawal: Balance = 1_000_000_000_000_000_000; // 1000 CHML
+    pub const MaxValidators: u32 = 10;
+}
+
+/// Configure MEV Protection pallet
+impl pallet_mev_protection::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeCall = RuntimeCall;
+    type WeightInfo = ();
+    type MinDelay = MevMinDelay;
+    type MaxDelay = MevMaxDelay;
+    type MaxCallLength = MevMaxCallLength;
+}
+
+/// Configure Emissions pallet
+impl pallet_emissions::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = ();
+    type Currency = Balances;
+    type InitialEmissionRate = InitialEmissionRate;
+    type EmissionsPalletId = EmissionsPalletId;
+    type BlocksPerYear = BlocksPerYear;
+}
+
+/// Configure Staking pallet
+impl pallet_staking::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type Currency = Balances;
+    type WeightInfo = ();
+    type MinimumStake = MinimumStake;
+    type RewardsPalletId = RewardsPalletId;
+}
+
+/// Configure Bridge pallet
+impl pallet_bridge::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = ();
+    type Currency = Balances;
+    type MinimumDeposit = MinimumDeposit;
+    type MaximumWithdrawal = MaximumWithdrawal;
+    type MaxValidators = MaxValidators;
+}
+

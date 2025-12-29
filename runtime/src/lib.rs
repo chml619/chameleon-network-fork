@@ -225,4 +225,19 @@ mod runtime {
 	// Include the custom logic from the pallet-template in the runtime.
 	#[runtime::pallet_index(7)]
 	pub type Template = pallet_template;
+
+
+
+        #[runtime::pallet_index(8)]
+        pub type MevProtection = pallet_mev_protection;
+
+        #[runtime::pallet_index(9)]
+        pub type Emissions = pallet_emissions;
+
+
+        #[runtime::pallet_index(11)]
+        pub type Staking = pallet_staking;
+
+        #[runtime::pallet_index(12)]
+        pub type Bridge = pallet_bridge;
 }
