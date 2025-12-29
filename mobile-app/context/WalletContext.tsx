@@ -182,15 +182,20 @@ export function WalletProvider({ children }: WalletProviderProps) {
       const savedWallet = await multiWalletService.getWallet(address);
       
       if (savedWallet?.type === 'dev') {
-        // Find which dev account this is
-        const devAccountName = Object.entries(DEV_ACCOUNTS).find(([_, uri]) => {
-          // Import the account temporarily to check the address
-          return true; // This is a simplified check
-        });
+        // Extract account name from various formats:
+        // "Alice (Dev)", "Dev Account (Alice)", "alice", etc.
+        const nameLower = name.toLowerCase();
+        let accountNameLower: 'alice' | 'bob' | 'charlie' | 'dave' | 'eve' | null = null;
         
-        // Re-import based on name
-        const accountNameLower = name.toLowerCase().replace(' (dev)', '') as 'alice' | 'bob' | 'charlie' | 'dave' | 'eve';
-        if (['alice', 'bob', 'charlie', 'dave', 'eve'].includes(accountNameLower)) {
+        const devNames: Array<'alice' | 'bob' | 'charlie' | 'dave' | 'eve'> = ['alice', 'bob', 'charlie', 'dave', 'eve'];
+        for (const devName of devNames) {
+          if (nameLower.includes(devName)) {
+            accountNameLower = devName;
+            break;
+          }
+        }
+        
+        if (accountNameLower) {
           const walletState = await walletService.importDevAccount(accountNameLower);
           const uri = DEV_ACCOUNTS[accountNameLower];
           
@@ -199,6 +204,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
           await multiWalletService.setActiveWallet(walletState.address);
           
           setWallet(walletState);
+        } else {
+          throw new Error('Could not identify dev account');
         }
       } else {
         // For custom/imported wallets, just update the state
