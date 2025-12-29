@@ -140,62 +140,20 @@ After extensive troubleshooting of Cargo.lock dependency conflicts (sc-network-t
 
 | Metric | Value |
 |--------|-------|
-| **Current Week** | 8 of 16 (COMPLETE) |
-| **Overall Progress** | ~90% |
+| **Current Week** | 9 of 16 |
+| **Overall Progress** | ~55% |
 | **Timeline** | 🟢 ON TRACK |
 | **Blockers** | pDEX deferred (version conflict) |
 | **Build Server** | Contabo (178.18.243.189) |
 | **Network Endpoint** | ws://64.23.233.36:9944 |
 
----
-
-## ✅ WEEK 7: COMPLETE (Dec 27, 2025)
-
-**Timeline:** Dec 23-27, 2025 | **Status:** ✅ COMPLETE (with known limitations)
-
-### Deliverables
-
-**MEV Protection Pallet:**
-- ✅ Integrated in runtime (pallet index 8)
-- ✅ Extrinsics: submit_protected_tx, execute_protected_tx, cancel_protected_tx
-- ✅ Storage/events functional, transaction submission working
-- ⚠️ Manual execution required (on_finalize auto-execution pending)
-
-**Mobile App - Transaction Features:**
-- ✅ Transaction success screen auto-dismisses
-- ✅ Explorer link (View in Explorer button)
-- ✅ Copy-to-clipboard (tx hash, block hash)
-- ✅ Transaction history (AsyncStorage per wallet)
-- ✅ Recent Activity (last 5 txs) + View All screen
-- ✅ Incoming transaction detection for receiving wallets
-
-**Mobile App - UX/UI:**
-- ✅ DEVNET badge redesigned (light gray, better contrast)
-- ✅ Pull-to-refresh on home/wallet/trade screens
-- ✅ Mock View banners on Trade/Stake/Bridge
-- ✅ MEV toggle defaults OFF with "Beta" label
-
-**Mobile App - Advanced Features:**
-- ✅ Local notifications (tx sent/confirmed/received/failed)
-- ✅ Multi-wallet persistence (saved wallets list)
-- ✅ Wallet switching + Manage Wallets screen
-- ✅ Notification bell with unread badge
-
-**Infrastructure:**
-- ✅ Genesis: Alice 100, Bob 150, Charlie 200, Dave 250, Eve 300 CHML
-- ✅ Custom chain spec (chameleon_testnet) deployed
-- ✅ Node stable at ws://64.23.233.36:9944
-- ✅ Android cleartext + crypto polyfills configured
-
-### Known Limitations ⚠️
-
-| Issue | Impact | Workaround | Priority |
-|-------|--------|------------|----------|
-| MEV auto-execution | Users must manually execute | Call execute_protected_tx | Medium |
-| Explorer HTTPS→WS | Web app can't connect | Copy hash manually | Low |
-
-### Metrics
-- **Dev Time:** 6 days | **Blockers Resolved:** 3 | **Features:** 15+ improvements
+**Progress Breakdown:**
+- Foundation (Weeks 1-6): ✅ 100%
+- Core Pallets (Weeks 7-8): ✅ 100%  
+- Privacy Layer (Week 9): 🚀 0% (starting)
+- pDEX + Integration (Week 10): ⏳ 0%
+- Infrastructure (Weeks 11-14): ⏳ 0%
+- Testnet Launch (Week 15+): ⏳ 0%
 
 ---
 
