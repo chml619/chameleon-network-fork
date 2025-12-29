@@ -27,16 +27,21 @@ use sp_keyring::Sr25519Keyring;
 // Returns the genesis config presets populated with given parameters.
 fn testnet_genesis(
 	initial_authorities: Vec<(AuraId, GrandpaId)>,
-	endowed_accounts: Vec<AccountId>,
 	root: AccountId,
 ) -> Value {
+	// Pre-funded dev wallets with specific CHML amounts
+	// Using 12 decimals: 1 CHML = 1_000_000_000_000
+	let endowed_accounts: Vec<(AccountId, u128)> = vec![
+		(Sr25519Keyring::Alice.to_account_id(), 100_000_000_000_000),   // 100 CHML
+		(Sr25519Keyring::Bob.to_account_id(), 150_000_000_000_000),     // 150 CHML
+		(Sr25519Keyring::Charlie.to_account_id(), 200_000_000_000_000), // 200 CHML
+		(Sr25519Keyring::Dave.to_account_id(), 250_000_000_000_000),    // 250 CHML
+		(Sr25519Keyring::Eve.to_account_id(), 300_000_000_000_000),     // 300 CHML
+	];
+
 	build_struct_json_patch!(RuntimeGenesisConfig {
 		balances: BalancesConfig {
-			balances: endowed_accounts
-				.iter()
-				.cloned()
-				.map(|k| (k, 1u128 << 60))
-				.collect::<Vec<_>>(),
+			balances: endowed_accounts,
 		},
 		aura: pallet_aura::GenesisConfig {
 			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect::<Vec<_>>(),
