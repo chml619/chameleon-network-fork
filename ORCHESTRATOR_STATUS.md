@@ -142,6 +142,11 @@ After extensive troubleshooting of Cargo.lock dependency conflicts (sc-network-t
 | HTTP RPC | `http://64.23.233.36:9944` | ✅ Active |
 | WebSocket | `ws://64.23.233.36:9944` | ✅ Active |
 
+### Binary Info
+- **Binary:** solochain-template-node v0.1.0
+- **Commit:** 72c6a14
+- **Build:** Dec 29, 2025
+
 ### Quick Health Check
 ```bash
 curl -H "Content-Type: application/json" \
