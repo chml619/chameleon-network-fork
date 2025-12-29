@@ -91,14 +91,16 @@ External View:   Only visible at bridge entry/exit points
 
 ---
 
-## ✅ WEEK 8: COMPLETE (Dec 28-29, 2025)
+## 📋 PRIOR WEEKS
+
+### ✅ WEEK 8: COMPLETE (Dec 28-29, 2025)
 
 **Status:** ✅ COMPLETE - Fresh Template Migration + 4 Pallets Deployed
 
-### Major Achievement: Template Migration
+**Major Achievement:** Template Migration
 After extensive troubleshooting of Cargo.lock dependency conflicts (sc-network-types v0.15.5 vs v0.15.3), we migrated to a fresh `polkadot-sdk-solochain-template` with a working baseline.
 
-### Pallets Integrated into Runtime:
+**Pallets Integrated into Runtime:**
 | Pallet | Index | Status | Notes |
 |--------|-------|--------|-------|
 | MEV Protection | 8 | ✅ Active | Executing on every block |
@@ -107,32 +109,11 @@ After extensive troubleshooting of Cargo.lock dependency conflicts (sc-network-t
 | Bridge | 11 | ✅ Integrated | Ready for testing |
 | pDEX | - | ⏸️ Deferred | Needs pallet-assets version alignment |
 
-### Devnet Deployment:
+**Devnet Deployment:**
 - **Endpoint:** ws://64.23.233.36:9944
 - **Binary:** solochain-template-node v0.1.0
 - **Block Production:** ✅ Active (~6 sec blocks)
 - **Commit:** 72c6a14
-
-### Key Files Changed:
-- `/Cargo.toml` - Workspace with 5 custom pallets
-- `/runtime/Cargo.toml` - Runtime dependencies
-- `/runtime/src/lib.rs` - Pallet indices 8-11
-- `/runtime/src/configs/mod.rs` - Pallet configurations
-
-### Cargo.lock Strategy:
-- ✅ Backed up working Cargo.lock to `/root/Cargo.lock.4-pallets-working`
-- ✅ Tagged as `baseline-4-pallets-v1` on GitHub
-- ⚠️ NEVER delete Cargo.lock without backup
-
-### Known Issues:
-1. pDEX requires pallet-assets with matching sp-* versions
-2. GitHub workflow files removed (PAT lacks workflow scope)
-
-### Next Steps (Week 9):
-1. Fix genesis pre-funding bug for dev wallets ✅ DONE
-2. Add pDEX with proper pallet-assets integration
-3. Privacy layer planning (zkSNARK integration path)
-4. Mobile app UI updates for Staking/Bridge screens
 
 ---
 
