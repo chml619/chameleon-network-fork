@@ -210,15 +210,44 @@ export default function SendScreen() {
 
   // Helper to check if form is ready (for button state)
   const isFormReady = (): boolean => {
-    return !!(
-      wallet?.address &&
-      recipient &&
-      isValidAddress &&
-      amount &&
-      parseFloat(amount) > 0 &&
-      balance &&
-      !new BN(balance.free).isZero()
-    );
+    try {
+      const hasWallet = !!wallet?.address;
+      const hasRecipient = !!recipient;
+      const hasValidAddress = !!isValidAddress;
+      const hasAmount = !!amount && parseFloat(amount) > 0;
+      const hasBalance = !!balance;
+      const hasNonZeroBalance = hasBalance && balance.free && !new BN(balance.free).isZero();
+      
+      console.log('[Send] isFormReady check:', {
+        hasWallet,
+        hasRecipient,
+        hasValidAddress,
+        hasAmount,
+        hasBalance,
+        balanceFree: balance?.free,
+        hasNonZeroBalance,
+      });
+      
+      return hasWallet && hasRecipient && hasValidAddress && hasAmount && hasNonZeroBalance;
+    } catch (error) {
+      console.error('[Send] isFormReady error:', error);
+      return false;
+    }
+  };
+
+  // Get button text based on current state
+  const getButtonText = (): string => {
+    if (!wallet?.address) return 'Connect Wallet';
+    if (!recipient) return 'Enter Recipient';
+    if (!isValidAddress) return 'Invalid Address';
+    if (!amount || parseFloat(amount) <= 0) return 'Enter Amount';
+    if (!balance) return 'Loading...';
+    try {
+      if (new BN(balance.free).isZero()) return 'No Balance';
+    } catch {
+      return 'Balance Error';
+    }
+    return 'Review Send';
   };
 
   const handleReview = () => {
