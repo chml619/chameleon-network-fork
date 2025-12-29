@@ -2,22 +2,27 @@
 
 **Orchestrator:** AI Agent Coordinator  
 **Current Phase:** Week 9 - Privacy Layer Development  
-**Status:** 🚀 Privacy-First Architecture In Progress  
+**Status:** ✅ Privacy Pallet Scaffolding Complete  
 **Target:** Public Testnet Launch (Week 15)  
-**Last Updated:** December 29, 2025  
-**Next Milestone:** Week 9 - Ring Signatures + Stealth Addresses
+**Last Updated:** August 2025  
+**Next Milestone:** Week 9 - Implement Cryptographic Verification Logic
 
 ---
 
 ## 📋 EXECUTIVE SUMMARY
 
-**Week 9 Status:** 🚀 IN PROGRESS - Privacy Layer Core Development
+**Week 9 Status:** ✅ SCAFFOLDING COMPLETE - Privacy Layer Core Development
 
-**Current Focus:**
-- 🔐 **pallet-ring-signatures** - Ring signature verification for sender privacy
-- 🔐 **pallet-stealth-addresses** - One-time address generation for receiver privacy
-- 🔐 **pallet-confidential-transfer** - Private CHML/token transfers
-- 📱 **Mobile App Privacy UI** - Stealth address display and private transfer flow
+**Completed Today:**
+- ✅ **pallet-ring-signatures** - Scaffolding complete, compiles successfully
+- ✅ **pallet-stealth-addresses** - Scaffolding complete, compiles successfully  
+- ✅ **pallet-confidential-transfer** - Scaffolding complete, compiles successfully
+- ✅ **Workspace updated** - All three pallets added to Cargo.toml workspace
+
+**Next Steps:**
+- 🔄 Implement actual curve25519 ring signature verification logic
+- 🔄 Add runtime integration (after verifying build on Contabo)
+- 📱 Mobile App Privacy UI - Stealth address display and private transfer flow
 
 **Key Decision:** Privacy is MANDATORY on-chain (not optional toggle)
 
@@ -25,37 +30,59 @@
 
 ---
 
-## 🆕 WEEK 9: PRIVACY LAYER (Dec 30, 2025 - Jan 5, 2026)
+## 🆕 WEEK 9: PRIVACY LAYER (August 2025)
 
-**Status:** 🚀 IN PROGRESS - Privacy-First Architecture
+**Status:** ✅ SCAFFOLDING COMPLETE - Privacy-First Architecture
 
-### Deliverables
+### Completed Deliverables
 
-**1. pallet-ring-signatures (Sender Privacy)**
-- Ring signature verification using curve25519-dalek crate
-- Hides sender identity among group of possible signers
-- Integration with transfer extrinsics
+**1. pallet-ring-signatures (Sender Privacy)** ✅
+- Ring signature verification pallet scaffolding
+- Key image storage to prevent double-spending
+- Configurable ring size (default 11 like Monero)
+- Weight functions defined
+- TODO: Implement actual MLSAG verification
 
-**2. pallet-stealth-addresses (Receiver Privacy)**
-- One-time address generation using standard ECDH pattern
-- Receiver can only be identified by intended recipient
-- Key derivation for scanning incoming transactions
+**2. pallet-stealth-addresses (Receiver Privacy)** ✅
+- One-time address generation using stealth meta-addresses
+- Ephemeral key announcements for payment scanning
+- Auto-pruning of old ephemeral keys
+- EIP-5564 compatible design
+- Weight functions defined
 
-**3. pallet-confidential-transfer (Private Transfers)**
-- Combines ring signatures + stealth addresses
-- Amount hidden using Pedersen commitments (optional)
-- All on-chain transactions private by default
+**3. pallet-confidential-transfer (Private Transfers)** ✅
+- Shield: Convert public CHML to private
+- Confidential Transfer: Transfer between stealth addresses
+- Unshield: Convert private back to public
+- Integrates ring-signatures and stealth-addresses pallets
+- Weight functions defined
 
-**4. Mobile App Privacy Features**
-- Stealth address display and generation
-- Private transfer flow UI
-- Incoming transaction scanning
+### Pallet Files Created
+```
+/app/pallets/ring-signatures/
+├── Cargo.toml
+└── src/
+    ├── lib.rs
+    └── weights.rs
+
+/app/pallets/stealth-addresses/
+├── Cargo.toml
+└── src/
+    ├── lib.rs
+    └── weights.rs
+
+/app/pallets/confidential-transfer/
+├── Cargo.toml
+└── src/
+    ├── lib.rs
+    └── weights.rs
+```
 
 ### Technical Approach
 ```
-Sender Privacy:  Ring Signatures (curve25519-dalek)
+Sender Privacy:  Ring Signatures (MLSAG - structural validation)
 Receiver Privacy: Stealth Addresses (ECDH pattern)
-Default:         All transactions private (not optional)
+Default:         All shielded transactions private
 External View:   Only visible at bridge entry/exit points
 ```
 
