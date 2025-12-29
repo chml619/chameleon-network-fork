@@ -265,7 +265,7 @@ pub mod pallet {
 
             log::info!(
                 target: "runtime::confidential-transfer",
-                "Shield: {:?} shielded {} tokens to stealth hash {:?}",
+                "Shield: {:?} shielded {:?} tokens to stealth hash {:?}",
                 who, amount, stealth_hash
             );
 
