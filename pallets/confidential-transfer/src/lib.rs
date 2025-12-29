@@ -467,7 +467,7 @@ pub mod pallet {
 
             log::info!(
                 target: "runtime::confidential-transfer",
-                "Unshield: {} tokens to {:?}, key image {:?}",
+                "Unshield: {:?} tokens to {:?}, key image {:?}",
                 amount, to, key_image
             );
 
