@@ -55,6 +55,7 @@ pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
+    use sp_runtime::traits::Saturating;
     use sp_std::vec::Vec;
 
     /// Stealth meta-address structure.
