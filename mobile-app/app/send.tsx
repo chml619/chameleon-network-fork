@@ -162,15 +162,18 @@ export default function SendScreen() {
     if (!isValidAddress) return 'Invalid recipient address';
     if (!amount || parseFloat(amount) <= 0) return 'Please enter a valid amount';
     if (!balance) return 'Unable to check balance';
-    if (!feeEstimate) return 'Unable to estimate fee';
     
-    const amountBN = transactionService.parseAmount(amount);
-    const feeBN = new BN(feeEstimate.partialFee);
-    const totalBN = amountBN.add(feeBN);
-    const balanceBN = new BN(balance.free);
-    
-    if (totalBN.gt(balanceBN)) {
-      return 'Insufficient balance (including fees)';
+    // Allow proceeding even if fee estimate is still loading
+    // The fee will be checked before final confirmation
+    if (feeEstimate) {
+      const amountBN = transactionService.parseAmount(amount);
+      const feeBN = new BN(feeEstimate.partialFee);
+      const totalBN = amountBN.add(feeBN);
+      const balanceBN = new BN(balance.free);
+      
+      if (totalBN.gt(balanceBN)) {
+        return 'Insufficient balance (including fees)';
+      }
     }
     
     return null;
