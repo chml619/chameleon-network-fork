@@ -217,7 +217,7 @@ pub mod pallet {
         /// - `AmountBelowMinimum`: Amount is below minimum threshold.
         /// - `InsufficientBalance`: Caller doesn't have enough public balance.
         #[pallet::call_index(0)]
-        #[pallet::weight(T::WeightInfo::shield())]
+        #[pallet::weight(T::ConfidentialWeightInfo::shield())]
         pub fn shield(
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
