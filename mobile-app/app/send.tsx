@@ -219,20 +219,11 @@ export default function SendScreen() {
     try {
       const hasWallet = !!wallet?.address;
       const hasRecipient = !!recipient;
-      const hasValidAddress = !!isValidAddress;
+      // Use direct validation instead of state to avoid race conditions
+      const hasValidAddress = checkAddressValid(recipient);
       const hasAmount = !!amount && parseFloat(amount) > 0;
       const hasBalance = !!balance;
       const hasNonZeroBalance = hasBalance && balance.free && !new BN(balance.free).isZero();
-      
-      console.log('[Send] isFormReady check:', {
-        hasWallet,
-        hasRecipient,
-        hasValidAddress,
-        hasAmount,
-        hasBalance,
-        balanceFree: balance?.free,
-        hasNonZeroBalance,
-      });
       
       return hasWallet && hasRecipient && hasValidAddress && hasAmount && hasNonZeroBalance;
     } catch (error) {
@@ -245,7 +236,8 @@ export default function SendScreen() {
   const getButtonText = (): string => {
     if (!wallet?.address) return 'Connect Wallet';
     if (!recipient) return 'Enter Recipient';
-    if (!isValidAddress) return 'Invalid Address';
+    // Use direct validation instead of state
+    if (!checkAddressValid(recipient)) return 'Invalid Address';
     if (!amount || parseFloat(amount) <= 0) return 'Enter Amount';
     if (!balance) return 'Loading...';
     try {
