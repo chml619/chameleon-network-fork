@@ -25,7 +25,73 @@
 
 ---
 
-## 🆕 WEEK 8 COMPLETION (Dec 28-29, 2025)
+## 🆕 WEEK 9: PRIVACY LAYER (Dec 30, 2025 - Jan 5, 2026)
+
+**Status:** 🚀 IN PROGRESS - Privacy-First Architecture
+
+### Deliverables
+
+**1. pallet-ring-signatures (Sender Privacy)**
+- Ring signature verification using curve25519-dalek crate
+- Hides sender identity among group of possible signers
+- Integration with transfer extrinsics
+
+**2. pallet-stealth-addresses (Receiver Privacy)**
+- One-time address generation using standard ECDH pattern
+- Receiver can only be identified by intended recipient
+- Key derivation for scanning incoming transactions
+
+**3. pallet-confidential-transfer (Private Transfers)**
+- Combines ring signatures + stealth addresses
+- Amount hidden using Pedersen commitments (optional)
+- All on-chain transactions private by default
+
+**4. Mobile App Privacy Features**
+- Stealth address display and generation
+- Private transfer flow UI
+- Incoming transaction scanning
+
+### Technical Approach
+```
+Sender Privacy:  Ring Signatures (curve25519-dalek)
+Receiver Privacy: Stealth Addresses (ECDH pattern)
+Default:         All transactions private (not optional)
+External View:   Only visible at bridge entry/exit points
+```
+
+### Privacy Architecture
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Sender | Ring Signatures | Hide which address sent tx |
+| Receiver | Stealth Addresses | Hide which address receives |
+| Amount | Pedersen Commitments | Hide transfer amounts (Phase 2) |
+
+---
+
+## 📅 WEEKS 10-12: ROADMAP
+
+### WEEK 10: pDEX + Privacy Integration
+**Status:** ⏳ QUEUED
+
+**Deliverables:**
+1. Resolve pallet-assets version conflict
+2. pallet-pdex with privacy-aware AMM pools
+3. Private swap execution (hide trader identity)
+4. Mobile app pDEX UI with private swaps
+
+### WEEK 11-12: Bridge + Infrastructure
+**Status:** ⏳ QUEUED
+
+**Deliverables:**
+1. Bridge pallet external chain connectors
+2. Multi-validator P2P infrastructure
+3. Staking pallet testing with real validators
+4. Shield/Unshield flow complete
+5. Privacy on/off at bridge boundaries only
+
+---
+
+## ✅ WEEK 8: COMPLETE (Dec 28-29, 2025)
 
 **Status:** ✅ COMPLETE - Fresh Template Migration + 4 Pallets Deployed
 
