@@ -315,17 +315,30 @@ curl -H "Content-Type: application/json" \
 
 ## 🎯 NEXT STEPS
 
-### Week 9 Development (Starting Dec 30, 2025)
-- [ ] pDEX pallet: Resolve pallet-assets version conflict
-- [ ] Privacy layer planning: zkSNARK integration research
-- [ ] Mobile UI: Update Staking and Bridge screens
-- [ ] Testing: Stake/Unstake and Bridge deposit/withdrawal flows
+### Week 9 Development (Dec 30, 2025 - Jan 5, 2026)
+- [ ] **pallet-ring-signatures**: Implement ring signature verification
+- [ ] **pallet-stealth-addresses**: Implement stealth address generation
+- [ ] **pallet-confidential-transfer**: Combine for private transfers
+- [ ] **Mobile app**: Stealth address UI and scanning
+- [ ] **Testing**: End-to-end private transfer flow
 
-### Weeks 10-14 (Testnet Prep)
+### Week 10 (pDEX + Privacy)
+- [ ] Resolve pallet-assets version conflict
+- [ ] Privacy-aware AMM pools
+- [ ] Private swap execution
+- [ ] Mobile pDEX UI
+
+### Weeks 11-12 (Bridge + Infrastructure)
+- [ ] Bridge external connectors
+- [ ] Multi-validator P2P
+- [ ] Shield/Unshield complete
+- [ ] Real validator testing
+
+### Weeks 13-14 (Testnet Prep)
 - [ ] Security audits
-- [ ] Multi-validator deployment
-- [ ] Mobile beta program
+- [ ] Performance optimization
 - [ ] Documentation finalization
+- [ ] Mobile beta program
 
 ---
 
