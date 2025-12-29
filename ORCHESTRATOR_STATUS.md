@@ -253,13 +253,23 @@ curl -H "Content-Type: application/json" \
 
 ## 📁 KEY FILE REFERENCES
 
-### Substrate Node
+### Substrate Node (Fresh Template Structure)
 ```
-/node-template/
-├── pallets/mev-protection/     # MEV pallet (✅ Deployed)
-├── runtime/src/lib.rs          # Runtime config
-├── Cargo.lock                  # Pinned dependencies (DO NOT MODIFY)
-└── target/release/             # Built binary
+/app/
+├── pallets/
+│   ├── mev-protection/     # MEV pallet (index 8) ✅
+│   ├── emissions/          # Emissions pallet (index 9) ✅
+│   ├── staking/            # Staking pallet (index 10) ✅
+│   ├── bridge/             # Bridge pallet (index 11) ✅
+│   ├── pdex/               # pDEX pallet (⏸️ deferred)
+│   └── template/           # Template pallet
+├── runtime/src/
+│   ├── lib.rs              # Runtime config with pallet indices
+│   ├── configs/mod.rs      # Pallet configurations
+│   └── genesis_config_presets.rs  # Dev wallet pre-funding
+├── node/                   # Node implementation
+├── Cargo.toml              # Workspace root
+└── Cargo.lock              # ⚠️ DO NOT DELETE - backed up
 ```
 
 ### Mobile App
