@@ -201,26 +201,6 @@ curl -H "Content-Type: application/json" \
 - pallet-confidential-transfer: Combined private transfers
 - Mobile app: Stealth address display and scanning
 
-### Week 8 Achievement Summary
-
-**CRITICAL FIX APPLIED:**
-- Emissions now uses CORRECT tokenomics (10% yearly reduction, not 50% halving)
-- 65M CHML over 20 years with proper schedule
-- Year 1: 1.407 CHML/block (7.4M CHML total)
-
-**All Pallets Compile:**
-- `cargo check -p pallet-emissions` ✅
-- `cargo check -p pallet-pdex` ✅
-- `cargo check -p pallet-staking` ✅
-- `cargo check -p pallet-bridge` ✅
-
-### Agent 2 (Mobile Wallet) - COMPLETE ✅
-- Transaction flow, history, notifications, multi-wallet all working
-
-### Agent 3 (MEV Protection) - COMPLETE* ✅
-- Pallet integrated, extrinsics working, mobile UI integrated
-- *Auto-execution hook pending (manual execution available)
-
 ---
 
 ## 📱 MOBILE WALLET STATUS
