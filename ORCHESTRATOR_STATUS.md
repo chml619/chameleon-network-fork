@@ -298,10 +298,17 @@ curl -H "Content-Type: application/json" \
 |------|-----------|--------|
 | 7 | MEV pallet + Mobile enhancements | ✅ **COMPLETE** |
 | 8 | Emissions, Staking, Bridge pallets | ✅ **COMPLETE** |
-| 9 | pDEX integration + Privacy planning | 🟡 **STARTING** |
-| 10 | Integration testing + Mobile UI | ⏳ Pending |
+| 9 | **Privacy Layer Core** (Ring Sigs + Stealth Addr) | 🚀 **IN PROGRESS** |
+| 10 | pDEX + Privacy Integration | ⏳ QUEUED |
 
-### Phase 3: Testnet Prep (Weeks 11-14) ⏳
+### Phase 3: Infrastructure (Weeks 11-14) ⏳ PLANNED
+
+| Week | Milestone | Status |
+|------|-----------|--------|
+| 11 | Bridge connectors + Multi-validator | ⏳ QUEUED |
+| 12 | Shield/Unshield flow + Testing | ⏳ QUEUED |
+| 13-14 | Security audits + Bug fixes | ⏳ QUEUED |
+
 ### Phase 4: Public Testnet (Week 15+) 🎯 Target
 
 ---
