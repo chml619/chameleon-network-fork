@@ -293,7 +293,7 @@ pub mod pallet {
         /// - `NoteNotFound`: Input note doesn't exist.
         /// - `NoteAlreadySpent`: Input note was already spent.
         #[pallet::call_index(1)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer())]
+        #[pallet::weight(T::ConfidentialWeightInfo::confidential_transfer())]
         pub fn confidential_transfer(
             origin: OriginFor<T>,
             ring_members: Vec<[u8; 32]>,
