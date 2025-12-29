@@ -377,7 +377,7 @@ pub mod pallet {
 
             log::info!(
                 target: "runtime::confidential-transfer",
-                "Confidential transfer: {} tokens, ring size {}, key image {:?}",
+                "Confidential transfer: {:?} tokens, ring size {}, key image {:?}",
                 amount, ring_size, key_image
             );
 
