@@ -77,10 +77,6 @@ pub fn local_config_genesis() -> Value {
 				sp_keyring::Ed25519Keyring::Bob.public().into(),
 			),
 		],
-		Sr25519Keyring::iter()
-			.filter(|v| v != &Sr25519Keyring::One && v != &Sr25519Keyring::Two)
-			.map(|v| v.to_account_id())
-			.collect::<Vec<_>>(),
 		Sr25519Keyring::Alice.to_account_id(),
 	)
 }
