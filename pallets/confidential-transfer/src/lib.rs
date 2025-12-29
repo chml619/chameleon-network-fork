@@ -460,7 +460,7 @@ pub mod pallet {
             });
 
             Self::deposit_event(Event::Unshielded {
-                to,
+                to: to.clone(),
                 amount,
                 key_image,
             });
@@ -468,7 +468,7 @@ pub mod pallet {
             log::info!(
                 target: "runtime::confidential-transfer",
                 "Unshield: {:?} tokens to {:?}, key image {:?}",
-                amount, to, key_image
+                amount, &to, key_image
             );
 
             Ok(())
