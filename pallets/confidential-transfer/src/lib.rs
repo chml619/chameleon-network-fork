@@ -51,11 +51,11 @@ mod tests;
 mod benchmarking;
 
 pub mod weights;
-pub use weights::WeightInfo;
+pub use weights::WeightInfo as ConfidentialWeightInfo;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use super::*;
+    use super::ConfidentialWeightInfo;
     use frame_support::{
         pallet_prelude::*,
         traits::{Currency, ExistenceRequirement, WithdrawReasons},
@@ -101,7 +101,7 @@ pub mod pallet {
         type MaxNotesPerAccount: Get<u32>;
 
         /// Weight information for extrinsics in this pallet.
-        type WeightInfo: WeightInfo;
+        type ConfidentialWeightInfo: ConfidentialWeightInfo;
     }
 
     #[pallet::pallet]
