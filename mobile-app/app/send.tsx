@@ -97,21 +97,35 @@ export default function SendScreen() {
     console.log('[Send] MEV protection:', value ? 'enabled' : 'disabled');
   };
 
-  // Validate address directly (not relying on state which may have race conditions)
+  // Validate address safely (with error handling)
   const checkAddressValid = useCallback((addr: string): boolean => {
-    if (!addr || addr.length === 0) return false;
-    return transactionService.validateAddress(addr);
+    try {
+      if (!addr || addr.length === 0) return false;
+      // Basic validation first (doesn't need API)
+      if (addr.length < 47 || addr.length > 48 || !addr.startsWith('5')) {
+        return false;
+      }
+      return transactionService.validateAddress(addr);
+    } catch (error) {
+      console.error('[Send] Address validation error:', error);
+      return false;
+    }
   }, []);
 
   // Validate recipient address (for UI feedback only)
   useEffect(() => {
-    if (recipient.length > 0) {
-      const valid = transactionService.validateAddress(recipient);
-      setIsValidAddress(valid);
-    } else {
+    try {
+      if (recipient.length > 0) {
+        const valid = checkAddressValid(recipient);
+        setIsValidAddress(valid);
+      } else {
+        setIsValidAddress(false);
+      }
+    } catch (error) {
+      console.error('[Send] Address validation effect error:', error);
       setIsValidAddress(false);
     }
-  }, [recipient]);
+  }, [recipient, checkAddressValid]);
 
   // Estimate fee when amount and recipient change
   useEffect(() => {
