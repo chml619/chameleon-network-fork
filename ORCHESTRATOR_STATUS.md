@@ -237,13 +237,13 @@ curl -H "Content-Type: application/json" \
 
 ## 🎯 NEXT STEPS
 
-### Week 8 Development (Starting Dec 27, 2025)
-- [ ] pDEX pallet: AMM pools, liquidity providers, swap mechanics
-- [ ] Bridge pallet: ETH, USDC, USDT, WBTC lock/mint
-- [ ] Staking improvements: delegation, reward distribution
-- [ ] Mobile UI for pDEX and Bridge screens
+### Week 9 Development (Starting Dec 30, 2025)
+- [ ] pDEX pallet: Resolve pallet-assets version conflict
+- [ ] Privacy layer planning: zkSNARK integration research
+- [ ] Mobile UI: Update Staking and Bridge screens
+- [ ] Testing: Stake/Unstake and Bridge deposit/withdrawal flows
 
-### Weeks 11-14 (Testnet Prep)
+### Weeks 10-14 (Testnet Prep)
 - [ ] Security audits
 - [ ] Multi-validator deployment
 - [ ] Mobile beta program
