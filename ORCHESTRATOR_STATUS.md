@@ -74,58 +74,12 @@ After extensive troubleshooting of Cargo.lock dependency conflicts (sc-network-t
 
 | Metric | Value |
 |--------|-------|
-| **Current Week** | 8 of 16 |
+| **Current Week** | 8 of 16 (COMPLETE) |
 | **Overall Progress** | ~90% |
 | **Timeline** | 🟢 ON TRACK |
-| **Blockers** | None - All pallets compile |
+| **Blockers** | pDEX deferred (version conflict) |
 | **Build Server** | Contabo (178.18.243.189) |
 | **Network Endpoint** | ws://64.23.233.36:9944 |
-
----
-
-## 🆕 WEEK 8: COMPLETE (Dec 28, 2025)
-
-**Timeline:** Dec 28, 2025 | **Status:** ✅ ALL PALLETS COMPILING
-
-### Deliverables
-
-**1. Emissions Pallet (`/node-template/pallets/emissions/`) - ✅ FIXED**
-- ✅ **CORRECT Tokenomics:** 65M CHML over 20 years
-- ✅ **Year 1:** 7,400,000 CHML (1.407 CHML/block)
-- ✅ **Reduction:** 10% yearly (multiply by 0.9)
-- ✅ **Split:** 70% validators / 30% LP providers
-- ✅ **Duration:** 20 years, then emissions STOP
-- ✅ Extrinsics: set_lp_apy, claim_validator_rewards, claim_lp_rewards, update_emission_rate
-
-**2. pDEX Pallet (`/node-template/pallets/pdex/`) - ✅ COMPLETE**
-- ✅ Constant product AMM (x * y = k)
-- ✅ **pallet-assets integration** for multi-token support
-- ✅ Helper functions for emissions integration
-- ✅ LP token minting/burning, slippage protection
-- ✅ Extrinsics: create_pool, add_liquidity, remove_liquidity, swap
-
-**3. Staking Pallet (`/node-template/pallets/staking/`) - ✅ COMPLETE**
-- ✅ Flexible staking without lock periods (testnet)
-- ✅ Proportional reward distribution per block
-- ✅ Extrinsics: stake, unstake, claim_rewards, set_reward_rate, fund_reward_pool
-
-**4. Bridge Pallet (`/node-template/pallets/bridge/`) - ✅ COMPLETE**
-- ✅ Multi-chain: Bitcoin, Ethereum, Polygon
-- ✅ Multi-asset: BTC, ETH, USDT, USDC
-- ✅ Validator-based multi-sig confirmations
-- ✅ Extrinsics: initiate_deposit, confirm_deposit, initiate_withdrawal, confirm_withdrawal
-
-**5. pallet-assets - ✅ INTEGRATED**
-- ✅ Added to runtime (index 13)
-- ✅ Full configuration in configs/mod.rs
-- ✅ pDEX uses Assets pallet for token operations
-
-**Runtime Integration Status:**
-- ✅ All pallets added to runtime (indices 9-13)
-- ✅ Config implementations added
-- ✅ Cargo.toml updated with all dependencies
-- ✅ All pallets compile individually
-- ⏳ Full runtime build (resource-intensive)
 
 ---
 
