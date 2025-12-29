@@ -610,12 +610,20 @@ export default function SendScreen() {
         <TouchableOpacity
           style={[
             styles.reviewButton,
-            validateTransaction() && styles.buttonDisabled,
+            !isFormReady() && styles.buttonDisabled,
           ]}
           onPress={handleReview}
-          disabled={!!validateTransaction()}
+          disabled={!isFormReady()}
         >
-          <Text style={styles.reviewButtonText}>Review Send</Text>
+          <Text style={styles.reviewButtonText}>
+            {!wallet?.address ? 'Connect Wallet' :
+             !recipient ? 'Enter Recipient' :
+             !isValidAddress ? 'Invalid Address' :
+             !amount || parseFloat(amount) <= 0 ? 'Enter Amount' :
+             !balance ? 'Loading...' :
+             new BN(balance.free).isZero() ? 'No Balance' :
+             'Review Send'}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
 
