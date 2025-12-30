@@ -83,20 +83,45 @@ export default function SendScreen() {
     }
   }, []);
 
-  // Validate recipient address (for UI feedback only)
+  // Check transfer mode when wallet changes
   useEffect(() => {
-    try {
-      if (recipient.length > 0) {
-        const valid = checkAddressValid(recipient);
-        setIsValidAddress(valid);
-      } else {
-        setIsValidAddress(false);
-      }
-    } catch (error) {
-      console.error('[Send] Address validation effect error:', error);
-      setIsValidAddress(false);
+    checkTransferMode();
+  }, [wallet?.address]);
+
+  const checkTransferMode = async () => {
+    if (!wallet?.address) {
+      setTransferMode('checking');
+      return;
     }
-  }, [recipient, checkAddressValid]);
+
+    try {
+      const api = apiService.getApi();
+      if (!api) {
+        setTransferMode('public'); // Default to public if no API
+        return;
+      }
+
+      const keyPair = walletService.getKeyPair();
+      if (!keyPair) {
+        setTransferMode('public');
+        return;
+      }
+
+      privacyService.setApi(api);
+      
+      const senderStealthMeta = {
+        spendPubkey: keyPair.publicKey,
+        viewPubkey: keyPair.publicKey, // Simplified for demo
+      };
+      const inputStealthHash = generateStealthHash(senderStealthMeta);
+      
+      const hasShieldedNotes = await privacyService.hasShieldedNotes(inputStealthHash);
+      setTransferMode(hasShieldedNotes ? 'private' : 'public');
+    } catch (error) {
+      console.error('[Send] Error checking transfer mode:', error);
+      setTransferMode('public'); // Default to public on error
+    }
+  };
 
   // Estimate fee when amount and recipient change
   useEffect(() => {
