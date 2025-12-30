@@ -204,8 +204,8 @@ curl -H "Content-Type: application/json" \
 - **Notifications:** expo-notifications
 
 ### Latest Build
-**Build:** 1.018 | **Date:** Dec 27, 2025 | **Status:** Production-ready for testnet  
-**Link:** [expo.dev/builds/8e26c4f2](https://expo.dev/accounts/spronline/projects/chameleon-wallet-spronline/builds/8e26c4f2-0d9b-4c17-8f8d-d4aa1a02e475)
+**Build:** 1.024 | **Date:** Dec 30, 2025 | **Status:** Ready for testing transactions with funded wallets, core privacy, MEV protection, transaction history, saved imported wallets and other features.  
+**Link:** [expo.dev/builds/4682d032](https://expo.dev/accounts/spronline/projects/chameleon-wallet-spronline/builds/4682d032-4bb6-4e5f-b651-164958c9ca16)
 
 ---
 
