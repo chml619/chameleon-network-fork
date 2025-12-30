@@ -354,12 +354,15 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const clearError = useCallback(() => {
     setError(null);
   }, []);
+
+  const value: WalletContextType = {
     wallet,
     isLoading,
     error,
     stealthMetaAddress,
     stealthHash,
     privateBalance,
+    publicBalance,
     createWallet,
     importWallet,
     importDevAccount,
@@ -367,6 +370,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
     logout,
     clearError,
     refreshPrivateBalance,
+    refreshPublicBalance,
+    refreshBalances,
   };
 
   return (
