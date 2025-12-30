@@ -26,6 +26,7 @@ import { walletService } from '@/services/wallet';
 import { apiService } from '@/services/api';
 import { transactionService } from '@/services/transaction';
 import { formatBalance, parseAmount } from '@/utils/balance';
+import { THEME, GRADIENTS } from '@/constants/theme';
 
 export default function UnshieldScreen() {
   const router = useRouter();
