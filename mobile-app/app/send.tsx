@@ -469,12 +469,12 @@ export default function SendScreen() {
       >
         {/* Recipient Input */}
         <View style={styles.inputSection}>
-          <Text style={styles.inputLabel}>To</Text>
+          <Text style={styles.inputLabel}>To (Stealth Address)</Text>
           <View style={styles.inputRow}>
             <View style={[styles.inputContainer, { flex: 1, marginRight: THEME.spacing.sm }]}>
               <TextInput
                 style={styles.textInput}
-                placeholder="Enter recipient address"
+                placeholder="0x... or regular address"
                 placeholderTextColor={THEME.colors.textMuted}
                 value={recipient}
                 onChangeText={setRecipient}
@@ -488,6 +488,12 @@ export default function SendScreen() {
           </View>
           {recipient.length > 0 && !isValidAddress && (
             <Text style={styles.errorText}>Invalid address format</Text>
+          )}
+          {recipient.startsWith('0x') && isValidAddress && (
+            <View style={styles.stealthBadge}>
+              <Ionicons name="eye-off" size={14} color={THEME.colors.success} />
+              <Text style={styles.stealthText}>Stealth address detected - fully private</Text>
+            </View>
           )}
         </View>
 
