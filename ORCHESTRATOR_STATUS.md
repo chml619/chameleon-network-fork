@@ -60,6 +60,7 @@
 ├── Cargo.toml
 └── src/
     ├── lib.rs
+    ├── mlsag.rs         # Core MLSAG implementation (179 lines)
     └── weights.rs
 
 /app/pallets/stealth-addresses/
@@ -77,7 +78,7 @@
 
 ### Technical Approach
 ```
-Sender Privacy:  Ring Signatures (MLSAG - structural validation)
+Sender Privacy:  Ring Signatures (Full MLSAG with curve25519-dalek)
 Receiver Privacy: Stealth Addresses (ECDH pattern)
 Default:         All shielded transactions private
 External View:   Only visible at bridge entry/exit points
