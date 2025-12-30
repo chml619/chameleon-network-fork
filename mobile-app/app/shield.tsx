@@ -58,7 +58,7 @@ export default function ShieldScreen() {
         return;
       }
       
-      const { data: { free } } = await api.query.system.account(wallet.address);
+      const { data: { free } } = await api.query.system.account(wallet.address) as any;
       const publicBalanceBN = new BN(free.toString());
       setPublicBalance({ free: publicBalanceBN.toString() });
     } catch (error) {
