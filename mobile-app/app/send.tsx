@@ -695,6 +695,21 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: THEME.spacing.lg,
   },
+  transferModeIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: THEME.colors.white,
+    paddingHorizontal: THEME.spacing.md,
+    paddingVertical: THEME.spacing.sm,
+    borderRadius: THEME.borderRadius.medium,
+    marginBottom: THEME.spacing.lg,
+    ...THEME.shadows.small,
+  },
+  transferModeText: {
+    fontSize: THEME.fontSize.sm,
+    fontWeight: THEME.fontWeight.medium,
+    marginLeft: THEME.spacing.xs,
+  },
   inputSection: {
     marginBottom: THEME.spacing.lg,
   },
