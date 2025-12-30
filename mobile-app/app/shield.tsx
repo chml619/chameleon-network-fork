@@ -77,7 +77,7 @@ export default function ShieldScreen() {
     const maxAmount = balanceBN.sub(feeBN);
     
     if (maxAmount.gt(new BN(0))) {
-      const formatted = transactionService.formatBalance(maxAmount.toString()).split(' ')[0];
+      const formatted = transactionService.formatAmount(maxAmount);
       setAmount(formatted.replace(/,/g, ''));
     }
   };
