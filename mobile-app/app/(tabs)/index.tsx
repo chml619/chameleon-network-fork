@@ -1087,9 +1087,19 @@ const styles = StyleSheet.create({
     color: THEME.colors.text,
   },
   balanceContainer: {
+    flexDirection: 'column',
+    gap: THEME.spacing.sm,
+  },
+  balanceSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: THEME.spacing.sm,
+    justifyContent: 'space-between',
+    minWidth: 200,
+  },
+  balanceLabel: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+    fontWeight: THEME.fontWeight.medium,
   },
   growthBadge: {
     backgroundColor: THEME.colors.successBg,
