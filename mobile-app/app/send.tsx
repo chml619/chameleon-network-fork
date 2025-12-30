@@ -264,164 +264,73 @@ export default function SendScreen() {
       const amountBN = transactionService.parseAmount(amount);
       const formattedAmount = `${amount} CHML`;
       
-      // Check if MEV protection is enabled
-      if (mevEnabled) {
-        console.log('[Send] Using MEV protection for transaction');
-        
-        // Use MEV protection service
-        const result = await mevService.submitProtectedTransaction(
-          api,
-          keyPair,
-          recipient,
-          amountBN
-        );
-        
-        // Create transaction result
-        const txResult = {
-          hash: result.txHash || '',
-          status: result.success ? 'finalized' as const : 'failed' as const,
-          blockHash: result.blockHash,
-          error: result.error,
-          usedMEVProtection: result.usedMEVProtection,
-          amount: formattedAmount,
-          to: recipient,
-          from: wallet.address,
-        };
-        
-        // Save to transaction history
-        if (wallet.address) {
-          await transactionHistoryService.saveTransaction(wallet.address, {
-            hash: result.txHash || `mev_${Date.now()}`,
-            from: wallet.address,
-            to: recipient,
-            amount: amountBN.toString(),
-            formattedAmount,
-            fee: feeEstimate.partialFee,
-            status: result.success ? 'finalized' : 'failed',
-            blockHash: result.blockHash,
-            usedMEVProtection: result.usedMEVProtection,
-            mevDelayBlocks: mevService.getConfig().delayBlocks,
-            error: result.error,
-          });
-        }
-        
-        setTransactionResult(txResult);
-        setIsSending(false);
-        setShowResult(true);
-        
-        if (!result.success) {
-          console.error('[Send] MEV protected transaction failed:', result.error);
-        } else {
-          console.log('[Send] MEV protected transaction successful:', result.txHash);
-        }
+      // Set API for privacy service
+      privacyService.setApi(api);
+      
+      console.log('[Send] Using confidential transfer (always private)');
+      
+      // Generate stealth addresses for confidential transfer
+      const senderStealthMeta = {
+        spendPubkey: keyPair.publicKey,
+        viewPubkey: keyPair.publicKey, // Simplified for demo
+      };
+      const inputStealthHash = generateStealthHash(senderStealthMeta);
+      
+      // For recipient, if it's a stealth hash use it directly, otherwise generate one
+      let outputStealthHash: Uint8Array;
+      if (recipient.startsWith('0x') && recipient.length === 66) {
+        // It's already a stealth hash
+        outputStealthHash = new Uint8Array(Buffer.from(recipient.slice(2), 'hex'));
       } else {
-        // Use standard transaction with monitoring
-        console.log('[Send] Using standard transaction (MEV protection disabled)');
-        
-        // Set initial pending state immediately
-        setTransactionResult({
-          hash: '',
-          status: 'pending' as const,
-          usedMEVProtection: false,
-          amount: formattedAmount,
-          to: recipient,
-          from: wallet.address,
-        });
-        
-        // Send "transaction submitted" notification
-        notificationService.notifyTransactionSent(formattedAmount, recipient);
-        
-        try {
-          await transactionService.sendTransactionWithMonitoring(
-            keyPair,
-            recipient,
-            amountBN,
-            async (result) => {
-              console.log('[Send] Transaction callback received:', result.status);
-              
-              const txResult = {
-                ...result,
-                usedMEVProtection: false,
-                amount: formattedAmount,
-                to: recipient,
-                from: wallet.address,
-              };
-              
-              // Always update the result
-              setTransactionResult(txResult);
-              
-              if (result.status === 'finalized') {
-                console.log('[Send] Transaction finalized, showing result modal');
-                
-                // Send "transaction confirmed" notification
-                notificationService.notifyTransactionConfirmed(
-                  formattedAmount,
-                  recipient,
-                  result.hash,
-                  result.blockNumber
-                );
-                
-                // Save to transaction history
-                if (wallet.address) {
-                  try {
-                    await transactionHistoryService.saveTransaction(wallet.address, {
-                      hash: result.hash,
-                      from: wallet.address,
-                      to: recipient,
-                      amount: amountBN.toString(),
-                      formattedAmount,
-                      fee: feeEstimate.partialFee,
-                      status: result.status,
-                      blockNumber: result.blockNumber,
-                      blockHash: result.blockHash,
-                      usedMEVProtection: false,
-                      error: result.error,
-                    });
-                    console.log('[Send] Transaction saved to history');
-                  } catch (historyError) {
-                    console.error('[Send] Failed to save to history:', historyError);
-                  }
-                }
-                
-                // Update UI state
-                setIsSending(false);
-                setShowResult(true);
-              } else if (result.status === 'failed') {
-                console.log('[Send] Transaction failed, showing result modal');
-                
-                // Send "transaction failed" notification
-                notificationService.notifyTransactionFailed(
-                  formattedAmount,
-                  result.error || 'Transaction failed'
-                );
-                
-                // Update UI state
-                setIsSending(false);
-                setShowResult(true);
-              }
-            }
-          );
-        } catch (txError) {
-          console.error('[Send] Transaction error:', txError);
-          
-          // Send failed notification
-          const errorMsg = txError instanceof Error ? txError.message : 'Transaction failed';
-          notificationService.notifyTransactionFailed(formattedAmount, errorMsg);
-          
-          // Even on error, show the result modal with failure
-          setTransactionResult({
-            hash: '',
-            status: 'failed' as const,
-            error: txError instanceof Error ? txError.message : 'Transaction failed',
-            usedMEVProtection: false,
-            amount: formattedAmount,
-            to: recipient,
-            from: wallet.address,
-          });
-          setIsSending(false);
-          setShowResult(true);
-        }
+        // Generate stealth hash for regular address (simplified)
+        const recipientStealthMeta = {
+          spendPubkey: new Uint8Array(32), // Would be derived from recipient's public key
+          viewPubkey: new Uint8Array(32),
+        };
+        outputStealthHash = generateStealthHash(recipientStealthMeta);
       }
+      
+      // Generate ephemeral key for the transaction
+      const ephemeralPubkey = keyPair.publicKey; // Simplified for demo
+      
+      // Use confidential transfer
+      const txHash = await privacyService.confidentialTransfer(
+        keyPair,
+        inputStealthHash,
+        outputStealthHash,
+        amountBN,
+        ephemeralPubkey
+      );
+      
+      // Create transaction result
+      const txResult = {
+        hash: txHash,
+        status: 'finalized' as const,
+        usedMEVProtection: false, // Privacy is built-in, not MEV protection
+        amount: formattedAmount,
+        to: recipient,
+        from: wallet.address,
+      };
+      
+      // Save to transaction history
+      if (wallet.address) {
+        await transactionHistoryService.saveTransaction(wallet.address, {
+          hash: txHash,
+          from: wallet.address,
+          to: recipient,
+          amount: amountBN.toString(),
+          formattedAmount,
+          fee: feeEstimate.partialFee,
+          status: 'finalized',
+          usedMEVProtection: false,
+        });
+      }
+      
+      setTransactionResult(txResult);
+      setIsSending(false);
+      setShowResult(true);
+      
+      console.log('[Send] Confidential transfer successful:', txHash);
     } catch (error) {
       console.error('Error sending transaction:', error);
       setIsSending(false);
