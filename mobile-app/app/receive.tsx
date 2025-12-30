@@ -111,61 +111,67 @@ export default function ReceiveScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <View style={styles.content}>
-        {/* QR Code Card */}
-        <View style={styles.qrCard}>
-          <Text style={styles.qrTitle}>Share this address to receive private payments</Text>
-          
-          <View style={styles.qrContainer}>
-            <QRCode value={stealthAddress} size={200} />
-          </View>
-
-          <Text style={styles.addressLabel}>
-            {isStealthAddress ? 'Your Stealth Address' : 'Your Address'}
-          </Text>
-          <Text style={styles.addressText}>
-            {isStealthAddress 
-              ? formatStealthHash(new Uint8Array(Buffer.from(stealthAddress.slice(2), 'hex')))
-              : `${stealthAddress.slice(0, 8)}...${stealthAddress.slice(-8)}`
-            }
-          </Text>
-
-          {isStealthAddress && (
-            <View style={styles.privacyBadge}>
-              <Ionicons name="eye-off" size={16} color={THEME.colors.success} />
-              <Text style={styles.privacyText}>Fully Private & Untraceable</Text>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.content}>
+          {/* QR Code Card */}
+          <View style={styles.qrCard}>
+            <Text style={styles.qrTitle}>Share this address to receive private payments</Text>
+            
+            <View style={styles.qrContainer}>
+              <QRCode value={stealthAddress} size={200} />
             </View>
-          )}
 
-          {/* Action Buttons */}
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleCopyAddress}>
-              <View style={styles.actionIconContainer}>
-                <Ionicons name="copy-outline" size={24} color={THEME.colors.primary} />
-              </View>
-              <Text style={styles.actionButtonText}>Copy</Text>
-            </TouchableOpacity>
+            <Text style={styles.addressLabel}>
+              {isStealthAddress ? 'Your Stealth Address' : 'Your Address'}
+            </Text>
+            <Text style={styles.addressText}>
+              {isStealthAddress 
+                ? formatStealthHash(new Uint8Array(Buffer.from(stealthAddress.slice(2), 'hex')))
+                : `${stealthAddress.slice(0, 8)}...${stealthAddress.slice(-8)}`
+              }
+            </Text>
 
-            <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-              <View style={styles.actionIconContainer}>
-                <Ionicons name="share-outline" size={24} color={THEME.colors.primary} />
+            {isStealthAddress && (
+              <View style={styles.privacyBadge}>
+                <Ionicons name="eye-off" size={16} color={THEME.colors.success} />
+                <Text style={styles.privacyText}>Fully Private & Untraceable</Text>
               </View>
-              <Text style={styles.actionButtonText}>Share</Text>
-            </TouchableOpacity>
+            )}
+
+            {/* Action Buttons */}
+            <View style={styles.actionRow}>
+              <TouchableOpacity style={styles.actionButton} onPress={handleCopyAddress}>
+                <View style={styles.actionIconContainer}>
+                  <Ionicons name="copy-outline" size={24} color={THEME.colors.primary} />
+                </View>
+                <Text style={styles.actionButtonText}>Copy</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
+                <View style={styles.actionIconContainer}>
+                  <Ionicons name="share-outline" size={24} color={THEME.colors.primary} />
+                </View>
+                <Text style={styles.actionButtonText}>Share</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Info Note */}
+          <View style={styles.infoNote}>
+            <Ionicons name="information-circle-outline" size={20} color={THEME.colors.secondary} />
+            <Text style={styles.infoText}>
+              {isStealthAddress 
+                ? 'This stealth address ensures your privacy. Payments to this address are completely untraceable.'
+                : 'Only send CHML tokens to this address. Sending other tokens may result in permanent loss.'
+              }
+            </Text>
           </View>
         </View>
-
-        {/* Info Note */}
-        <View style={styles.infoNote}>
-          <Ionicons name="information-circle-outline" size={20} color={THEME.colors.secondary} />
-          <Text style={styles.infoText}>
-            {isStealthAddress 
-              ? 'This stealth address ensures your privacy. Payments to this address are completely untraceable.'
-              : 'Only send CHML tokens to this address. Sending other tokens may result in permanent loss.'
-            }
-          </Text>
-        </View>
-      </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
