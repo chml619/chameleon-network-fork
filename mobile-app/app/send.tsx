@@ -153,7 +153,7 @@ export default function SendScreen() {
     
     setIsEstimatingFee(true);
     try {
-      const amountBN = transactionService.parseAmount(amount);
+      const amountBN = parseAmount(amount);
       const estimate = await transactionService.estimateFee(wallet.address, recipient, amountBN);
       setFeeEstimate(estimate);
     } catch (error) {
