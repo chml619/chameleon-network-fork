@@ -11,18 +11,17 @@
 
 ## 📋 EXECUTIVE SUMMARY
 
-**Week 9 Status:** ✅ SCAFFOLDING COMPLETE - Privacy Layer Core Development
+**Week 9 Status:** ✅ COMPLETE - Full MLSAG Privacy Pipeline Deployed
 
-**Completed Today:**
-- ✅ **pallet-ring-signatures** - Scaffolding complete, compiles successfully
-- ✅ **pallet-stealth-addresses** - Scaffolding complete, compiles successfully  
-- ✅ **pallet-confidential-transfer** - Scaffolding complete, compiles successfully
-- ✅ **Workspace updated** - All three pallets added to Cargo.toml workspace
+**Completed (Dec 29-30, 2025):**
+- ✅ **pallet-ring-signatures** - Full MLSAG implementation with curve25519-dalek
+- ✅ **pallet-stealth-addresses** - Meta-address registration, ephemeral key announcements  
+- ✅ **pallet-confidential-transfer** - Shield/Transfer/Unshield with real MLSAG verification
+- ✅ **Runtime Integration** - All 3 privacy pallets live on devnet (indices 13, 14, 15)
 
 **Next Steps:**
-- 🔄 Implement actual curve25519 ring signature verification logic
-- 🔄 Add runtime integration (after verifying build on Contabo)
 - 📱 Mobile App Privacy UI - Stealth address display and private transfer flow
+- 🔄 Week 10: pDEX with privacy integration
 
 **Key Decision:** Privacy is MANDATORY on-chain (not optional toggle)
 
