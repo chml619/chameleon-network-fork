@@ -19,6 +19,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { useWallet } from '@/context/WalletContext';
 import { QRCode } from '@/components/QRCode';
+import { generateStealthMetaAddress, generateStealthHash, formatStealthHash } from '@/services/privacy';
+import { walletService } from '@/services/wallet';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 export default function ReceiveScreen() {
