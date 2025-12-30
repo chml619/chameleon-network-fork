@@ -254,7 +254,7 @@ export default function UnshieldScreen() {
   const formatPrivateBalance = (): string => {
     if (loadingBalance) return 'Loading...';
     if (privateBalance.isZero()) return '0 CHML';
-    const formatted = transactionService.formatAmount(privateBalance);
+    return transactionService.formatAmount(privateBalance);
   };
 
   return (
