@@ -34,6 +34,7 @@ import { notificationService } from '@/services/notifications';
 import { apiService } from '@/services/api';
 import { formatBalance } from '@/utils/balance';
 import { truncateAddress } from '@/utils/address';
+import BN from 'bn.js';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 // Explorer URL
