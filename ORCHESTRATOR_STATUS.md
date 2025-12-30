@@ -351,6 +351,53 @@ curl -H "Content-Type: application/json" \
 
 ## 📋 PRIOR WEEKS
 
+---
+
+### ✅ WEEK 9: COMPLETE (Dec 29-30, 2025)
+
+**Status:** ✅ COMPLETE - Full MLSAG Privacy Pipeline
+
+### Privacy Pallets Implemented:
+
+| Pallet | Index | Status | Description |
+|--------|-------|--------|-------------|
+| Ring Signatures | 13 | ✅ COMPLETE | MLSAG with curve25519-dalek, key image tracking |
+| Stealth Addresses | 14 | ✅ COMPLETE | Meta-address registration, ephemeral key announcements |
+| Confidential Transfer | 15 | ✅ COMPLETE | Shield/Transfer/Unshield with real MLSAG verification |
+
+### Cryptographic Implementation:
+- **Ring Signatures**: Full MLSAG (Multilayered Linkable Spontaneous Anonymous Group)
+- **Curve**: Ristretto on Curve25519 via `curve25519-dalek` v4.1
+- **Hashing**: SHA-512 for challenge computation
+- **Key Images**: Prevent double-spending across ring signatures
+- **Message Binding**: Signatures bound to transaction data (prevents replay)
+
+### Privacy Flow:
+```
+Public CHML → [SHIELD] → Shielded Note → [CONFIDENTIAL TRANSFER] → Shielded Note → [UNSHIELD] → Public CHML
+                 ↓                              ↓
+           Ring Signature                 Ring Signature
+           (hides sender)                 (hides sender)
+                 ↓                              ↓
+           Stealth Address                Stealth Address
+           (hides receiver)               (hides receiver)
+```
+
+### Files Added/Modified:
+- `pallets/ring-signatures/src/mlsag.rs` - Core MLSAG implementation (179 lines)
+- `pallets/ring-signatures/src/lib.rs` - Public verification function
+- `pallets/confidential-transfer/src/lib.rs` - Wired to real MLSAG
+
+### Tags:
+- `privacy-mlsag-v1` - Initial MLSAG implementation
+- `privacy-complete-v1` - Full pipeline with confidential-transfer integration
+
+### Devnet:
+- **Endpoint:** ws://64.23.233.36:9944
+- **Pallets:** 7 total (MEV, Emissions, Staking, Bridge + 3 Privacy)
+
+---
+
 ### ✅ WEEK 8: COMPLETE (Dec 28-29, 2025)
 
 **Status:** ✅ COMPLETE - Fresh Template Migration + 4 Pallets Deployed
