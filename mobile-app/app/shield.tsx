@@ -41,14 +41,34 @@ export default function ShieldScreen() {
   const [publicBalance, setPublicBalance] = useState<any>(null);
   const [loadingPublicBalance, setLoadingPublicBalance] = useState(false);
 
-  // Estimate fee when amount changes
+  // Load public balance on mount
   useEffect(() => {
-    if (amount && wallet?.address && parseFloat(amount) > 0) {
-      estimateFee();
-    } else {
-      setFeeEstimate(null);
+    loadPublicBalance();
+  }, [wallet?.address]);
+
+  const loadPublicBalance = async () => {
+    if (!wallet?.address) return;
+    
+    setLoadingPublicBalance(true);
+    try {
+      const api = apiService.getApi();
+      if (!api) {
+        console.log('API not connected, using hook balance');
+        setPublicBalance(balance);
+        return;
+      }
+      
+      const { data: { free } } = await api.query.system.account(wallet.address);
+      const publicBalanceBN = new BN(free.toString());
+      setPublicBalance({ free: publicBalanceBN.toString() });
+    } catch (error) {
+      console.error('Error loading public balance:', error);
+      // Fallback to hook balance
+      setPublicBalance(balance);
+    } finally {
+      setLoadingPublicBalance(false);
     }
-  }, [amount, wallet?.address]);
+  };
 
   const estimateFee = async () => {
     if (!wallet?.address || !amount) return;
