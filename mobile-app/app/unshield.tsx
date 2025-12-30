@@ -164,7 +164,7 @@ export default function UnshieldScreen() {
       return 'No private balance available';
     }
     
-    const amountBN = transactionService.parseAmount(amount);
+    const amountBN = parseAmount(amount);
     if (amountBN.gt(privateBalance)) {
       return 'Insufficient private balance';
     }
