@@ -283,7 +283,7 @@ export default function ShieldScreen() {
           </View>
           <Text style={styles.availableText}>
             Available: {loadingPublicBalance ? 'Loading...' : 
-              (publicBalance ? transactionService.formatAmount(publicBalance.free) : formattedFreeBalance)}
+              (publicBalance ? formatBalance(publicBalance.free) + ' CHML' : formattedFreeBalance)}
           </Text>
         </View>
 
