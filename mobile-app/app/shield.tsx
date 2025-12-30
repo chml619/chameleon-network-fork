@@ -85,7 +85,7 @@ export default function ShieldScreen() {
     
     setIsEstimatingFee(true);
     try {
-      const amountBN = transactionService.parseAmount(amount);
+      const amountBN = parseAmount(amount);
       // For shield, we estimate a basic transfer fee as placeholder
       const estimate = await transactionService.estimateFee(
         wallet.address, 
