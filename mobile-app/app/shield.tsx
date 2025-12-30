@@ -119,13 +119,15 @@ export default function ShieldScreen() {
     if (!amount || parseFloat(amount) <= 0) {
       return 'Please enter a valid amount';
     }
-    if (!balance || !balance.free) {
+    
+    const currentBalance = publicBalance || balance;
+    if (!currentBalance || !currentBalance.free) {
       return 'Loading balance...';
     }
     
-    const balanceBN = new BN(balance.free);
+    const balanceBN = new BN(currentBalance.free);
     if (balanceBN.isZero()) {
-      return 'Insufficient balance';
+      return 'Insufficient public balance';
     }
     
     if (feeEstimate && feeEstimate.partialFee) {
