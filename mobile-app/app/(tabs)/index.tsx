@@ -475,12 +475,24 @@ export default function HomeScreen() {
                 <ActivityIndicator size="small" color={THEME.colors.primary} />
               ) : (
                 <View style={styles.balanceContainer}>
-                  <Text style={styles.balanceAmount}>{balanceNumber}</Text>
+                  <View style={styles.balanceSection}>
+                    <Text style={styles.balanceLabel}>Public Balance</Text>
+                    <Text style={styles.balanceAmount}>{balanceNumber}</Text>
+                  </View>
+                  <View style={styles.balanceSection}>
+                    <Text style={styles.balanceLabel}>Private Balance</Text>
+                    <Text style={styles.balanceAmount}>
+                      {privateBalance ? 
+                        (parseFloat(privateBalance.toString()) / Math.pow(10, 18)).toFixed(2) : 
+                        '0.00'
+                      }
+                    </Text>
+                  </View>
                   <PrivacyIndicator />
                 </View>
               )}
               <View style={styles.growthBadge}>
-                <Text style={styles.growthText}>All funds are private</Text>
+                <Text style={styles.growthText}>Shield your public balance to enable private transfers</Text>
               </View>
             </View>
             <TouchableOpacity
