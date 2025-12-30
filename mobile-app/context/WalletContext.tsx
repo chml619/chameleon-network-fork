@@ -63,16 +63,16 @@ export function WalletProvider({ children }: WalletProviderProps) {
     return unsubscribe;
   }, []);
 
-  // Auto-refresh private balance periodically
+  // Auto-refresh balances periodically
   useEffect(() => {
-    if (stealthHash) {
+    if (wallet?.address) {
       const interval = setInterval(() => {
-        refreshPrivateBalance();
+        refreshBalances();
       }, 30000); // Refresh every 30 seconds
 
       return () => clearInterval(interval);
     }
-  }, [stealthHash]);
+  }, [wallet?.address]);
 
   const generateStealthAddressForWallet = async (walletState: WalletState) => {
     try {
