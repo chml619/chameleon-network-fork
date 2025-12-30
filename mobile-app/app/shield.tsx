@@ -270,10 +270,10 @@ export default function ShieldScreen() {
             <TouchableOpacity
               style={[
                 styles.maxButton,
-                (!balance || !feeEstimate) && styles.maxButtonDisabled,
+                (!publicBalance && !balance) && styles.maxButtonDisabled,
               ]}
               onPress={handleMaxAmount}
-              disabled={!balance || !feeEstimate}
+              disabled={!publicBalance && !balance}
             >
               <Text style={styles.maxButtonText}>MAX</Text>
             </TouchableOpacity>
