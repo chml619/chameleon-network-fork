@@ -235,12 +235,9 @@ curl -H "Content-Type: application/json" \
 
 ## 🎯 NEXT STEPS
 
-### Week 9 Development (Dec 30, 2025 - Jan 5, 2026)
-- [ ] **pallet-ring-signatures**: Implement ring signature verification
-- [ ] **pallet-stealth-addresses**: Implement stealth address generation
-- [ ] **pallet-confidential-transfer**: Combine for private transfers
+### Week 9 Remaining
 - [ ] **Mobile app**: Stealth address UI and scanning
-- [ ] **Testing**: End-to-end private transfer flow
+- [ ] **Testing**: End-to-end private transfer flow on devnet
 
 ### Week 10 (pDEX + Privacy)
 - [ ] Resolve pallet-assets version conflict
