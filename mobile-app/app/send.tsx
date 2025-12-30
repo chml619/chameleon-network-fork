@@ -522,24 +522,6 @@ export default function SendScreen() {
               <Text style={styles.modalAmount}>{feeEstimate?.formatted}</Text>
             </View>
             
-            {/* MEV Protection Status in Modal */}
-            <View style={styles.modalSection}>
-              <Text style={styles.modalLabel}>MEV Protection</Text>
-              <View style={styles.mevStatusRow}>
-                <Ionicons 
-                  name={mevEnabled ? "shield-checkmark" : "shield-outline"} 
-                  size={16} 
-                  color={mevEnabled ? THEME.colors.success : THEME.colors.textMuted} 
-                />
-                <Text style={[
-                  styles.modalAmount, 
-                  { color: mevEnabled ? THEME.colors.success : THEME.colors.textMuted }
-                ]}>
-                  {mevEnabled ? 'Enabled' : 'Disabled'}
-                </Text>
-              </View>
-            </View>
-            
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmSend}>
                 <Text style={styles.confirmButtonText}>Confirm & Send</Text>
