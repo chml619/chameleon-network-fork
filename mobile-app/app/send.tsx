@@ -30,7 +30,7 @@ import { notificationService } from '@/services/notifications';
 import { chainService } from '@/services/chain';
 import { walletService, DEV_ACCOUNT_ADDRESSES } from '@/services/wallet';
 import { apiService } from '@/services/api';
-import { mevService } from '@/services/mev';
+import { privacyService, generateStealthHash } from '@/services/privacy';
 import { TransactionStatus } from '@/components/TransactionStatus';
 import { truncateAddress } from '@/utils/address';
 import { THEME, GRADIENTS } from '@/constants/theme';
