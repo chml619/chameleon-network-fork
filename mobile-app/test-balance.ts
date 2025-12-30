@@ -3,7 +3,7 @@
  */
 
 import BN from 'bn.js';
-import { formatBalance, parseAmount, formatBalanceWithUnit } from '../utils/balance';
+import { formatBalance, parseAmount, formatBalanceWithUnit } from './utils/balance';
 
 console.log('=== Balance Formatting Test ===');
 
