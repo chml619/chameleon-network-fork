@@ -218,7 +218,7 @@ curl -H "Content-Type: application/json" \
 |------|-----------|--------|
 | 7 | MEV pallet + Mobile enhancements | ✅ **COMPLETE** |
 | 8 | Emissions, Staking, Bridge pallets | ✅ **COMPLETE** |
-| 9 | **Privacy Layer Core** (Ring Sigs + Stealth Addr) | 🚀 **IN PROGRESS** |
+| 9 | **Privacy Layer Core** (Ring Sigs + Stealth Addr) | ✅ **COMPLETE** |
 | 10 | pDEX + Privacy Integration | ⏳ QUEUED |
 
 ### Phase 3: Infrastructure (Weeks 11-14) ⏳ PLANNED
