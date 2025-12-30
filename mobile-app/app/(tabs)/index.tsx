@@ -477,7 +477,12 @@ export default function HomeScreen() {
                 <View style={styles.balanceContainer}>
                   <View style={styles.balanceSection}>
                     <Text style={styles.balanceLabel}>Public Balance</Text>
-                    <Text style={styles.balanceAmount}>{balanceNumber}</Text>
+                    <Text style={styles.balanceAmount}>
+                      {publicBalance ? 
+                        (parseFloat(publicBalance.toString()) / Math.pow(10, 18)).toFixed(2) : 
+                        balanceNumber
+                      }
+                    </Text>
                   </View>
                   <View style={styles.balanceSection}>
                     <Text style={styles.balanceLabel}>Private Balance</Text>
