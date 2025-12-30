@@ -99,9 +99,10 @@ export default function ShieldScreen() {
   };
 
   const handleMaxAmount = () => {
-    if (!balance || !feeEstimate) return;
+    const currentBalance = publicBalance || balance;
+    if (!currentBalance || !feeEstimate) return;
     
-    const balanceBN = new BN(balance.free);
+    const balanceBN = new BN(currentBalance.free);
     const feeBN = new BN(feeEstimate.partialFee);
     const maxAmount = balanceBN.sub(feeBN);
     
