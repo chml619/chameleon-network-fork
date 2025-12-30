@@ -171,7 +171,7 @@ export default function ShieldScreen() {
       // Set API for privacy service
       privacyService.setApi(api);
       
-      const amountBN = transactionService.parseAmount(amount);
+      const amountBN = parseAmount(amount);
       
       // Generate stealth hash for receiving the shielded tokens
       // In a real implementation, this would be derived from wallet seed
