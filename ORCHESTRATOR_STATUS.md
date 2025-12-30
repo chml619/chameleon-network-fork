@@ -123,7 +123,7 @@ External View:   Only visible at bridge entry/exit points
 | Metric | Value |
 |--------|-------|
 | **Current Week** | 9 of 16 |
-| **Overall Progress** | ~55% |
+| **Overall Progress** | ~60% |
 | **Timeline** | 🟢 ON TRACK |
 | **Blockers** | pDEX deferred (version conflict) |
 | **Build Server** | Contabo (178.18.243.189) |
@@ -132,7 +132,7 @@ External View:   Only visible at bridge entry/exit points
 **Progress Breakdown:**
 - Foundation (Weeks 1-6): ✅ 100%
 - Core Pallets (Weeks 7-8): ✅ 100%  
-- Privacy Layer (Week 9): 🚀 0% (starting)
+- Privacy Layer (Week 9): ✅ 100%
 - pDEX + Integration (Week 10): ⏳ 0%
 - Infrastructure (Weeks 11-14): ⏳ 0%
 - Testnet Launch (Week 15+): ⏳ 0%
