@@ -7,6 +7,9 @@ import React, { createContext, useContext, useEffect, useState, useCallback, Rea
 import { walletService, type WalletState, DEV_ACCOUNTS } from '../services/wallet';
 import { storageService } from '../services/storage';
 import { multiWalletService } from '../services/multiWallet';
+import { privacyService, generateStealthMetaAddress, generateStealthHash } from '../services/privacy';
+import { apiService } from '../services/api';
+import BN from 'bn.js';
 
 interface WalletContextType {
   wallet: WalletState | null;
