@@ -474,10 +474,13 @@ export default function HomeScreen() {
               {balanceLoading ? (
                 <ActivityIndicator size="small" color={THEME.colors.primary} />
               ) : (
-                <Text style={styles.balanceAmount}>{balanceNumber}</Text>
+                <View style={styles.balanceContainer}>
+                  <Text style={styles.balanceAmount}>{balanceNumber}</Text>
+                  <PrivacyIndicator />
+                </View>
               )}
               <View style={styles.growthBadge}>
-                <Text style={styles.growthText}>CHML</Text>
+                <Text style={styles.growthText}>All funds are private</Text>
               </View>
             </View>
             <TouchableOpacity
