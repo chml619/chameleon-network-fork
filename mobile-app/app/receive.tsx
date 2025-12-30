@@ -244,6 +244,22 @@ const styles = StyleSheet.create({
     color: THEME.colors.text,
     fontWeight: THEME.fontWeight.medium,
   },
+  privacyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10B98120',
+    paddingHorizontal: THEME.spacing.sm,
+    paddingVertical: THEME.spacing.xs,
+    borderRadius: THEME.borderRadius.small,
+    marginBottom: THEME.spacing.md,
+    alignSelf: 'center',
+  },
+  privacyText: {
+    fontSize: THEME.fontSize.xs,
+    color: THEME.colors.success,
+    fontWeight: THEME.fontWeight.semibold,
+    marginLeft: THEME.spacing.xs,
+  },
   infoNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
