@@ -1082,7 +1082,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   balanceAmount: {
-    fontSize: THEME.fontSize['4xl'],
+    fontSize: THEME.fontSize.xl,
     fontWeight: THEME.fontWeight.bold,
     color: THEME.colors.text,
   },
