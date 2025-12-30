@@ -205,7 +205,7 @@ pub mod pallet {
         ///
         /// Implements full Curve25519-based MLSAG (Multilayered Linkable
         /// Spontaneous Anonymous Group) signature verification.
-        fn verify_signature_internal(
+        pub fn verify_signature_internal(
             ring_members: &[[u8; 32]],
             key_image: &[u8; 32],
             signature: &[u8],

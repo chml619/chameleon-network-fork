@@ -321,16 +321,23 @@ pub mod pallet {
             ensure!(!input_note.spent, Error::<T>::NoteAlreadySpent);
             ensure!(input_note.amount >= amount, Error::<T>::InsufficientShieldedBalance);
 
-            // Verify ring signature (structural validation for MVP)
-            // In production, this calls pallet_ring_signatures::verify_ring_signature
+            // Verify ring signature using MLSAG
             let ring_size = ring_members.len() as u32;
             ensure!(
-                ring_size == T::RingSize::get(),
+                ring_size >= 2,
                 Error::<T>::InvalidRingSize
             );
 
-            // Validate signature structure
-            ensure!(!signature.is_empty(), Error::<T>::InvalidRingSignature);
+            // Build message for signature verification
+            let message = (input_stealth_hash, output_stealth_hash, amount).encode();
+
+            // Verify MLSAG ring signature
+            pallet_ring_signatures::Pallet::<T>::verify_signature_internal(
+                &ring_members,
+                &key_image,
+                &signature,
+                &message,
+            ).map_err(|_| Error::<T>::InvalidRingSignature)?;
 
             // Mark input note as spent
             input_note.spent = true;
@@ -428,13 +435,20 @@ pub mod pallet {
             ensure!(!note.spent, Error::<T>::NoteAlreadySpent);
             ensure!(note.amount >= amount, Error::<T>::InsufficientShieldedBalance);
 
-            // Verify ring signature
+            // Verify ring signature using MLSAG
             let ring_size = ring_members.len() as u32;
-            ensure!(
-                ring_size == T::RingSize::get(),
-                Error::<T>::InvalidRingSize
-            );
-            ensure!(!signature.is_empty(), Error::<T>::InvalidRingSignature);
+            ensure!(ring_size >= 2, Error::<T>::InvalidRingSize);
+
+            // Build message for signature verification
+            let message = (stealth_hash, amount, &to).encode();
+
+            // Verify MLSAG ring signature
+            pallet_ring_signatures::Pallet::<T>::verify_signature_internal(
+                &ring_members,
+                &key_image,
+                &signature,
+                &message,
+            ).map_err(|_| Error::<T>::InvalidRingSignature)?;
 
             // Mark note as spent
             note.spent = true;
