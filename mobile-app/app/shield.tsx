@@ -25,7 +25,7 @@ import { privacyService, generateStealthHash } from '@/services/privacy';
 import { walletService } from '@/services/wallet';
 import { apiService } from '@/services/api';
 import { transactionService } from '@/services/transaction';
-import { THEME, GRADIENTS } from '@/constants/theme';
+import { formatBalance, parseAmount } from '@/utils/balance';
 
 export default function ShieldScreen() {
   const router = useRouter();
