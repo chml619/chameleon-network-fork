@@ -197,7 +197,7 @@ export default function UnshieldScreen() {
       // Set API for privacy service
       privacyService.setApi(api);
       
-      const amountBN = transactionService.parseAmount(amount);
+      const amountBN = parseAmount(amount);
       
       // Generate stealth hash for the input (current private balance)
       const stealthMetaAddress = {
