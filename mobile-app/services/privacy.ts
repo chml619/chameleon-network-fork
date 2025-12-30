@@ -186,7 +186,8 @@ export class PrivacyService {
     );
 
     return new Promise((resolve, reject) => {
-      tx.signAndSend(signerKeypair, ({ status, dispatchError }) => {
+      tx.signAndSend(signerKeypair, (result: any) => {
+        const { status, dispatchError } = result;
         if (status.isInBlock || status.isFinalized) {
           if (dispatchError) {
             reject(new Error(dispatchError.toString()));
@@ -212,7 +213,8 @@ export class PrivacyService {
     );
 
     return new Promise((resolve, reject) => {
-      tx.signAndSend(signerKeypair, ({ status, dispatchError }) => {
+      tx.signAndSend(signerKeypair, (result: any) => {
+        const { status, dispatchError } = result;
         if (status.isInBlock || status.isFinalized) {
           if (dispatchError) {
             reject(new Error(dispatchError.toString()));
@@ -261,7 +263,8 @@ export class PrivacyService {
     );
 
     return new Promise((resolve, reject) => {
-      tx.signAndSend(signerKeypair, ({ status, dispatchError }) => {
+      tx.signAndSend(signerKeypair, (result: any) => {
+        const { status, dispatchError } = result;
         if (status.isInBlock || status.isFinalized) {
           if (dispatchError) {
             reject(new Error(dispatchError.toString()));
