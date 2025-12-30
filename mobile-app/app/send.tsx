@@ -56,6 +56,7 @@ export default function SendScreen() {
   const [isValidAddress, setIsValidAddress] = useState(false);
   const [feeEstimate, setFeeEstimate] = useState<any>(null);
   const [isEstimatingFee, setIsEstimatingFee] = useState(false);
+  const [transferMode, setTransferMode] = useState<'private' | 'public' | 'checking'>('checking');
   
   // Transaction state
   const [showConfirmation, setShowConfirmation] = useState(false);
