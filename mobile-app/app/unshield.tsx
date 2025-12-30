@@ -142,7 +142,7 @@ export default function UnshieldScreen() {
     
     // For private balance, we don't need to subtract fees from the private amount
     // Fees are paid from public balance
-    const formatted = transactionService.formatBalance(privateBalance.toString()).split(' ')[0];
+    const formatted = transactionService.formatAmount(privateBalance);
     setAmount(formatted.replace(/,/g, ''));
   };
 
