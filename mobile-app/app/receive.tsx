@@ -195,6 +195,12 @@ const styles = StyleSheet.create({
     fontWeight: THEME.fontWeight.bold,
     color: THEME.colors.text,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: THEME.spacing.xl,
+  },
   content: {
     flex: 1,
     padding: THEME.spacing.lg,
