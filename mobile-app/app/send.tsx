@@ -679,6 +679,22 @@ const styles = StyleSheet.create({
     fontSize: THEME.fontSize.sm,
     marginTop: THEME.spacing.xs,
   },
+  stealthBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10B98120',
+    paddingHorizontal: THEME.spacing.sm,
+    paddingVertical: THEME.spacing.xs,
+    borderRadius: THEME.borderRadius.small,
+    marginTop: THEME.spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  stealthText: {
+    fontSize: THEME.fontSize.xs,
+    color: THEME.colors.success,
+    fontWeight: THEME.fontWeight.semibold,
+    marginLeft: THEME.spacing.xs,
+  },
   // Quick Test Accounts styles
   quickAccountsSection: {
     marginBottom: THEME.spacing.lg,
