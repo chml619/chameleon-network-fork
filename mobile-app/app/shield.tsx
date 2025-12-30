@@ -194,6 +194,7 @@ export default function ShieldScreen() {
             onPress: () => {
               setAmount('');
               setFeeEstimate(null);
+              loadPublicBalance(); // Refresh balance
               router.back();
             }
           }
