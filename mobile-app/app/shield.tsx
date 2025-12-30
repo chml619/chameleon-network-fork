@@ -134,7 +134,7 @@ export default function ShieldScreen() {
     }
     
     if (feeEstimate && feeEstimate.partialFee) {
-      const amountBN = transactionService.parseAmount(amount);
+      const amountBN = parseAmount(amount);
       const feeBN = new BN(feeEstimate.partialFee);
       const totalBN = amountBN.add(feeBN);
       
