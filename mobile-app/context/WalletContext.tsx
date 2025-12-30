@@ -80,7 +80,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
       if (!keyPair) return;
 
       // Generate stealth meta-address from wallet seed
-      const seed = await storageService.getDecryptedSeed();
+      const seed = await storageService.getEncryptedSeed();
       if (!seed) return;
 
       const metaAddress = generateStealthMetaAddress(seed);
