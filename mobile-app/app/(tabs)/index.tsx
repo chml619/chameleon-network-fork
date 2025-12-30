@@ -1074,6 +1074,11 @@ const styles = StyleSheet.create({
     fontWeight: THEME.fontWeight.bold,
     color: THEME.colors.text,
   },
+  balanceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: THEME.spacing.sm,
+  },
   growthBadge: {
     backgroundColor: THEME.colors.successBg,
     paddingHorizontal: THEME.spacing.sm,
