@@ -107,7 +107,7 @@ export default function ReceiveScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBackButton}>
           <Ionicons name="chevron-back" size={24} color={THEME.colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Receive CHML</Text>
+        <Text style={styles.headerTitle}>Receive Private Payments</Text>
         <View style={{ width: 24 }} />
       </View>
 
