@@ -331,18 +331,25 @@ export function WalletProvider({ children }: WalletProviderProps) {
     try {
       const api = apiService.getApi();
       if (!api) {
-        // Use mock balance for demo
-        setPublicBalance(new BN('100000000000000000000')); // 100 CHML
+        // Keep existing balance during API reconnection
         return;
       }
 
       const { data: { free } } = await api.query.system.account(wallet.address) as any;
-      const publicBalanceBN = new BN(free.toString());
-      setPublicBalance(publicBalanceBN);
+      const newBalance = new BN(free.toString());
+      balanceRef.current = newBalance;
+      setPublicBalance(newBalance);
+      setBalanceLoading(false);
     } catch (error) {
       console.error('Error refreshing public balance:', error);
+      // Keep old balance on error - don't reset to null/0
       // Use mock balance for demo
-      setPublicBalance(new BN('100000000000000000000')); // 100 CHML
+      if (!balanceRef.current) {
+        const mockBalance = new BN('100000000000000000000'); // 100 CHML
+        balanceRef.current = mockBalance;
+        setPublicBalance(mockBalance);
+      }
+      setBalanceLoading(false);
     }
   }, [wallet?.address]);
 
