@@ -33,7 +33,7 @@ import { apiService } from '@/services/api';
 import { privacyService, generateStealthHash } from '@/services/privacy';
 import { TransactionStatus } from '@/components/TransactionStatus';
 import { truncateAddress } from '@/utils/address';
-import { THEME, GRADIENTS } from '@/constants/theme';
+import { formatBalance, parseAmount } from '@/utils/balance';
 
 // Quick test accounts for easy selection
 const QUICK_TEST_ACCOUNTS = [
