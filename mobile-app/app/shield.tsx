@@ -38,6 +38,8 @@ export default function ShieldScreen() {
   const [isShielding, setIsShielding] = useState(false);
   const [feeEstimate, setFeeEstimate] = useState<any>(null);
   const [isEstimatingFee, setIsEstimatingFee] = useState(false);
+  const [publicBalance, setPublicBalance] = useState<any>(null);
+  const [loadingPublicBalance, setLoadingPublicBalance] = useState(false);
 
   // Estimate fee when amount changes
   useEffect(() => {
