@@ -423,9 +423,16 @@ export default function SendScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color={THEME.colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Private Transfer</Text>
+        <Text style={styles.headerTitle}>
+          {transferMode === 'checking' ? 'Transfer' : 
+           transferMode === 'private' ? 'Private Transfer' : 'Public Transfer'}
+        </Text>
         <View style={styles.privacyHeaderBadge}>
-          <Ionicons name="shield-checkmark" size={16} color={THEME.colors.success} />
+          <Ionicons 
+            name={transferMode === 'private' ? 'shield-checkmark' : 'eye'} 
+            size={16} 
+            color={transferMode === 'private' ? THEME.colors.success : THEME.colors.warning} 
+          />
         </View>
       </View>
 
