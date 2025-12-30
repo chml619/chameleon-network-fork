@@ -29,32 +29,30 @@
 
 ---
 
-## 🆕 WEEK 9: PRIVACY LAYER (August 2025)
+## 🆕 WEEK 9: PRIVACY LAYER (Dec 29-30, 2025)
 
-**Status:** ✅ SCAFFOLDING COMPLETE - Privacy-First Architecture
+**Status:** ✅ COMPLETE - Full MLSAG Privacy Pipeline
 
 ### Completed Deliverables
 
 **1. pallet-ring-signatures (Sender Privacy)** ✅
-- Ring signature verification pallet scaffolding
+- Full MLSAG (Multilayered Linkable Spontaneous Anonymous Group) implementation
+- Curve: Ristretto on Curve25519 via `curve25519-dalek` v4.1
 - Key image storage to prevent double-spending
-- Configurable ring size (default 11 like Monero)
-- Weight functions defined
-- TODO: Implement actual MLSAG verification
+- SHA-512 for challenge computation
+- Public `verify_signature_internal` function for cross-pallet calls
 
 **2. pallet-stealth-addresses (Receiver Privacy)** ✅
 - One-time address generation using stealth meta-addresses
 - Ephemeral key announcements for payment scanning
 - Auto-pruning of old ephemeral keys
 - EIP-5564 compatible design
-- Weight functions defined
 
 **3. pallet-confidential-transfer (Private Transfers)** ✅
 - Shield: Convert public CHML to private
-- Confidential Transfer: Transfer between stealth addresses
+- Confidential Transfer: Transfer between stealth addresses  
 - Unshield: Convert private back to public
-- Integrates ring-signatures and stealth-addresses pallets
-- Weight functions defined
+- **Wired to real MLSAG verification** (not structural validation)
 
 ### Pallet Files Created
 ```
