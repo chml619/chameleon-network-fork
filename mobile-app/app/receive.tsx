@@ -28,18 +28,46 @@ export default function ReceiveScreen() {
   const insets = useSafeAreaInsets();
   const { wallet } = useWallet();
 
+  // Generate stealth address for receiving
+  const getStealthAddress = (): string => {
+    if (!wallet?.address) return '';
+    
+    try {
+      const keyPair = walletService.getKeyPair();
+      if (!keyPair) {
+        // Fallback to regular address if wallet is locked
+        return wallet.address;
+      }
+      
+      // Generate stealth meta-address from wallet
+      const stealthMeta = {
+        spendPubkey: keyPair.publicKey,
+        viewPubkey: keyPair.publicKey, // Simplified for demo
+      };
+      
+      const stealthHash = generateStealthHash(stealthMeta);
+      return '0x' + Buffer.from(stealthHash).toString('hex');
+    } catch (error) {
+      console.error('Error generating stealth address:', error);
+      return wallet.address; // Fallback to regular address
+    }
+  };
+
+  const stealthAddress = getStealthAddress();
+  const isStealthAddress = stealthAddress.startsWith('0x');
+
   const handleCopyAddress = async () => {
-    if (wallet?.address) {
-      await Clipboard.setStringAsync(wallet.address);
+    if (stealthAddress) {
+      await Clipboard.setStringAsync(stealthAddress);
       Alert.alert('Copied!', 'Address copied to clipboard');
     }
   };
 
   const handleShare = async () => {
-    if (wallet?.address) {
+    if (stealthAddress) {
       try {
         await Share.share({
-          message: `My Chameleon address: ${wallet.address}`,
+          message: `My Chameleon stealth address: ${stealthAddress}`,
         });
       } catch (error) {
         console.error('Error sharing:', error);
