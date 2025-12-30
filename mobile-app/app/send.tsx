@@ -617,6 +617,14 @@ const styles = StyleSheet.create({
     fontWeight: THEME.fontWeight.bold,
     color: THEME.colors.text,
   },
+  privacyHeaderBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#10B98120',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   scrollView: {
     flex: 1,
   },
