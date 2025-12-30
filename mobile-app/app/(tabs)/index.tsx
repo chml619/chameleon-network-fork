@@ -136,11 +136,9 @@ export default function HomeScreen() {
                   );
                   
                   if (isSuccess) {
-                    // Format amount (assuming 18 decimals)
-                    const amountNum = BigInt(amount);
-                    const decimals = BigInt(10 ** 18);
-                    const whole = amountNum / decimals;
-                    const formattedAmount = `${whole.toString()} CHML`;
+                    // Format amount using correct decimals
+                    const amountBN = new BN(amount);
+                    const formattedAmount = formatBalance(amountBN) + ' CHML';
                     
                     console.log('[Home] Found incoming transfer:', txHash, 'from:', sender, 'amount:', formattedAmount);
                     
