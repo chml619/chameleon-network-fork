@@ -111,7 +111,7 @@ export default function UnshieldScreen() {
     
     setIsEstimatingFee(true);
     try {
-      const amountBN = transactionService.parseAmount(amount);
+      const amountBN = parseAmount(amount);
       // For unshield, we estimate a basic transfer fee as placeholder
       const estimate = await transactionService.estimateFee(
         wallet.address,
