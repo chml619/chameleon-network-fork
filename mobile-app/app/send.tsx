@@ -57,10 +57,6 @@ export default function SendScreen() {
   const [feeEstimate, setFeeEstimate] = useState<any>(null);
   const [isEstimatingFee, setIsEstimatingFee] = useState(false);
   
-  // MEV Protection state - Default to OFF (Beta feature)
-  const [mevEnabled, setMevEnabled] = useState(false);
-  const [mevPalletAvailable, setMevPalletAvailable] = useState(false);
-  
   // Transaction state
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSending, setIsSending] = useState(false);
