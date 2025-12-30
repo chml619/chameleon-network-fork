@@ -18,6 +18,7 @@ interface WalletContextType {
   stealthMetaAddress: any | null;
   stealthHash: Uint8Array | null;
   privateBalance: BN | null;
+  publicBalance: BN | null;
   createWallet: (mnemonic: string, name?: string) => Promise<void>;
   importWallet: (mnemonic: string, name?: string) => Promise<void>;
   importDevAccount: (accountName: 'alice' | 'bob' | 'charlie' | 'dave' | 'eve') => Promise<void>;
@@ -25,6 +26,8 @@ interface WalletContextType {
   logout: () => Promise<void>;
   clearError: () => void;
   refreshPrivateBalance: () => Promise<void>;
+  refreshPublicBalance: () => Promise<void>;
+  refreshBalances: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
