@@ -63,41 +63,15 @@ export default function SendScreen() {
   const [transactionResult, setTransactionResult] = useState<any>(null);
   const [showResult, setShowResult] = useState(false);
 
-  // Check MEV pallet availability on mount
-  useEffect(() => {
-    const checkMEVPallet = () => {
-      const api = apiService.getApi();
-      if (api) {
-        const available = mevService.isMEVPalletAvailable(api);
-        setMevPalletAvailable(available);
-        console.log('[Send] MEV pallet available:', available);
-      }
-    };
-    
-    checkMEVPallet();
-    
-    // Re-check when API connects
-    const unsubscribe = apiService.onConnectionStateChange((state) => {
-      if (state.status === 'connected') {
-        checkMEVPallet();
-      }
-    });
-    
-    return () => unsubscribe();
-  }, []);
-
-  // Handle MEV toggle
-  const handleMevToggle = (value: boolean) => {
-    setMevEnabled(value);
-    mevService.setEnabled(value);
-    console.log('[Send] MEV protection:', value ? 'enabled' : 'disabled');
-  };
-
   // Validate address safely (with error handling)
   const checkAddressValid = useCallback((addr: string): boolean => {
     try {
       if (!addr || addr.length === 0) return false;
-      // Basic validation first (doesn't need API)
+      // For privacy transfers, we accept stealth address hashes (0x format)
+      if (addr.startsWith('0x') && addr.length === 66) {
+        return true; // Valid stealth hash
+      }
+      // Also accept regular substrate addresses for compatibility
       if (addr.length < 47 || addr.length > 48 || !addr.startsWith('5')) {
         return false;
       }
