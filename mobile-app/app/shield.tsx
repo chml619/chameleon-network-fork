@@ -78,6 +78,8 @@ export default function ShieldScreen() {
       setFeeEstimate(null);
     }
   }, [amount, wallet?.address]);
+
+  const estimateFee = async () => {
     if (!wallet?.address || !amount) return;
     
     setIsEstimatingFee(true);
