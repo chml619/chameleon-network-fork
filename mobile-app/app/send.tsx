@@ -146,6 +146,8 @@ export default function SendScreen() {
       setFeeEstimate(null);
     }
   }, [recipient, amount, isValidAddress, wallet?.address]);
+
+  const estimateFee = async () => {
     if (!wallet?.address || !isValidAddress || !amount) return;
     
     setIsEstimatingFee(true);
