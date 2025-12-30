@@ -441,6 +441,23 @@ export default function SendScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Transfer Mode Indicator */}
+        {transferMode !== 'checking' && (
+          <View style={styles.transferModeIndicator}>
+            <Ionicons 
+              name={transferMode === 'private' ? 'shield-checkmark' : 'eye'} 
+              size={14} 
+              color={transferMode === 'private' ? THEME.colors.success : THEME.colors.warning} 
+            />
+            <Text style={[
+              styles.transferModeText,
+              { color: transferMode === 'private' ? THEME.colors.success : THEME.colors.warning }
+            ]}>
+              {transferMode === 'private' ? 'Using private balance' : 'Using public balance'}
+            </Text>
+          </View>
+        )}
+
         {/* Recipient Input */}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>To (Stealth Address)</Text>
