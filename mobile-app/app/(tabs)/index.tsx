@@ -128,11 +128,11 @@ export default function HomeScreen() {
               transactionHistoryService.getTransaction(wallet.address, txHash).then(existing => {
                 if (!existing) {
                   // Check if the transaction was successful
-                  const events = allRecords.filter(({ phase }) => 
+                  const events = (allRecords as any).filter(({ phase }: any) => 
                     phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(index)
                   );
                   
-                  const isSuccess = events.some(({ event }) => 
+                  const isSuccess = events.some(({ event }: any) => 
                     api.events.system.ExtrinsicSuccess.is(event)
                   );
                   
