@@ -323,9 +323,33 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, []);
 
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
+  const refreshPublicBalance = useCallback(async () => {
+    if (!wallet?.address) return;
+
+    try {
+      const api = apiService.getApi();
+      if (!api) {
+        // Use mock balance for demo
+        setPublicBalance(new BN('100000000000000000000')); // 100 CHML
+        return;
+      }
+
+      const { data: { free } } = await api.query.system.account(wallet.address);
+      const publicBalanceBN = new BN(free.toString());
+      setPublicBalance(publicBalanceBN);
+    } catch (error) {
+      console.error('Error refreshing public balance:', error);
+      // Use mock balance for demo
+      setPublicBalance(new BN('100000000000000000000')); // 100 CHML
+    }
+  }, [wallet?.address]);
+
+  const refreshBalances = useCallback(async () => {
+    await Promise.all([
+      refreshPublicBalance(),
+      refreshPrivateBalance(),
+    ]);
+  }, [refreshPublicBalance, refreshPrivateBalance]);
 
   const value: WalletContextType = {
     wallet,
