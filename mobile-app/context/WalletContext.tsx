@@ -89,8 +89,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
       setStealthMetaAddress(metaAddress);
       setStealthHash(hash);
 
-      // Initial private balance load
-      refreshPrivateBalance();
+      // Initial balance load
+      refreshBalances();
     } catch (error) {
       console.error('Error generating stealth address:', error);
     }
