@@ -178,7 +178,7 @@ export default function HomeScreen() {
     } catch (error) {
       console.error('[Home] Error checking incoming transactions:', error);
     }
-  }, [wallet?.address, loadTransactionHistory]);
+  }, [wallet?.address]);
 
   // Load transaction history when wallet changes or screen comes into focus
   const loadTransactionHistory = useCallback(async () => {
