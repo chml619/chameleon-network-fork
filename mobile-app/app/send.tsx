@@ -456,8 +456,10 @@ export default function SendScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color={THEME.colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Send CHML</Text>
-        <View style={{ width: 24 }} />
+        <Text style={styles.headerTitle}>Private Transfer</Text>
+        <View style={styles.privacyHeaderBadge}>
+          <Ionicons name="shield-checkmark" size={16} color={THEME.colors.success} />
+        </View>
       </View>
 
       <ScrollView
