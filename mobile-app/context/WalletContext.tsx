@@ -3,7 +3,7 @@
  * Updated with multi-wallet support
  */
 
-import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode, useRef } from 'react';
 import { walletService, type WalletState, DEV_ACCOUNTS } from '../services/wallet';
 import { storageService } from '../services/storage';
 import { multiWalletService } from '../services/multiWallet';
