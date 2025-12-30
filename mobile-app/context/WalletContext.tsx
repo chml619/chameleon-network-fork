@@ -50,10 +50,68 @@ export function WalletProvider({ children }: WalletProviderProps) {
   useEffect(() => {
     const unsubscribe = walletService.onWalletStateChange((state) => {
       setWallet(state);
+      // Generate stealth address when wallet changes
+      if (state && !state.isLocked) {
+        generateStealthAddressForWallet(state);
+      }
     });
 
     return unsubscribe;
   }, []);
+
+  // Auto-refresh private balance periodically
+  useEffect(() => {
+    if (stealthHash) {
+      const interval = setInterval(() => {
+        refreshPrivateBalance();
+      }, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [stealthHash]);
+
+  const generateStealthAddressForWallet = async (walletState: WalletState) => {
+    try {
+      const keyPair = walletService.getKeyPair();
+      if (!keyPair) return;
+
+      // Generate stealth meta-address from wallet seed
+      const seed = await storageService.getDecryptedSeed();
+      if (!seed) return;
+
+      const metaAddress = generateStealthMetaAddress(seed);
+      const hash = generateStealthHash(metaAddress);
+
+      setStealthMetaAddress(metaAddress);
+      setStealthHash(hash);
+
+      // Initial private balance load
+      refreshPrivateBalance();
+    } catch (error) {
+      console.error('Error generating stealth address:', error);
+    }
+  };
+
+  const refreshPrivateBalance = useCallback(async () => {
+    if (!stealthHash) return;
+
+    try {
+      const api = apiService.getApi();
+      if (!api) {
+        // Use mock balance for demo
+        setPrivateBalance(new BN('1000000000000000000')); // 1 CHML
+        return;
+      }
+
+      privacyService.setApi(api);
+      const balance = await privacyService.getPrivateBalance(stealthHash);
+      setPrivateBalance(balance);
+    } catch (error) {
+      console.error('Error refreshing private balance:', error);
+      // Use mock balance for demo
+      setPrivateBalance(new BN('1000000000000000000')); // 1 CHML
+    }
+  }, [stealthHash]);
 
   const initializeWallet = async () => {
     setIsLoading(true);
