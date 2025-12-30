@@ -33,6 +33,7 @@ import { transactionHistoryService, StoredTransaction } from '@/services/transac
 import { notificationService } from '@/services/notifications';
 import { apiService } from '@/services/api';
 import { formatBalance } from '@/utils/balance';
+import { truncateAddress } from '@/utils/address';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 // Explorer URL
