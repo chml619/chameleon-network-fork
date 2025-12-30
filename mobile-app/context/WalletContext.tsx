@@ -327,12 +327,16 @@ export function WalletProvider({ children }: WalletProviderProps) {
     wallet,
     isLoading,
     error,
+    stealthMetaAddress,
+    stealthHash,
+    privateBalance,
     createWallet,
     importWallet,
     importDevAccount,
     switchWallet,
     logout,
     clearError,
+    refreshPrivateBalance,
   };
 
   return (
