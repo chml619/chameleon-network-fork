@@ -351,7 +351,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
     ]);
   }, [refreshPublicBalance, refreshPrivateBalance]);
 
-  const value: WalletContextType = {
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
     wallet,
     isLoading,
     error,
