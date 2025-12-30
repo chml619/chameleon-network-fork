@@ -38,15 +38,15 @@ import { THEME, GRADIENTS } from '@/constants/theme';
 // Explorer URL
 const EXPLORER_BASE_URL = 'https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F64.23.233.36%3A9944#/explorer';
 
-// Action items for the grid - Updated with Week 7 features
+// Action items for the grid - Updated with Week 9 privacy features
 const ACTIONS = [
   { id: 'send', label: 'Send', icon: 'arrow-up-outline', route: '/send', color: '#FF6B6B' },
   { id: 'receive', label: 'Receive', icon: 'arrow-down-outline', route: '/receive', color: '#4ECDC4' },
   { id: 'trade', label: 'Trade', icon: 'swap-horizontal-outline', tab: 'trade', color: '#9B59B6' },
   { id: 'bridge', label: 'Bridge', icon: 'git-branch-outline', route: '/bridge', color: '#3498DB' },
   { id: 'stake', label: 'Stake', icon: 'layers-outline', route: '/staking', color: '#F39C12' },
-  { id: 'shield', label: 'Shield', icon: 'shield-checkmark-outline', disabled: true },
-  { id: 'papp', label: 'pApp', icon: 'apps-outline', disabled: true },
+  { id: 'shield', label: 'Shield', icon: 'shield-checkmark-outline', route: '/shield', color: '#10B981' },
+  { id: 'unshield', label: 'Unshield', icon: 'eye-outline', route: '/unshield', color: '#F59E0B' },
   { id: 'power', label: 'Power', icon: 'flash-outline', disabled: true },
 ];
 
