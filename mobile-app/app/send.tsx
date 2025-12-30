@@ -123,14 +123,20 @@ export default function SendScreen() {
     }
   };
 
-  // Estimate fee when amount and recipient change
+  // Validate recipient address (for UI feedback only)
   useEffect(() => {
-    if (isValidAddress && amount && wallet?.address && parseFloat(amount) > 0) {
-      estimateFee();
-    } else {
-      setFeeEstimate(null);
+    try {
+      if (recipient.length > 0) {
+        const valid = checkAddressValid(recipient);
+        setIsValidAddress(valid);
+      } else {
+        setIsValidAddress(false);
+      }
+    } catch (error) {
+      console.error('[Send] Address validation effect error:', error);
+      setIsValidAddress(false);
     }
-  }, [recipient, amount, isValidAddress, wallet?.address]);
+  }, [recipient, checkAddressValid]);
 
   const estimateFee = async () => {
     if (!wallet?.address || !isValidAddress || !amount) return;
