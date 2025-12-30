@@ -75,6 +75,45 @@ export class PrivacyService {
     return [senderPubkey, alice.publicKey];
   }
 
+  // Check if user has shielded notes
+  async hasShieldedNotes(stealthHash: Uint8Array): Promise<boolean> {
+    if (!this.api) return false;
+    
+    try {
+      const note = await this.api.query.confidentialTransfer.shieldedNotes(
+        Array.from(stealthHash)
+      );
+      if (note.isEmpty) return false;
+      const noteData = note.toJSON() as any;
+      return noteData && !noteData.spent && noteData.amount > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  // Public transfer fallback
+  async publicTransfer(
+    senderKeypair: any,
+    toAddress: string,
+    amount: BN
+  ): Promise<string> {
+    if (!this.api) throw new Error('API not connected');
+    
+    const tx = this.api.tx.balances.transferKeepAlive(toAddress, amount.toString());
+    
+    return new Promise((resolve, reject) => {
+      tx.signAndSend(senderKeypair, ({ status, dispatchError }) => {
+        if (status.isInBlock || status.isFinalized) {
+          if (dispatchError) {
+            reject(new Error(dispatchError.toString()));
+          } else {
+            resolve(status.asFinalized?.toString() || status.asInBlock.toString());
+          }
+        }
+      }).catch(reject);
+    });
+  }
+
   // Generate key image (simplified for devnet)
   generateKeyImage(privateKey: Uint8Array): Uint8Array {
     // Key image = hash of private key (simplified)
