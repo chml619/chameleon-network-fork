@@ -15,12 +15,16 @@ interface WalletContextType {
   wallet: WalletState | null;
   isLoading: boolean;
   error: string | null;
+  stealthMetaAddress: any | null;
+  stealthHash: Uint8Array | null;
+  privateBalance: BN | null;
   createWallet: (mnemonic: string, name?: string) => Promise<void>;
   importWallet: (mnemonic: string, name?: string) => Promise<void>;
   importDevAccount: (accountName: 'alice' | 'bob' | 'charlie' | 'dave' | 'eve') => Promise<void>;
   switchWallet: (address: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
+  refreshPrivateBalance: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
