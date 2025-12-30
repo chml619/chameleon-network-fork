@@ -70,7 +70,14 @@ export default function ShieldScreen() {
     }
   };
 
-  const estimateFee = async () => {
+  // Estimate fee when amount changes
+  useEffect(() => {
+    if (amount && wallet?.address && parseFloat(amount) > 0) {
+      estimateFee();
+    } else {
+      setFeeEstimate(null);
+    }
+  }, [amount, wallet?.address]);
     if (!wallet?.address || !amount) return;
     
     setIsEstimatingFee(true);
