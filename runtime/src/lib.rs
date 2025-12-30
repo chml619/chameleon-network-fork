@@ -240,4 +240,11 @@ mod runtime {
 
         #[runtime::pallet_index(12)]
         pub type Bridge = pallet_bridge;
+
+        #[runtime::pallet_index(13)]
+        pub type RingSignatures = pallet_ring_signatures;
+        #[runtime::pallet_index(14)]
+        pub type StealthAddresses = pallet_stealth_addresses;
+        #[runtime::pallet_index(15)]
+        pub type ConfidentialTransfer = pallet_confidential_transfer;
 }

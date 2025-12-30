@@ -37,6 +37,9 @@ frame-benchmarking-cli = { version = "47.0.0", default-features = false }
 frame-metadata-hash-extension = { version = "0.8.0", default-features = false }
 frame-system = { version = "40.1.0", default-features = false }
 sp-std = { version = "14.0.0", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+rand_core = { version = "0.6", default-features = false }
+curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
 pallet-assets = { version = "40.0.0", default-features = false }
 futures = { version = "0.3.31" }
 jsonrpsee = { version = "0.24.3" }
@@ -99,4 +102,5 @@ panic = "unwind"
 codegen-units = 1
 inherits = "release"
 lto = true
+
 

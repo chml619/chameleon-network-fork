@@ -31,6 +31,9 @@ pallet-mev-protection.workspace = true
 pallet-emissions.workspace = true
 pallet-staking.workspace = true
 pallet-bridge.workspace = true
+pallet-ring-signatures.workspace = true
+pallet-stealth-addresses.workspace = true
+pallet-confidential-transfer.workspace = true
 pallet-timestamp.workspace = true
 pallet-transaction-payment-rpc-runtime-api.workspace = true
 pallet-transaction-payment.workspace = true
@@ -75,6 +78,9 @@ std = [
         "pallet-emissions/std",
         "pallet-staking/std",
         "pallet-bridge/std",
+        "pallet-ring-signatures/std",
+        "pallet-stealth-addresses/std",
+        "pallet-confidential-transfer/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",

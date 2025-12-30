@@ -6055,6 +6055,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-confidential-transfer"
+version = "0.1.0"
+dependencies = [
+ "frame-benchmarking 40.0.0",
+ "frame-support 40.1.0",
+ "frame-system 40.1.0",
+ "log",
+ "pallet-balances",
+ "pallet-ring-signatures",
+ "pallet-stealth-addresses",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core 36.1.0",
+ "sp-io 40.0.1",
+ "sp-runtime 41.1.0",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-emissions"
 version = "0.1.0"
 dependencies = [
@@ -6126,6 +6145,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-ring-signatures"
+version = "0.1.0"
+dependencies = [
+ "curve25519-dalek",
+ "frame-benchmarking 40.0.0",
+ "frame-support 40.1.0",
+ "frame-system 40.1.0",
+ "log",
+ "parity-scale-codec",
+ "rand_core 0.6.4",
+ "scale-info",
+ "sha2 0.10.9",
+ "sp-core 36.1.0",
+ "sp-io 40.0.1",
+ "sp-runtime 41.1.0",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-session"
 version = "40.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6156,6 +6194,22 @@ dependencies = [
  "frame-system 40.1.0",
  "log",
  "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core 36.1.0",
+ "sp-io 40.0.1",
+ "sp-runtime 41.1.0",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-stealth-addresses"
+version = "0.1.0"
+dependencies = [
+ "frame-benchmarking 40.0.0",
+ "frame-support 40.1.0",
+ "frame-system 40.1.0",
+ "log",
  "parity-scale-codec",
  "scale-info",
  "sp-core 36.1.0",
@@ -9758,10 +9812,13 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-bridge",
+ "pallet-confidential-transfer",
  "pallet-emissions",
  "pallet-grandpa",
  "pallet-mev-protection",
+ "pallet-ring-signatures",
  "pallet-staking",
+ "pallet-stealth-addresses",
  "pallet-sudo",
  "pallet-template",
  "pallet-timestamp",

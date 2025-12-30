@@ -235,3 +235,40 @@ impl pallet_bridge::Config for Runtime {
     type MaxValidators = MaxValidators;
 }
 
+
+// Privacy pallets configuration
+parameter_types! {
+    pub const RingSize: u32 = 11;
+    pub const MaxRingSize: u32 = 16;
+    pub const MaxMemoSize: u32 = 256;
+    pub const EphemeralKeyRetentionPeriod: BlockNumber = 14400; // ~24 hours
+    pub const MaxEphemeralKeysPerBlock: u32 = 100;
+    pub const MinShieldAmount: Balance = EXISTENTIAL_DEPOSIT;
+    pub const MaxNotesPerAccount: u32 = 256;
+}
+
+/// Configure Ring Signatures pallet
+impl pallet_ring_signatures::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type RingSize = RingSize;
+    type MaxRingSize = MaxRingSize;
+    type WeightInfo = pallet_ring_signatures::weights::SubstrateWeight<Runtime>;
+}
+
+/// Configure Stealth Addresses pallet
+impl pallet_stealth_addresses::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type MaxMemoSize = MaxMemoSize;
+    type EphemeralKeyRetentionPeriod = EphemeralKeyRetentionPeriod;
+    type MaxEphemeralKeysPerBlock = MaxEphemeralKeysPerBlock;
+    type WeightInfo = pallet_stealth_addresses::weights::SubstrateWeight<Runtime>;
+}
+
+/// Configure Confidential Transfer pallet
+impl pallet_confidential_transfer::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type Currency = Balances;
+    type MinShieldAmount = MinShieldAmount;
+    type MaxNotesPerAccount = MaxNotesPerAccount;
+    type ConfidentialWeightInfo = pallet_confidential_transfer::weights::SubstrateWeight<Runtime>;
+}

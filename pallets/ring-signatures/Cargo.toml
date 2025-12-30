@@ -22,6 +22,9 @@ scale-info = { features = ["derive"], workspace = true }
 sp-runtime = { workspace = true, default-features = false }
 sp-std = { workspace = true, default-features = false }
 sp-core = { workspace = true, default-features = false }
+sha2 = { workspace = true, default-features = false }
+rand_core = { workspace = true, default-features = false }
+curve25519-dalek = { workspace = true }
 
 [dev-dependencies]
 sp-core = { default-features = true, workspace = true }
@@ -38,6 +41,8 @@ std = [
     "log/std",
     "scale-info/std",
     "sp-runtime/std",
+    "sha2/std",
+    "rand_core/std",
     "sp-std/std",
     "sp-core/std",
 ]

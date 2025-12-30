@@ -38,6 +38,7 @@ mod tests;
 mod benchmarking;
 
 pub mod weights;
+pub mod mlsag;
 pub use weights::WeightInfo;
 
 #[frame_support::pallet]
@@ -119,6 +120,10 @@ pub mod pallet {
         RingSizeTooLarge,
         /// The signature data is malformed.
         MalformedSignature,
+        /// Invalid key image.
+        InvalidKeyImage,
+        /// Invalid signature.
+        InvalidSignature,
         /// The message hash is invalid.
         InvalidMessageHash,
         /// One or more ring members have invalid public keys.
@@ -196,19 +201,26 @@ pub mod pallet {
 
     /// Internal helper functions.
     impl<T: Config> Pallet<T> {
-        /// Internal ring signature verification.
+        /// Internal ring signature verification using MLSAG.
         ///
-        /// TODO: Implement actual Curve25519-based MLSAG (Multilayered Linkable
+        /// Implements full Curve25519-based MLSAG (Multilayered Linkable
         /// Spontaneous Anonymous Group) signature verification.
-        ///
-        /// Current implementation is a placeholder that validates structure only.
-        /// Full cryptographic implementation will be added with Claude + Sid.
         fn verify_signature_internal(
             ring_members: &[[u8; 32]],
-            _key_image: &[u8; 32],
+            key_image: &[u8; 32],
             signature: &[u8],
-            _message: &[u8],
+            message: &[u8],
         ) -> DispatchResult {
+            // Validate ring size
+            ensure!(
+                ring_members.len() >= 2,
+                Error::<T>::InvalidRingSize
+            );
+            ensure!(
+                ring_members.len() <= T::MaxRingSize::get() as usize,
+                Error::<T>::InvalidRingSize
+            );
+
             // Validate ring members are non-zero
             for member in ring_members.iter() {
                 ensure!(
@@ -217,34 +229,27 @@ pub mod pallet {
                 );
             }
 
-            // Validate signature is not empty
-            ensure!(!signature.is_empty(), Error::<T>::MalformedSignature);
+            // Verify key image is valid
+            crate::mlsag::verify_key_image(key_image)
+                .map_err(|_| Error::<T>::InvalidKeyImage)?;
 
-            // Expected signature size: ring_size * 32 bytes (for c values)
-            // + ring_size * 32 bytes (for r values) = ring_size * 64
-            let expected_min_size = ring_members.len() * 64;
-            ensure!(
-                signature.len() >= expected_min_size,
-                Error::<T>::MalformedSignature
-            );
-
-            // TODO: Implement actual MLSAG verification:
-            // 1. Reconstruct the ring from public keys
-            // 2. Verify the key image is on the curve
-            // 3. Compute challenge values c[i] for each ring member
-            // 4. Verify: c[0] == H(message || L[0] || R[0] || ... || L[n-1] || R[n-1])
-            //    where L[i] = r[i]*G + c[i]*P[i]
-            //    and   R[i] = r[i]*H(P[i]) + c[i]*I
-            //    (I = key image, G = base point, P[i] = ring member public key)
+            // Verify MLSAG signature
+            crate::mlsag::verify_mlsag(ring_members, key_image, signature, message)
+                .map_err(|e| {
+                    log::debug!(
+                        target: "runtime::ring-signatures",
+                        "MLSAG verification failed: {}", e
+                    );
+                    Error::<T>::InvalidSignature
+                })?;
 
             log::debug!(
                 target: "runtime::ring-signatures",
-                "Ring signature verification passed (structural check only)"
+                "MLSAG signature verification passed"
             );
 
             Ok(())
         }
-
         /// Check if a key image has been used.
         pub fn is_key_image_used(key_image: &[u8; 32]) -> bool {
             UsedKeyImages::<T>::contains_key(key_image)
