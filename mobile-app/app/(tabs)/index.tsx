@@ -32,7 +32,7 @@ import { PrivacyIndicator } from '@/components/PrivacyIndicator';
 import { transactionHistoryService, StoredTransaction } from '@/services/transactionHistory';
 import { notificationService } from '@/services/notifications';
 import { apiService } from '@/services/api';
-import { truncateAddress } from '@/utils/address';
+import { formatBalance } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 // Explorer URL
