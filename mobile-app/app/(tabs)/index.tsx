@@ -28,6 +28,7 @@ import { useBalance } from '@/hooks/useBalance';
 import { useApi } from '@/hooks/useApi';
 import { NetworkBadge } from '@/components/NetworkBadge';
 import { MEVProtectionToggle } from '@/components/MEVProtectionToggle';
+import { PrivacyIndicator } from '@/components/PrivacyIndicator';
 import { transactionHistoryService, StoredTransaction } from '@/services/transactionHistory';
 import { notificationService } from '@/services/notifications';
 import { apiService } from '@/services/api';
