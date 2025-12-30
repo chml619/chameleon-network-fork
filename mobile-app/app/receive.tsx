@@ -114,14 +114,28 @@ export default function ReceiveScreen() {
       <View style={styles.content}>
         {/* QR Code Card */}
         <View style={styles.qrCard}>
-          <Text style={styles.qrTitle}>Scan to send CHML</Text>
+          <Text style={styles.qrTitle}>Share this address to receive private payments</Text>
           
           <View style={styles.qrContainer}>
-            <QRCode value={wallet.address} size={200} />
+            <QRCode value={stealthAddress} size={200} />
           </View>
 
-          <Text style={styles.addressLabel}>Your Address</Text>
-          <Text style={styles.addressText}>{truncatedAddress}</Text>
+          <Text style={styles.addressLabel}>
+            {isStealthAddress ? 'Your Stealth Address' : 'Your Address'}
+          </Text>
+          <Text style={styles.addressText}>
+            {isStealthAddress 
+              ? formatStealthHash(new Uint8Array(Buffer.from(stealthAddress.slice(2), 'hex')))
+              : `${stealthAddress.slice(0, 8)}...${stealthAddress.slice(-8)}`
+            }
+          </Text>
+
+          {isStealthAddress && (
+            <View style={styles.privacyBadge}>
+              <Ionicons name="eye-off" size={16} color={THEME.colors.success} />
+              <Text style={styles.privacyText}>Fully Private & Untraceable</Text>
+            </View>
+          )}
 
           {/* Action Buttons */}
           <View style={styles.actionRow}>
