@@ -303,7 +303,7 @@ export default function SendScreen() {
         throw new Error('Not connected to network');
       }
       
-      const amountBN = transactionService.parseAmount(amount);
+      const amountBN = parseAmount(amount);
       const formattedAmount = `${amount} CHML`;
       
       // Set API for privacy service
