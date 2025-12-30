@@ -574,53 +574,6 @@ export default function SendScreen() {
           </View>
         </View>
 
-        {/* MEV Protection Toggle */}
-        <View style={styles.mevSection}>
-          <View style={styles.mevHeader}>
-            <View style={styles.mevLabelContainer}>
-              <Ionicons 
-                name="shield-checkmark" 
-                size={20} 
-                color={mevEnabled ? THEME.colors.primary : THEME.colors.textMuted} 
-              />
-              <Text style={styles.mevLabel}>MEV Protection</Text>
-              <View style={styles.betaBadge}>
-                <Text style={styles.betaText}>Beta</Text>
-              </View>
-            </View>
-            <Switch
-              value={mevEnabled}
-              onValueChange={handleMevToggle}
-              trackColor={{ false: THEME.colors.lightGrey, true: THEME.colors.primaryLight }}
-              thumbColor={mevEnabled ? THEME.colors.primary : THEME.colors.grey}
-            />
-          </View>
-          <Text style={styles.mevDescription}>
-            {mevEnabled 
-              ? mevPalletAvailable 
-                ? '✓ Protected via on-chain MEV pallet' 
-                : '⚠ Pallet unavailable, using fallback protection'
-              : 'Protect against front-running attacks'
-            }
-          </Text>
-          {mevEnabled && (
-            <View style={styles.mevWarning}>
-              <Ionicons name="information-circle-outline" size={14} color="#F57C00" />
-              <Text style={styles.mevWarningText}>
-                Auto-execution under development. Manual execution may be required.
-              </Text>
-            </View>
-          )}
-          {mevEnabled && mevPalletAvailable && (
-            <View style={styles.mevInfo}>
-              <Ionicons name="time-outline" size={14} color={THEME.colors.textSecondary} />
-              <Text style={styles.mevInfoText}>
-                Transaction delayed by ~{mevService.getConfig().delayBlocks * 6}s for protection
-              </Text>
-            </View>
-          )}
-        </View>
-
         {/* Review Button */}
         <TouchableOpacity
           style={[
