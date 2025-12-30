@@ -102,7 +102,8 @@ export class PrivacyService {
     const tx = this.api.tx.balances.transferKeepAlive(toAddress, amount.toString());
     
     return new Promise((resolve, reject) => {
-      tx.signAndSend(senderKeypair, ({ status, dispatchError }) => {
+      tx.signAndSend(senderKeypair, (result: any) => {
+        const { status, dispatchError } = result;
         if (status.isInBlock || status.isFinalized) {
           if (dispatchError) {
             reject(new Error(dispatchError.toString()));
