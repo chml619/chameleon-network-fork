@@ -279,7 +279,8 @@ export default function ShieldScreen() {
             </TouchableOpacity>
           </View>
           <Text style={styles.availableText}>
-            Available: {formattedFreeBalance}
+            Available: {loadingPublicBalance ? 'Loading...' : 
+              (publicBalance ? transactionService.formatAmount(publicBalance.free) : formattedFreeBalance)}
           </Text>
         </View>
 
