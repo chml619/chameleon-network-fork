@@ -3,7 +3,7 @@
  * Updated with clean light theme design and MEV protection integration
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
