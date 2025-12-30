@@ -43,6 +43,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const [stealthMetaAddress, setStealthMetaAddress] = useState<any | null>(null);
   const [stealthHash, setStealthHash] = useState<Uint8Array | null>(null);
   const [privateBalance, setPrivateBalance] = useState<BN | null>(null);
+  const [publicBalance, setPublicBalance] = useState<BN | null>(null);
 
   // Initialize wallet from storage on app start
   useEffect(() => {
