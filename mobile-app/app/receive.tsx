@@ -159,7 +159,10 @@ export default function ReceiveScreen() {
         <View style={styles.infoNote}>
           <Ionicons name="information-circle-outline" size={20} color={THEME.colors.secondary} />
           <Text style={styles.infoText}>
-            Only send CHML tokens to this address. Sending other tokens may result in permanent loss.
+            {isStealthAddress 
+              ? 'This stealth address ensures your privacy. Payments to this address are completely untraceable.'
+              : 'Only send CHML tokens to this address. Sending other tokens may result in permanent loss.'
+            }
           </Text>
         </View>
       </View>
