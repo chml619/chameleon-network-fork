@@ -269,6 +269,9 @@ curl -H "Content-Type: application/json" \
 │   ├── emissions/          # Emissions pallet (index 9) ✅
 │   ├── staking/            # Staking pallet (index 10) ✅
 │   ├── bridge/             # Bridge pallet (index 11) ✅
+│   ├── ring-signatures/    # Ring signatures (index 13) ✅ NEW
+│   ├── stealth-addresses/  # Stealth addresses (index 14) ✅ NEW
+│   ├── confidential-transfer/ # Confidential transfer (index 15) ✅ NEW
 │   ├── pdex/               # pDEX pallet (⏸️ deferred)
 │   └── template/           # Template pallet
 ├── runtime/src/
