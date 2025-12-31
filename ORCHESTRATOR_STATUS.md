@@ -313,7 +313,7 @@ curl -H "Content-Type: application/json" \
 ### Phase 2 Targets (Week 8+)
 - ✅ Mobile app displays correct CHML balances
 - ✅ Transaction history end-to-end
-- ⏳ pDEX swaps execute with <5s confirmation
+- ✅ pDEX integrated with internal token registry
 - ⏳ Bridge transfers testnet ETH
 
 ### Testnet Targets (Week 15)
