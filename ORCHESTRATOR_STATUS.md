@@ -387,7 +387,7 @@ After extensive troubleshooting of Cargo.lock dependency conflicts (sc-network-t
 | Emissions | 9 | ✅ Active | Minting 1.407 CHML/block |
 | Staking | 10 | ✅ Integrated | Ready for testing |
 | Bridge | 11 | ✅ Integrated | Ready for testing |
-| pDEX | - | ⏸️ Deferred | Needs pallet-assets version alignment |
+| pDEX | 16 | ✅ Integrated | Added in Week 10 with internal token registry |
 
 **Devnet Deployment:**
 - **Endpoint:** ws://64.23.233.36:9944
