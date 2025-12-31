@@ -186,21 +186,21 @@ curl -H "Content-Type: application/json" \
 ## 📅 16-WEEK ROADMAP STATUS
 
 ### Phase 1: Foundation (Weeks 1-6) ✅ COMPLETE
-### Phase 2: Core Features (Weeks 7-10) 🟡 IN PROGRESS
+### Phase 2: Core Features (Weeks 7-10) ✅ COMPLETE
 
 | Week | Milestone | Status |
 |------|-----------|--------|
 | 7 | MEV pallet + Mobile enhancements | ✅ **COMPLETE** |
 | 8 | Emissions, Staking, Bridge pallets | ✅ **COMPLETE** |
 | 9 | **Privacy Layer Core** (Ring Sigs + Stealth Addr) | ✅ **COMPLETE** |
-| 10 | pDEX + Privacy Integration | ⏳ QUEUED |
+| 10 | pDEX + Internal Token Registry | ✅ **COMPLETE** |
 
 ### Phase 3: Infrastructure (Weeks 11-14) ⏳ PLANNED
 
 | Week | Milestone | Status |
 |------|-----------|--------|
 | 11 | Bridge connectors + Multi-validator | ⏳ QUEUED |
-| 12 | Shield/Unshield flow + Testing | ⏳ QUEUED |
+| 12 | Privacy-integrated swaps + Testing | ⏳ QUEUED |
 | 13-14 | Security audits + Bug fixes | ⏳ QUEUED |
 
 ### Phase 4: Public Testnet (Week 15+) 🎯 Target
