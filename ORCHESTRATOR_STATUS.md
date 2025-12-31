@@ -95,10 +95,10 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Week** | 9 of 16 |
-| **Overall Progress** | ~60% |
+| **Current Week** | 10 of 16 |
+| **Overall Progress** | ~65% |
 | **Timeline** | 🟢 ON TRACK |
-| **Blockers** | pDEX deferred (version conflict) |
+| **Blockers** | None (pDEX version conflict resolved) |
 | **Build Server** | Contabo (178.18.243.189) |
 | **Network Endpoint** | ws://64.23.233.36:9944 |
 
@@ -106,7 +106,7 @@
 - Foundation (Weeks 1-6): ✅ 100%
 - Core Pallets (Weeks 7-8): ✅ 100%  
 - Privacy Layer (Week 9): ✅ 100%
-- pDEX + Integration (Week 10): ⏳ 0%
+- pDEX + Integration (Week 10): ✅ 80%
 - Infrastructure (Weeks 11-14): ⏳ 0%
 - Testnet Launch (Week 15+): ⏳ 0%
 
