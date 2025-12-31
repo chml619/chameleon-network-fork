@@ -239,10 +239,12 @@ curl -H "Content-Type: application/json" \
 │   ├── emissions/          # Emissions pallet (index 9) ✅
 │   ├── staking/            # Staking pallet (index 10) ✅
 │   ├── bridge/             # Bridge pallet (index 11) ✅
-│   ├── ring-signatures/    # Ring signatures (index 13) ✅ NEW
-│   ├── stealth-addresses/  # Stealth addresses (index 14) ✅ NEW
-│   ├── confidential-transfer/ # Confidential transfer (index 15) ✅ NEW
-│   ├── pdex/               # pDEX pallet (⏸️ deferred)
+│   ├── ring-signatures/    # Ring signatures (index 13) ✅
+│   ├── stealth-addresses/  # Stealth addresses (index 14) ✅
+│   ├── confidential-transfer/ # Confidential transfer (index 15) ✅
+│   ├── pdex/               # pDEX pallet (index 16) ✅ NEW
+│   │   ├── src/lib.rs      # AMM logic + internal token helpers
+│   │   └── src/tokens.rs   # TokenId enum for supported tokens
 │   └── template/           # Template pallet
 ├── runtime/src/
 │   ├── lib.rs              # Runtime config with pallet indices
@@ -253,10 +255,13 @@ curl -H "Content-Type: application/json" \
 └── Cargo.lock              # ⚠️ DO NOT DELETE - backed up
 ```
 
+**Total Runtime Pallets:** 8 custom + system pallets
+
 ### Mobile App
 ```
 /mobile-app/
 ├── services/mev.ts             # MEV service (✅ Updated)
+├── services/privacy.ts         # Privacy service (✅ NEW)
 ├── app/send.tsx                # Send screen with MEV toggle (✅ Updated)
 ├── config/network.ts           # Network endpoints (✅ Updated)
 └── services/api.ts             # API connection
