@@ -69,7 +69,7 @@ pub mod pallet {
 
     /// Configuration trait of this pallet.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + pallet_pdex::Config {
         /// The overarching runtime event type.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
@@ -77,7 +77,7 @@ pub mod pallet {
         type WeightInfo: WeightInfo;
 
         /// The currency used for reserving funds.
-        type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
+        type Currency: Currency<Self::AccountId, Balance: Into<u128> + From<u128>> + ReservableCurrency<Self::AccountId>;
 
         /// Minimum deposit amount (1 CHML equivalent).
         #[pallet::constant]
@@ -133,6 +133,17 @@ pub mod pallet {
 
     // Implement DecodeWithMemTracking manually for Asset
     impl codec::DecodeWithMemTracking for Asset {}
+    impl Asset {
+        /// Convert bridge Asset to pDEX TokenId (as u32)
+        pub fn to_token_id(&self) -> u32 {
+            match self {
+                Asset::BTC => 1,   // PBTC
+                Asset::ETH => 2,   // PETH
+                Asset::USDT => 3,  // PUSDT
+                Asset::USDC => 3,  // Map to PUSDT for now
+            }
+        }
+    }
 
     /// Status of a deposit operation.
     #[derive(Clone, Copy, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, MaxEncodedLen, Default)]
@@ -379,7 +390,7 @@ pub mod pallet {
         ///
         /// Emits `DepositInitiated` event on success.
         #[pallet::call_index(0)]
-        #[pallet::weight(T::WeightInfo::initiate_deposit())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::initiate_deposit())]
         pub fn initiate_deposit(
             origin: OriginFor<T>,
             chain: Chain,
@@ -439,7 +450,7 @@ pub mod pallet {
         ///
         /// Emits `DepositConfirmed` and potentially `DepositCompleted` events.
         #[pallet::call_index(1)]
-        #[pallet::weight(T::WeightInfo::confirm_deposit())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::confirm_deposit())]
         pub fn confirm_deposit(
             origin: OriginFor<T>,
             deposit_id: u64,
@@ -489,10 +500,12 @@ pub mod pallet {
                 let net_amount = deposit.amount.saturating_sub(fee);
                 
                 // Mint net amount to destination
-                let _imbalance = T::Currency::deposit_creating(&deposit.destination, net_amount);
+                // Mint pToken (pBTC, pETH, etc.) to destination via pDEX
+                let token_id = deposit.asset.to_token_id().into();
+                pallet_pdex::Pallet::<T>::do_mint(token_id, &deposit.destination, <T as pallet_pdex::Config>::Balance::from(net_amount.into()))?;
                 
                 // Mint fee to treasury (30%) - custodians get 70% off-chain
-                let treasury = T::TreasuryAccount::get();
+                let treasury = <T as pallet::Config>::TreasuryAccount::get();
                 let treasury_share = fee.saturating_mul(30u32.into()) / 100u32.into();
                 let _treasury_imbalance = T::Currency::deposit_creating(&treasury, treasury_share);
                 
@@ -531,7 +544,7 @@ pub mod pallet {
         ///
         /// Emits `WithdrawalInitiated` event on success.
         #[pallet::call_index(2)]
-        #[pallet::weight(T::WeightInfo::initiate_withdrawal())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::initiate_withdrawal())]
         pub fn initiate_withdrawal(
             origin: OriginFor<T>,
             chain: Chain,
@@ -555,20 +568,17 @@ pub mod pallet {
             let percent_fee = T::UnshieldFeePercent::get().mul_floor(amount);
             let min_fee = T::MinUnshieldFee::get();
             let fee = if percent_fee > min_fee { percent_fee } else { min_fee };
-            let net_amount = amount.saturating_sub(fee);
+            let _net_amount = amount.saturating_sub(fee);
             
             // Transfer fee to treasury (30%) - custodians get 70% off-chain
-            let treasury = T::TreasuryAccount::get();
+            let treasury = <T as pallet::Config>::TreasuryAccount::get();
             let treasury_share = fee.saturating_mul(30u32.into()) / 100u32.into();
-            T::Currency::transfer(&who, &treasury, treasury_share, frame_support::traits::ExistenceRequirement::KeepAlive)?;
+            // Burn pToken via pDEX (instead of native CHML)
+            let token_id = asset.to_token_id().into();
+            pallet_pdex::Pallet::<T>::do_burn(token_id, &who, <T as pallet_pdex::Config>::Balance::from(amount.into()))?;
             
-            // Burn the net amount (will be released on external chain)
-            let _imbalance = T::Currency::withdraw(
-                &who,
-                net_amount,
-                frame_support::traits::WithdrawReasons::TRANSFER,
-                frame_support::traits::ExistenceRequirement::KeepAlive,
-            )?;
+            // Mint treasury share as pToken (30% of fee)
+            pallet_pdex::Pallet::<T>::do_mint(token_id, &treasury, <T as pallet_pdex::Config>::Balance::from(treasury_share.into()))?;
 
             let current_block = frame_system::Pallet::<T>::block_number();
             let withdrawal_id = Self::next_withdrawal_id();
@@ -620,7 +630,7 @@ pub mod pallet {
         ///
         /// Emits `WithdrawalConfirmed` and potentially `WithdrawalCompleted` events.
         #[pallet::call_index(3)]
-        #[pallet::weight(T::WeightInfo::confirm_withdrawal())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::confirm_withdrawal())]
         pub fn confirm_withdrawal(
             origin: OriginFor<T>,
             withdrawal_id: u64,
@@ -689,7 +699,7 @@ pub mod pallet {
         ///
         /// Emits `ValidatorAdded` event on success.
         #[pallet::call_index(4)]
-        #[pallet::weight(T::WeightInfo::add_validator())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::add_validator())]
         pub fn add_validator(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -725,7 +735,7 @@ pub mod pallet {
         ///
         /// Emits `ValidatorRemoved` event on success.
         #[pallet::call_index(5)]
-        #[pallet::weight(T::WeightInfo::remove_validator())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::remove_validator())]
         pub fn remove_validator(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -759,7 +769,7 @@ pub mod pallet {
         ///
         /// Emits `ConfirmationThresholdUpdated` event on success.
         #[pallet::call_index(6)]
-        #[pallet::weight(T::WeightInfo::set_confirmation_threshold())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::set_confirmation_threshold())]
         pub fn set_confirmation_threshold(
             origin: OriginFor<T>,
             threshold: u32,
