@@ -289,7 +289,7 @@ curl -H "Content-Type: application/json" \
 | Explorer HTTPS→WS | Low | 🟡 KNOWN | Copy hash manually; SSL for mainnet |
 | Mobile app connection | High | ✅ RESOLVED | Cleartext + crypto polyfill fixed |
 | Genesis config | Medium | ✅ RESOLVED | Custom chain spec working |
-| pDEX complexity | Medium | 🟡 WEEK 8 | Following Substrate AMM patterns |
+| pDEX version conflict | Medium | ✅ RESOLVED | Internal token registry implemented |
 | Bridge security | Medium | ⏸️ Future | Security audits planned |
 
 ---
