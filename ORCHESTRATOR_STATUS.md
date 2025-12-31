@@ -29,90 +29,63 @@
 
 ---
 
-## 🆕 WEEK 9: PRIVACY LAYER (Dec 29-30, 2025)
+## 🔄 WEEK 10 PROGRESS (Dec 30-31, 2025)
 
-**Status:** ✅ COMPLETE - Full MLSAG Privacy Pipeline
+**Status:** ✅ pDEX INTEGRATED
 
-### Completed Deliverables
+### pDEX Pallet (Index 16)
 
-**1. pallet-ring-signatures (Sender Privacy)** ✅
-- Full MLSAG (Multilayered Linkable Spontaneous Anonymous Group) implementation
-- Curve: Ristretto on Curve25519 via `curve25519-dalek` v4.1
-- Key image storage to prevent double-spending
-- SHA-512 for challenge computation
-- Public `verify_signature_internal` function for cross-pallet calls
+| Feature | Status | Description |
+|---------|--------|-------------|
+| AMM Pools | ✅ Complete | Constant product (x*y=k) formula |
+| Swaps | ✅ Complete | Token swaps with slippage protection |
+| Liquidity Provision | ✅ Complete | Add/remove liquidity with LP tokens |
+| Fee Collection | ✅ Complete | 0.3% swap fee |
+| Internal Token Registry | ✅ Complete | Replaces pallet-assets dependency |
 
-**2. pallet-stealth-addresses (Receiver Privacy)** ✅
-- One-time address generation using stealth meta-addresses
-- Ephemeral key announcements for payment scanning
-- Auto-pruning of old ephemeral keys
-- EIP-5564 compatible design
+### Technical Implementation:
+- **Removed** pallet-assets dependency (resolved version conflict)
+- **Added** internal TokenBalances/TokenSupply storage
+- **Implemented** do_transfer, do_mint, do_burn helpers
+- **Integrated** at runtime pallet index 16
 
-**3. pallet-confidential-transfer (Private Transfers)** ✅
-- Shield: Convert public CHML to private
-- Confidential Transfer: Transfer between stealth addresses  
-- Unshield: Convert private back to public
-- **Wired to real MLSAG verification** (not structural validation)
+### Supported Tokens:
+- CHML (native)
+- pBTC (bridged Bitcoin)
+- pETH (bridged Ethereum)
+- pUSDT (bridged USDT)
+- LP Tokens (per pool)
 
-### Pallet Files Created
-```
-/app/pallets/ring-signatures/
-├── Cargo.toml
-└── src/
-    ├── lib.rs
-    ├── mlsag.rs         # Core MLSAG implementation (179 lines)
-    └── weights.rs
+### Files Modified:
+- `pallets/pdex/src/lib.rs` - Removed Assets trait, added internal helpers
+- `pallets/pdex/src/tokens.rs` - TokenId enum for supported tokens
+- `runtime/src/lib.rs` - Added pallet index 16
+- `runtime/src/configs/mod.rs` - pDEX config implementation
 
-/app/pallets/stealth-addresses/
-├── Cargo.toml
-└── src/
-    ├── lib.rs
-    └── weights.rs
-
-/app/pallets/confidential-transfer/
-├── Cargo.toml
-└── src/
-    ├── lib.rs
-    └── weights.rs
-```
-
-### Technical Approach
-```
-Sender Privacy:  Ring Signatures (Full MLSAG with curve25519-dalek)
-Receiver Privacy: Stealth Addresses (ECDH pattern)
-Default:         All shielded transactions private
-External View:   Only visible at bridge entry/exit points
-```
-
-### Privacy Architecture
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Sender | Ring Signatures | Hide which address sent tx |
-| Receiver | Stealth Addresses | Hide which address receives |
-| Amount | Pedersen Commitments | Hide transfer amounts (Phase 2) |
+### Tags:
+- `pdex-v1` - pDEX integration complete
 
 ---
 
-## 📅 WEEKS 10-12: ROADMAP
+## 📅 WEEKS 11-12: ROADMAP
 
-### WEEK 10: pDEX + Privacy Integration
-**Status:** ⏳ QUEUED
-
-**Deliverables:**
-1. Resolve pallet-assets version conflict
-2. pallet-pdex with privacy-aware AMM pools
-3. Private swap execution (hide trader identity)
-4. Mobile app pDEX UI with private swaps
-
-### WEEK 11-12: Bridge + Infrastructure
+### WEEK 11: Bridge + Multi-validator
 **Status:** ⏳ QUEUED
 
 **Deliverables:**
 1. Bridge pallet external chain connectors
 2. Multi-validator P2P infrastructure
-3. Staking pallet testing with real validators
-4. Shield/Unshield flow complete
-5. Privacy on/off at bridge boundaries only
+3. Privacy-integrated swaps on pDEX
+4. Fee distribution mechanism
+
+### WEEK 12: Testing + Hardening
+**Status:** ⏳ QUEUED
+
+**Deliverables:**
+1. Staking pallet testing with real validators
+2. Shield/Unshield flow complete
+3. End-to-end privacy testing
+4. Mobile app pDEX UI
 
 ---
 
