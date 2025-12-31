@@ -23,6 +23,7 @@ sp-runtime = { workspace = true, default-features = false }
 sp-std = { workspace = true, default-features = false }
 # Add pallet-assets for multi-token support
 pallet-assets = { workspace = true, optional = true }
+pallet-ring-signatures = { workspace = true, default-features = false }
 
 [dev-dependencies]
 sp-core = { default-features = true, workspace = true }
@@ -41,6 +42,7 @@ std = [
     "sp-runtime/std",
     "sp-std/std",
     "pallet-assets?/std",
+    "pallet-ring-signatures/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking/runtime-benchmarks",

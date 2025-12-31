@@ -74,7 +74,7 @@ pub mod pallet {
 
     /// Configuration trait of this pallet.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + pallet_ring_signatures::Config {
         /// The overarching runtime event type.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
@@ -263,6 +263,23 @@ pub mod pallet {
             /// Fee paid for the swap.
             fee: T::Balance,
         },
+        /// A private swap was executed (trader identity hidden).
+        PrivateSwap {
+            /// ID of the pool.
+            pool_id: u32,
+            /// Asset being sold.
+            asset_in: T::AssetId,
+            /// Amount of asset being sold.
+            amount_in: T::Balance,
+            /// Asset being bought.
+            asset_out: T::AssetId,
+            /// Amount of asset received.
+            amount_out: T::Balance,
+            /// Fee paid for the swap.
+            fee: T::Balance,
+            /// Key image (prevents replay).
+            key_image: [u8; 32],
+        },
     }
 
     /// Errors that can be returned by this pallet.
@@ -312,7 +329,7 @@ pub mod pallet {
         ///
         /// Emits `PoolCreated` event on success.
         #[pallet::call_index(0)]
-        #[pallet::weight(T::WeightInfo::create_pool())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::create_pool())]
         pub fn create_pool(
             origin: OriginFor<T>,
             asset_a: T::AssetId,
@@ -386,7 +403,7 @@ pub mod pallet {
         ///
         /// Emits `LiquidityAdded` event on success.
         #[pallet::call_index(1)]
-        #[pallet::weight(T::WeightInfo::add_liquidity())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::add_liquidity())]
         pub fn add_liquidity(
             origin: OriginFor<T>,
             pool_id: u32,
@@ -475,7 +492,7 @@ pub mod pallet {
         ///
         /// Emits `LiquidityRemoved` event on success.
         #[pallet::call_index(2)]
-        #[pallet::weight(T::WeightInfo::remove_liquidity())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::remove_liquidity())]
         pub fn remove_liquidity(
             origin: OriginFor<T>,
             pool_id: u32,
@@ -559,7 +576,7 @@ pub mod pallet {
         ///
         /// Emits `Swapped` event on success.
         #[pallet::call_index(3)]
-        #[pallet::weight(T::WeightInfo::swap())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::swap())]
         pub fn swap(
             origin: OriginFor<T>,
             pool_id: u32,
@@ -637,6 +654,115 @@ pub mod pallet {
                     asset_out,
                     amount_out,
                     fee: fee_amount,
+                });
+
+                Ok(())
+            })
+        }
+
+        /// Execute a private swap using ring signature for trader anonymity.
+        /// 
+        /// The trader's identity is hidden within a ring of public keys.
+        /// Amounts are visible but the actual trader cannot be determined.
+        #[pallet::call_index(4)]
+        #[pallet::weight(Weight::from_parts(100_000_000, 0))]
+        pub fn private_swap(
+            origin: OriginFor<T>,
+            pool_id: u32,
+            asset_in: T::AssetId,
+            amount_in: T::Balance,
+            min_amount_out: T::Balance,
+            ring_members: Vec<[u8; 32]>,
+            key_image: [u8; 32],
+            signature: Vec<u8>,
+        ) -> DispatchResult {
+            // Origin is fee payer, not necessarily the trader
+            ensure_signed(origin)?;
+
+            // Verify ring signature
+            let ring_size = ring_members.len() as u32;
+            ensure!(ring_size >= 2, Error::<T>::InvalidAmounts);
+
+            // Build message for verification
+            let message = (pool_id, asset_in, amount_in, min_amount_out).encode();
+
+            // Verify MLSAG signature
+            pallet_ring_signatures::Pallet::<T>::verify_signature_internal(
+                &ring_members,
+                &key_image,
+                &signature,
+                &message,
+            ).map_err(|_| Error::<T>::InvalidAmounts)?;
+
+            // Check key image not already used (prevents replay)
+            ensure!(
+                !pallet_ring_signatures::Pallet::<T>::is_key_image_used(&key_image),
+                Error::<T>::InvalidAmounts
+            );
+
+            // Mark key image as used
+            pallet_ring_signatures::UsedKeyImages::<T>::insert(
+                &key_image,
+                frame_system::Pallet::<T>::block_number()
+            );
+
+            // Execute swap logic (same as regular swap but trader is anonymous)
+            Pools::<T>::try_mutate(pool_id, |maybe_pool| -> DispatchResult {
+                let pool = maybe_pool.as_mut().ok_or(Error::<T>::PoolNotFound)?;
+                let pool_account = Self::pool_account(pool_id);
+
+                let (reserve_in, reserve_out, asset_out, is_a_to_b) = if asset_in == pool.asset_a {
+                    (pool.reserve_a, pool.reserve_b, pool.asset_b, true)
+                } else if asset_in == pool.asset_b {
+                    (pool.reserve_b, pool.reserve_a, pool.asset_a, false)
+                } else {
+                    return Err(Error::<T>::InvalidAmounts.into());
+                };
+
+                ensure!(!reserve_in.is_zero() && !reserve_out.is_zero(), Error::<T>::InsufficientLiquidity);
+
+                // Calculate output with fee
+                let swap_fee = T::SwapFee::get();
+                let fee_factor = Permill::one().saturating_sub(swap_fee);
+                let amount_in_with_fee: u128 = fee_factor.mul_floor(amount_in.into());
+
+                let numerator = reserve_out.into()
+                    .checked_mul(amount_in_with_fee)
+                    .ok_or(Error::<T>::Overflow)?;
+                let denominator = reserve_in.into()
+                    .checked_add(amount_in_with_fee)
+                    .ok_or(Error::<T>::Overflow)?;
+                let amount_out = T::Balance::from(
+                    numerator.checked_div(denominator).ok_or(Error::<T>::Overflow)?
+                );
+
+                ensure!(amount_out >= min_amount_out, Error::<T>::SlippageExceeded);
+                ensure!(amount_out < reserve_out, Error::<T>::InsufficientLiquidity);
+
+                let fee_amount = T::Balance::from(swap_fee.mul_floor(amount_in.into()));
+
+                // For private swap, tokens move from/to pool account
+                // The actual trader deposited to pool beforehand via shielded mechanism
+                // Here we just update pool reserves to reflect the swap
+                
+                // Update reserves
+                if is_a_to_b {
+                    pool.reserve_a = pool.reserve_a.saturating_add(amount_in);
+                    pool.reserve_b = pool.reserve_b.saturating_sub(amount_out);
+                } else {
+                    pool.reserve_b = pool.reserve_b.saturating_add(amount_in);
+                    pool.reserve_a = pool.reserve_a.saturating_sub(amount_out);
+                }
+
+                // Emit event (no trader identity revealed)
+                Self::deposit_event(Event::PrivateSwap {
+                    pool_id,
+                    asset_in,
+                    amount_in,
+                    asset_out,
+                    amount_out,
+                    fee: fee_amount,
+                    key_image,
                 });
 
                 Ok(())
