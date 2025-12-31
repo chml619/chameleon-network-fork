@@ -106,6 +106,11 @@ pub mod pallet {
         /// Swap fee in Permill (0.3% = 3/1000).
         #[pallet::constant]
         type SwapFee: Get<Permill>;
+        /// Treasury account to receive protocol fees.
+        type TreasuryAccount: Get<Self::AccountId>;
+        /// Treasury share of swap fees in Permill (10% = 100/1000).
+        #[pallet::constant]
+        type TreasuryFeeShare: Get<Permill>;
     }
 
     /// Hooks for automatic operations.
@@ -625,23 +630,31 @@ pub mod pallet {
                 ensure!(amount_out >= min_amount_out, Error::<T>::SlippageExceeded);
                 ensure!(amount_out < reserve_out, Error::<T>::InsufficientLiquidity);
 
-                // Calculate fee amount
-                let fee_amount = T::Balance::from(
-                    swap_fee.mul_floor(amount_in.into())
-                );
-
+                // Calculate fee amount and distribute
+                let fee_amount: u128 = swap_fee.mul_floor(amount_in.into());
+                let treasury_share = T::TreasuryFeeShare::get();
+                let treasury_fee: u128 = treasury_share.mul_floor(fee_amount);
+                let treasury_fee_balance = T::Balance::from(treasury_fee);
+                let amount_in_after_treasury = amount_in.saturating_sub(treasury_fee_balance);
+                
                 // Transfer token_in from trader to pool
                 Self::do_transfer(asset_in, &trader, &pool_account, amount_in)?;
-
                 // Transfer token_out from pool to trader
                 Self::do_transfer(asset_out, &pool_account, &trader, amount_out)?;
+                
+                // Transfer treasury fee from pool to treasury (10% of fee)
+                if treasury_fee > 0 {
+                    let treasury = T::TreasuryAccount::get();
+                    Self::do_transfer(asset_in, &pool_account, &treasury, treasury_fee_balance)?;
+                }
+                
 
                 // Update reserves (fee stays in pool for LPs)
                 if is_a_to_b {
-                    pool.reserve_a = pool.reserve_a.saturating_add(amount_in);
+                    pool.reserve_a = pool.reserve_a.saturating_add(amount_in_after_treasury);
                     pool.reserve_b = pool.reserve_b.saturating_sub(amount_out);
                 } else {
-                    pool.reserve_b = pool.reserve_b.saturating_add(amount_in);
+                    pool.reserve_b = pool.reserve_b.saturating_add(amount_in_after_treasury);
                     pool.reserve_a = pool.reserve_a.saturating_sub(amount_out);
                 }
 
@@ -653,7 +666,7 @@ pub mod pallet {
                     amount_in,
                     asset_out,
                     amount_out,
-                    fee: fee_amount,
+                    fee: T::Balance::from(fee_amount),
                 });
 
                 Ok(())
@@ -737,9 +750,16 @@ pub mod pallet {
                 );
 
                 ensure!(amount_out >= min_amount_out, Error::<T>::SlippageExceeded);
-                ensure!(amount_out < reserve_out, Error::<T>::InsufficientLiquidity);
-
-                let fee_amount = T::Balance::from(swap_fee.mul_floor(amount_in.into()));
+                let fee_amount: u128 = swap_fee.mul_floor(amount_in.into());
+                let treasury_share = T::TreasuryFeeShare::get();
+                let treasury_fee: u128 = treasury_share.mul_floor(fee_amount);
+                let treasury_fee_balance = T::Balance::from(treasury_fee);
+                let amount_in_after_treasury = amount_in.saturating_sub(treasury_fee_balance);
+                // Transfer treasury fee from pool
+                if treasury_fee > 0 {
+                    let treasury = T::TreasuryAccount::get();
+                    Self::do_transfer(asset_in, &pool_account, &treasury, treasury_fee_balance)?;
+                }
 
                 // For private swap, tokens move from/to pool account
                 // The actual trader deposited to pool beforehand via shielded mechanism
@@ -747,10 +767,10 @@ pub mod pallet {
                 
                 // Update reserves
                 if is_a_to_b {
-                    pool.reserve_a = pool.reserve_a.saturating_add(amount_in);
+                    pool.reserve_a = pool.reserve_a.saturating_add(amount_in_after_treasury);
                     pool.reserve_b = pool.reserve_b.saturating_sub(amount_out);
                 } else {
-                    pool.reserve_b = pool.reserve_b.saturating_add(amount_in);
+                    pool.reserve_b = pool.reserve_b.saturating_add(amount_in_after_treasury);
                     pool.reserve_a = pool.reserve_a.saturating_sub(amount_out);
                 }
 
@@ -761,7 +781,7 @@ pub mod pallet {
                     amount_in,
                     asset_out,
                     amount_out,
-                    fee: fee_amount,
+                    fee: T::Balance::from(fee_amount),
                     key_image,
                 });
 

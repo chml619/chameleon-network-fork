@@ -184,7 +184,25 @@ parameter_types! {
     pub const PdexPalletId: PalletId = PalletId(*b"pdex/amm");
     pub const MaxPools: u32 = 100;
     pub const MinimumLiquidity: Balance = 1_000_000_000_000; // 1 CHML
-    pub const SwapFee: Permill = Permill::from_parts(3000); // 0.3%
+    pub const SwapFee: Permill = Permill::from_parts(2500); // 0.25%
+    pub const TreasuryFeeShare: Permill = Permill::from_percent(10); // 10% to Treasury
+}
+// Treasury account (Eve for devnet)
+pub struct TreasuryAccount;
+impl frame_support::traits::Get<AccountId> for TreasuryAccount {
+    fn get() -> AccountId {
+        // Eve well-known dev account
+        AccountId::from([
+            0x8e, 0xaf, 0x04, 0x15, 0x16, 0x87, 0x73, 0x63,
+            0x26, 0xc9, 0xfe, 0xa1, 0x7e, 0x25, 0xfc, 0x52,
+            0x87, 0x61, 0x36, 0x93, 0xc9, 0x12, 0x90, 0x9c,
+            0xb2, 0x26, 0xaa, 0x47, 0x94, 0xf2, 0x6a, 0x48
+        ])
+    }
+}
+
+parameter_types! {
+
     
     // Staking - 1,750 CHML minimum
     pub const MinimumStake: Balance = 1_750_000_000_000_000; // 1750 CHML
@@ -284,4 +302,6 @@ impl pallet_pdex::Config for Runtime {
     type MaxPools = MaxPools;
     type MinimumLiquidity = MinimumLiquidity;
     type SwapFee = SwapFee;
+    type TreasuryAccount = TreasuryAccount;
+    type TreasuryFeeShare = TreasuryFeeShare;
 }
