@@ -1,27 +1,27 @@
 # 🦎 CHAMELEON NETWORK - ORCHESTRATOR STATUS DASHBOARD
 
 **Orchestrator:** AI Agent Coordinator  
-**Current Phase:** Week 9 - COMPLETE  
-**Status:** ✅ Full Privacy Pipeline Deployed  
+**Current Phase:** Week 10 - pDEX Integration  
+**Status:** ✅ pDEX Integrated  
 **Target:** Public Testnet Launch (Week 15)  
-**Last Updated:** December 30, 2025  
-**Next Milestone:** Week 10 - pDEX with Privacy Integration
+**Last Updated:** December 31, 2025  
+**Next Milestone:** Week 11 - Bridge + Multi-validator
 
 ---
 
 ## 📋 EXECUTIVE SUMMARY
 
-**Week 9 Status:** ✅ COMPLETE - Full MLSAG Privacy Pipeline Deployed
+**Week 10 Status:** ✅ pDEX INTEGRATED
 
-**Completed (Dec 29-30, 2025):**
-- ✅ **pallet-ring-signatures** - Full MLSAG implementation with curve25519-dalek
-- ✅ **pallet-stealth-addresses** - Meta-address registration, ephemeral key announcements  
-- ✅ **pallet-confidential-transfer** - Shield/Transfer/Unshield with real MLSAG verification
-- ✅ **Runtime Integration** - All 3 privacy pallets live on devnet (indices 13, 14, 15)
+**Completed (Dec 30-31, 2025):**
+- ✅ **pallet-pdex** - AMM pools with constant product formula
+- ✅ **Internal Token Registry** - Replaced pallet-assets dependency
+- ✅ **Swap/Liquidity Operations** - Full add/remove/swap functionality
+- ✅ **Runtime Integration** - pDEX live on devnet at pallet index 16
 
 **Next Steps:**
-- 📱 Mobile App Privacy UI - Stealth address display and private transfer flow
-- 🔄 Week 10: pDEX with privacy integration
+- 🔄 Privacy-integrated swaps (hide trader identity)
+- 🔄 Week 11: Bridge connectors + Multi-validator setup
 
 **Key Decision:** Privacy is MANDATORY on-chain (not optional toggle)
 
