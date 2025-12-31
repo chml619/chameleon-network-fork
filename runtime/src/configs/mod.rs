@@ -272,3 +272,16 @@ impl pallet_confidential_transfer::Config for Runtime {
     type MaxNotesPerAccount = MaxNotesPerAccount;
     type ConfidentialWeightInfo = pallet_confidential_transfer::weights::SubstrateWeight<Runtime>;
 }
+
+
+/// Configure pDEX pallet
+impl pallet_pdex::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = pallet_pdex::weights::SubstrateWeight<Runtime>;
+    type AssetId = u32;
+    type Balance = Balance;
+    type PalletId = PdexPalletId;
+    type MaxPools = MaxPools;
+    type MinimumLiquidity = MinimumLiquidity;
+    type SwapFee = SwapFee;
+}

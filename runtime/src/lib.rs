@@ -247,4 +247,7 @@ mod runtime {
         pub type StealthAddresses = pallet_stealth_addresses;
         #[runtime::pallet_index(15)]
         pub type ConfidentialTransfer = pallet_confidential_transfer;
+
+        #[runtime::pallet_index(16)]
+        pub type Pdex = pallet_pdex;
 }

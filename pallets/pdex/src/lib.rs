@@ -45,6 +45,7 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 pub mod weights;
+pub mod tokens;
 pub use weights::*;
 
 // All pallet logic is defined in its own module and must be annotated by the `pallet` attribute.
@@ -53,10 +54,7 @@ pub mod pallet {
     use super::*;
     use frame_support::{
         pallet_prelude::*,
-        traits::{
-            tokens::fungibles::{Inspect, Mutate, Create},
-            Hooks,
-        },
+        traits::Hooks,
         PalletId,
     };
     use frame_system::pallet_prelude::*;
@@ -91,10 +89,7 @@ pub mod pallet {
                       CheckedAdd + CheckedSub + CheckedMul + CheckedDiv +
                       From<u128> + Into<u128> + MaxEncodedLen + Default;
 
-        /// Multi-asset support for token operations.
-        type Assets: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = Self::Balance> +
-                     Mutate<Self::AccountId> +
-                     Create<Self::AccountId>;
+        
 
         /// Pallet ID for pool account derivation.
         #[pallet::constant]
@@ -180,6 +175,31 @@ pub mod pallet {
         Blake2_128Concat,
         u32, // pool_id
         T::Balance, // lp_token_balance
+        ValueQuery,
+    >;
+
+
+    /// Internal token balances for pDEX (replaces pallet-assets).
+    #[pallet::storage]
+    #[pallet::getter(fn token_balances)]
+    pub type TokenBalances<T: Config> = StorageDoubleMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        Blake2_128Concat,
+        T::AssetId,
+        T::Balance,
+        ValueQuery,
+    >;
+
+    /// Total supply for each token.
+    #[pallet::storage]
+    #[pallet::getter(fn token_supply)]
+    pub type TokenSupply<T: Config> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::AssetId,
+        T::Balance,
         ValueQuery,
     >;
 
@@ -324,8 +344,7 @@ pub mod pallet {
             let lp_asset_id: T::AssetId = (pool_id + 10000).into();
 
             // Create the LP token asset
-            T::Assets::create(lp_asset_id, who.clone(), true, T::Balance::from(1u128))
-                .map_err(|_| Error::<T>::LpTokenCreationFailed)?;
+            // LP token created implicitly via internal tracking
 
             // Create the pool
             let pool = LiquidityPool {
@@ -414,28 +433,12 @@ pub mod pallet {
                 ensure!(!lp_minted.is_zero(), Error::<T>::InvalidAmounts);
 
                 // Transfer tokens from provider to pool
-                T::Assets::transfer(
-                    pool.asset_a,
-                    &provider,
-                    &pool_account,
-                    amount_a,
-                    frame_support::traits::tokens::Preservation::Expendable,
-                ).map_err(|_| Error::<T>::TransferFailed)?;
+                Self::do_transfer(pool.asset_a, &provider, &pool_account, amount_a)?;
 
-                T::Assets::transfer(
-                    pool.asset_b,
-                    &provider,
-                    &pool_account,
-                    amount_b,
-                    frame_support::traits::tokens::Preservation::Expendable,
-                ).map_err(|_| Error::<T>::TransferFailed)?;
+                Self::do_transfer(pool.asset_b, &provider, &pool_account, amount_b)?;
 
                 // Mint LP tokens to provider
-                T::Assets::mint_into(
-                    pool.lp_asset_id,
-                    &provider,
-                    lp_minted,
-                ).map_err(|_| Error::<T>::LpTokenMintFailed)?;
+                Self::do_mint(pool.lp_asset_id, &provider, lp_minted)?;
 
                 // Update pool state
                 pool.reserve_a = pool.reserve_a.saturating_add(amount_a);
@@ -513,32 +516,12 @@ pub mod pallet {
                 ensure!(amount_a >= min_amount_a, Error::<T>::SlippageExceeded);
                 ensure!(amount_b >= min_amount_b, Error::<T>::SlippageExceeded);
 
-                // Burn LP tokens from provider
-                T::Assets::burn_from(
-                    pool.lp_asset_id,
-                    &provider,
-                    lp_tokens,
-                    frame_support::traits::tokens::Preservation::Expendable,
-                    frame_support::traits::tokens::Precision::Exact,
-                    frame_support::traits::tokens::Fortitude::Polite,
-                ).map_err(|_| Error::<T>::LpTokenBurnFailed)?;
+                Self::do_burn(pool.lp_asset_id, &provider, lp_tokens)?;
 
                 // Transfer tokens from pool to provider
-                T::Assets::transfer(
-                    pool.asset_a,
-                    &pool_account,
-                    &provider,
-                    amount_a,
-                    frame_support::traits::tokens::Preservation::Expendable,
-                ).map_err(|_| Error::<T>::TransferFailed)?;
+                Self::do_transfer(pool.asset_a, &pool_account, &provider, amount_a)?;
 
-                T::Assets::transfer(
-                    pool.asset_b,
-                    &pool_account,
-                    &provider,
-                    amount_b,
-                    frame_support::traits::tokens::Preservation::Expendable,
-                ).map_err(|_| Error::<T>::TransferFailed)?;
+                Self::do_transfer(pool.asset_b, &pool_account, &provider, amount_b)?;
 
                 // Update pool state
                 pool.reserve_a = pool.reserve_a.saturating_sub(amount_a);
@@ -631,22 +614,10 @@ pub mod pallet {
                 );
 
                 // Transfer token_in from trader to pool
-                T::Assets::transfer(
-                    asset_in,
-                    &trader,
-                    &pool_account,
-                    amount_in,
-                    frame_support::traits::tokens::Preservation::Expendable,
-                ).map_err(|_| Error::<T>::TransferFailed)?;
+                Self::do_transfer(asset_in, &trader, &pool_account, amount_in)?;
 
                 // Transfer token_out from pool to trader
-                T::Assets::transfer(
-                    asset_out,
-                    &pool_account,
-                    &trader,
-                    amount_out,
-                    frame_support::traits::tokens::Preservation::Expendable,
-                ).map_err(|_| Error::<T>::TransferFailed)?;
+                Self::do_transfer(asset_out, &pool_account, &trader, amount_out)?;
 
                 // Update reserves (fee stays in pool for LPs)
                 if is_a_to_b {
@@ -778,6 +749,53 @@ pub mod pallet {
                 y = (x + n / x) / 2;
             }
             x
+        }
+        // ============== INTERNAL TOKEN OPERATIONS ==============
+
+        /// Transfer tokens between accounts (internal)
+        pub fn do_transfer(
+            asset_id: T::AssetId,
+            from: &T::AccountId,
+            to: &T::AccountId,
+            amount: T::Balance,
+        ) -> DispatchResult {
+            if amount.is_zero() { return Ok(()); }
+            let from_balance = TokenBalances::<T>::get(from, asset_id);
+            ensure!(from_balance >= amount, Error::<T>::InsufficientBalance);
+            TokenBalances::<T>::mutate(from, asset_id, |b| *b = b.saturating_sub(amount));
+            TokenBalances::<T>::mutate(to, asset_id, |b| *b = b.saturating_add(amount));
+            Ok(())
+        }
+
+        /// Mint tokens to an account (internal)
+        pub fn do_mint(
+            asset_id: T::AssetId,
+            to: &T::AccountId,
+            amount: T::Balance,
+        ) -> DispatchResult {
+            if amount.is_zero() { return Ok(()); }
+            TokenBalances::<T>::mutate(to, asset_id, |b| *b = b.saturating_add(amount));
+            TokenSupply::<T>::mutate(asset_id, |s| *s = s.saturating_add(amount));
+            Ok(())
+        }
+
+        /// Burn tokens from an account (internal)
+        pub fn do_burn(
+            asset_id: T::AssetId,
+            from: &T::AccountId,
+            amount: T::Balance,
+        ) -> DispatchResult {
+            if amount.is_zero() { return Ok(()); }
+            let balance = TokenBalances::<T>::get(from, asset_id);
+            ensure!(balance >= amount, Error::<T>::InsufficientBalance);
+            TokenBalances::<T>::mutate(from, asset_id, |b| *b = b.saturating_sub(amount));
+            TokenSupply::<T>::mutate(asset_id, |s| *s = s.saturating_sub(amount));
+            Ok(())
+        }
+
+        /// Get token balance
+        pub fn balance_of(asset_id: T::AssetId, who: &T::AccountId) -> T::Balance {
+            TokenBalances::<T>::get(who, asset_id)
         }
     }
 }

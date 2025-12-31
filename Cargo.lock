@@ -9816,6 +9816,7 @@ dependencies = [
  "pallet-emissions",
  "pallet-grandpa",
  "pallet-mev-protection",
+ "pallet-pdex",
  "pallet-ring-signatures",
  "pallet-staking",
  "pallet-stealth-addresses",

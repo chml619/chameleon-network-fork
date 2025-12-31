@@ -34,6 +34,7 @@ pallet-bridge.workspace = true
 pallet-ring-signatures.workspace = true
 pallet-stealth-addresses.workspace = true
 pallet-confidential-transfer.workspace = true
+pallet-pdex.workspace = true
 pallet-timestamp.workspace = true
 pallet-transaction-payment-rpc-runtime-api.workspace = true
 pallet-transaction-payment.workspace = true
@@ -81,6 +82,7 @@ std = [
         "pallet-ring-signatures/std",
         "pallet-stealth-addresses/std",
         "pallet-confidential-transfer/std",
+        "pallet-pdex/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
