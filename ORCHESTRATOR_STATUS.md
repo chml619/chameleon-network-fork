@@ -209,23 +209,19 @@ curl -H "Content-Type: application/json" \
 
 ## 🎯 NEXT STEPS
 
-### Week 9 Remaining
-- [ ] **Mobile app**: Stealth address UI and scanning
-- [ ] **Testing**: End-to-end private transfer flow on devnet
+### Week 10 Remaining
+- [ ] **Privacy-integrated swaps**: Hide trader identity on pDEX
+- [ ] **Fee distribution**: LP rewards mechanism
+- [ ] **Mobile app**: pDEX trading UI
 
-### Week 10 (pDEX + Privacy)
-- [ ] Resolve pallet-assets version conflict
-- [ ] Privacy-aware AMM pools
-- [ ] Private swap execution
-- [ ] Mobile pDEX UI
-
-### Weeks 11-12 (Bridge + Infrastructure)
-- [ ] Bridge external connectors
-- [ ] Multi-validator P2P
-- [ ] Shield/Unshield complete
+### Week 11 (Bridge + Multi-validator)
+- [ ] Bridge external chain connectors
+- [ ] Multi-validator P2P setup
 - [ ] Real validator testing
+- [ ] Shield/Unshield flow complete
 
-### Weeks 13-14 (Testnet Prep)
+### Weeks 12-14 (Testing + Hardening)
+- [ ] End-to-end privacy testing
 - [ ] Security audits
 - [ ] Performance optimization
 - [ ] Documentation finalization
