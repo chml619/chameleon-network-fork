@@ -6046,6 +6046,7 @@ dependencies = [
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
+ "pallet-pdex",
  "parity-scale-codec",
  "scale-info",
  "sp-core 36.1.0",

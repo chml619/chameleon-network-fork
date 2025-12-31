@@ -57,6 +57,7 @@ pub mod pallet {
     use sp_runtime::traits::{Saturating, Zero};
     use sp_core::{H256, hashing::blake2_256};
     use sp_std::vec::Vec;
+    use pallet_pdex;
 
     /// The current storage version.
     const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
@@ -89,6 +90,20 @@ pub mod pallet {
         /// Maximum number of bridge validators.
         #[pallet::constant]
         type MaxValidators: Get<u32>;
+        /// Treasury account for fee collection.
+        type TreasuryAccount: Get<Self::AccountId>;
+        /// Minimum shield fee in native tokens (0.1 CHML).
+        #[pallet::constant]
+        type MinShieldFee: Get<BalanceOf<Self>>;
+        /// Minimum unshield fee in native tokens (0.25 CHML).
+        #[pallet::constant]
+        type MinUnshieldFee: Get<BalanceOf<Self>>;
+        /// Shield fee percentage in Permill (0.02% = 200/1_000_000).
+        #[pallet::constant]
+        type ShieldFeePercent: Get<sp_runtime::Permill>;
+        /// Unshield fee percentage in Permill (0.05% = 500/1_000_000).
+        #[pallet::constant]
+        type UnshieldFeePercent: Get<sp_runtime::Permill>;
     }
 
     /// Balance type alias.
@@ -466,22 +481,33 @@ pub mod pallet {
             if deposit.confirmations >= threshold {
                 // Mark as completed
                 deposit.status = DepositStatus::Completed;
-
-                // Mint tokens to destination
-                let _imbalance = T::Currency::deposit_creating(&deposit.destination, deposit.amount);
-
+                
+                // Calculate shield fee: max(0.02% of amount, 0.1 CHML)
+                let percent_fee = T::ShieldFeePercent::get().mul_floor(deposit.amount);
+                let min_fee = T::MinShieldFee::get();
+                let fee = if percent_fee > min_fee { percent_fee } else { min_fee };
+                let net_amount = deposit.amount.saturating_sub(fee);
+                
+                // Mint net amount to destination
+                let _imbalance = T::Currency::deposit_creating(&deposit.destination, net_amount);
+                
+                // Mint fee to treasury (30%) - custodians get 70% off-chain
+                let treasury = T::TreasuryAccount::get();
+                let treasury_share = fee.saturating_mul(30u32.into()) / 100u32.into();
+                let _treasury_imbalance = T::Currency::deposit_creating(&treasury, treasury_share);
+                
                 // Update total bridged in
                 let current_total = Self::total_bridged_in(&deposit.asset);
                 TotalBridgedIn::<T>::insert(&deposit.asset, current_total.saturating_add(deposit.amount));
-
+                
                 // Emit completion event
                 Self::deposit_event(Event::DepositCompleted {
                     deposit_id,
                     depositor: deposit.depositor.clone(),
-                    amount_minted: deposit.amount,
+                    amount_minted: net_amount,
                     external_tx_hash: tx_hash,
                 });
-
+                
                 // Remove from pending deposits
                 PendingDeposits::<T>::remove(&deposit_id);
             } else {
@@ -524,11 +550,22 @@ pub mod pallet {
                 T::Currency::free_balance(&who) >= amount,
                 Error::<T>::InsufficientBalance
             );
-
-            // Reserve/burn the tokens immediately
+            
+            // Calculate unshield fee: max(0.05% of amount, 0.25 CHML)
+            let percent_fee = T::UnshieldFeePercent::get().mul_floor(amount);
+            let min_fee = T::MinUnshieldFee::get();
+            let fee = if percent_fee > min_fee { percent_fee } else { min_fee };
+            let net_amount = amount.saturating_sub(fee);
+            
+            // Transfer fee to treasury (30%) - custodians get 70% off-chain
+            let treasury = T::TreasuryAccount::get();
+            let treasury_share = fee.saturating_mul(30u32.into()) / 100u32.into();
+            T::Currency::transfer(&who, &treasury, treasury_share, frame_support::traits::ExistenceRequirement::KeepAlive)?;
+            
+            // Burn the net amount (will be released on external chain)
             let _imbalance = T::Currency::withdraw(
                 &who,
-                amount,
+                net_amount,
                 frame_support::traits::WithdrawReasons::TRANSFER,
                 frame_support::traits::ExistenceRequirement::KeepAlive,
             )?;
