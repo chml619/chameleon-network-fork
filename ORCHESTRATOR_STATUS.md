@@ -369,7 +369,7 @@ Public CHML → [SHIELD] → Shielded Note → [CONFIDENTIAL TRANSFER] → Shiel
 
 ### Devnet:
 - **Endpoint:** ws://64.23.233.36:9944
-- **Pallets:** 7 total (MEV, Emissions, Staking, Bridge + 3 Privacy)
+- **Pallets:** 8 total (MEV, Emissions, Staking, Bridge, 3 Privacy, pDEX)
 
 ---
 
