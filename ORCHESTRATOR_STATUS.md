@@ -144,17 +144,18 @@ curl -H "Content-Type: application/json" \
 | 1. Tokenomics | CHML token, genesis config | ✅ COMPLETE | 100% |
 | 2. Mobile Wallet | React Native iOS/Android | ✅ COMPLETE | 100% |
 | 3. Privacy Layer | Ring signatures, stealth addresses | ✅ COMPLETE | 100% |
-| 4. pDEX | AMM pools, private swaps | ⏳ WEEK 10 | 0% |
+| 4. pDEX | AMM pools, private swaps | ✅ INTEGRATED | 80% |
 | 5. Ethereum Bridge | Lock/mint mechanism | ✅ COMPLETE | 100% |
 | 6. Staking | Delegation, rewards | ✅ COMPLETE | 100% |
 | 7. Emissions | Token minting, distribution | ✅ COMPLETE | 100% |
 
-### Agent 3 (Privacy Layer) - ✅ COMPLETE
-**Sprint Completed:** Ring Signatures + Stealth Addresses + Confidential Transfer
-- pallet-ring-signatures: Full MLSAG with curve25519-dalek ✅
-- pallet-stealth-addresses: Meta-address + ephemeral keys ✅
-- pallet-confidential-transfer: Shield/Transfer/Unshield ✅
-- Runtime Integration: Pallets 13, 14, 15 deployed ✅
+### Agent 4 (pDEX) - ✅ INTEGRATED
+**Sprint Completed:** AMM Pools + Internal Token Registry
+- pallet-pdex: Constant product AMM formula ✅
+- Internal tokens: Removed pallet-assets dependency ✅
+- Swap/Liquidity: Add/remove/swap operations ✅
+- Runtime Integration: Pallet index 16 deployed ✅
+- Remaining: Privacy-integrated swaps (Week 11)
 
 ---
 
