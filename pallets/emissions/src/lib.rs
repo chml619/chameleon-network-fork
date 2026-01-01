@@ -55,7 +55,7 @@ pub use weights::*;
 pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
-    use frame_support::traits::{Currency, Get, Hooks, ReservableCurrency};
+    use frame_support::traits::{Currency, FindAuthor, Get, Hooks, ReservableCurrency};
     use frame_support::PalletId;
     use frame_system::pallet_prelude::*;
     use sp_runtime::traits::{Saturating, Zero, AccountIdConversion, SaturatedConversion};
@@ -97,6 +97,8 @@ pub mod pallet {
         /// Number of blocks per year for emission reduction calculation.
         #[pallet::constant]
         type BlocksPerYear: Get<BlockNumberFor<Self>>;
+        /// Find block author for reward distribution.
+        type FindAuthor: frame_support::traits::FindAuthor<Self::AccountId>;
     }
 
     /// Hooks for automatic emission processing.
@@ -494,10 +496,9 @@ pub mod pallet {
 
         /// Get the block author (validator who produced this block).
         pub fn get_block_author() -> Option<T::AccountId> {
-            // For now, return None since we don't have access to consensus data
-            // In a real implementation, this would integrate with the consensus mechanism
-            // to get the actual block author. For testing, we can manually set validator rewards.
-            None
+            // Use FindAuthor trait to get current block author from Aura
+            let digest = frame_system::Pallet::<T>::digest();
+            T::FindAuthor::find_author(digest.logs.iter().filter_map(|d| d.as_pre_runtime()))
         }
 
         /// Distribute LP rewards across pools based on their APY.

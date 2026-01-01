@@ -230,6 +230,26 @@ impl pallet_mev_protection::Config for Runtime {
 }
 
 /// Configure Emissions pallet
+
+/// Adapter to convert Aura AuthorityId to AccountId for emissions
+pub struct AuraAccountAdapter;
+impl frame_support::traits::FindAuthor<AccountId> for AuraAccountAdapter {
+    fn find_author<'a, I>(digests: I) -> Option<AccountId>
+    where
+        I: 'a + IntoIterator<Item = (sp_runtime::ConsensusEngineId, &'a [u8])>,
+    {
+        // Find the slot from digests
+        let slot_number = <pallet_aura::Pallet<Runtime> as frame_support::traits::FindAuthor<u32>>::find_author(digests)?;
+        // Get authorities list
+        let authorities = pallet_aura::Authorities::<Runtime>::get();
+        // Get authority at slot index (modulo number of authorities)
+        let author_index = slot_number as usize % authorities.len();
+        authorities.get(author_index).map(|aura_id| {
+            // Convert AuraId to AccountId (both are 32-byte Sr25519 keys)
+            AccountId::new(aura_id.clone().into_inner().0)
+        })
+    }
+}
 impl pallet_emissions::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type WeightInfo = ();
@@ -237,6 +257,7 @@ impl pallet_emissions::Config for Runtime {
     type InitialEmissionRate = InitialEmissionRate;
     type EmissionsPalletId = EmissionsPalletId;
     type BlocksPerYear = BlocksPerYear;
+    type FindAuthor = AuraAccountAdapter;
 }
 
 /// Configure Staking pallet
