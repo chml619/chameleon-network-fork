@@ -396,6 +396,104 @@ curl -H "Content-Type: application/json" \
 
 ---
 
+### ✅ WEEK 11: COMPLETE (Jan 1-2, 2026)
+
+**Status:** ✅ COMPLETE - pCHML Integration + Multi-Validator Network
+
+### Major Achievements:
+
+**1. pCHML Privacy Token Integration**
+All CHML on Chameleon Network now exists as privacy-wrapped pCHML:
+- Staking: stake/unstake/claim_rewards use pCHML via pDEX
+- Emissions: Validator and LP rewards minted as pCHML
+- Bridge: Already mints pTokens (pBTC, pETH, pUSDT)
+- Exception: Native CHML retained for gas fees only (Option A)
+- Roadmap: Convert gas to pCHML pre-mainnet (Option B, ~7-12 days)
+
+**2. Multi-Validator P2P Network**
+| Node | Location | IP | Role |
+|------|----------|-----|------|
+| Alice | SFO | 64.23.233.36 | Validator + RPC |
+| Bob | NYC | 104.131.167.75 | Validator |
+
+- Round-robin Aura consensus confirmed
+- Grandpa finalization working
+- P2P connection stable across regions
+
+**3. Block Author Detection**
+- Created AuraAccountAdapter to convert Aura AuthorityId to AccountId
+- Rewards correctly attributed to block producer
+- ~0.985 pCHML per block per validator (70% of 1.407 emission)
+
+**4. Bridge pToken Integration**
+- Shield deposits mint pTokens (pBTC/pETH/pUSDT) via pallet_pdex::do_mint
+- Unshield withdrawals burn pTokens via pallet_pdex::do_burn
+- Fee structure: Shield 0.02%, Unshield 0.05%
+- Fee split: 30% Treasury, 70% Custodians
+
+### Architecture Decision: Privacy Model
+| Location | Token Type | Notes |
+|----------|------------|-------|
+| External (ETH/BNB) | ERC-20 CHML | Presale only |
+| On-chain holdings | pCHML | Privacy-wrapped |
+| Staking | pCHML | Validator status public, balance private |
+| Rewards | pCHML | Private earnings |
+| Gas fees | Native CHML | Temporary (Option A) |
+
+### Tags:
+- `bridge-fees-v1`
+- `bridge-ptoken-v1`
+- `multi-validator-v1`
+- `emissions-author-v1`
+- `pchml-integration-v1`
+
+### GitHub Commits:
+- `bbec93de` - Bridge pToken integration
+- `b104f0e1` - Block author detection via AuraAccountAdapter
+- `cf8dcbcd` - pCHML integration for Staking and Emissions
+
+---
+
+### ✅ WEEK 10: COMPLETE (Dec 30-31, 2025)
+
+**Status:** ✅ COMPLETE - pDEX + Bridge Fees + Fee Distribution
+
+### pDEX Pallet (Index 16)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| AMM Pools | ✅ Complete | Constant product (x*y=k) formula |
+| Swaps | ✅ Complete | Token swaps with slippage protection |
+| Liquidity Provision | ✅ Complete | Add/remove liquidity with LP tokens |
+| Fee Collection | ✅ Complete | 0.25% swap fee |
+| Fee Distribution | ✅ Complete | 90% to LP providers, 10% to Treasury |
+| Internal Token Registry | ✅ Complete | Replaces pallet-assets dependency |
+
+### Token ID Registry:
+| TokenId | Token | Description |
+|---------|-------|-------------|
+| 0 | pCHML | Native privacy token |
+| 1 | pBTC | Bridged Bitcoin |
+| 2 | pETH | Bridged Ethereum |
+| 3 | pUSDT | Bridged Tether |
+
+### Bridge Fee Structure:
+- Shield: 0.02% OR 0.1 CHML minimum
+- Unshield: 0.05% OR 0.25 CHML minimum
+- Split: 30% Treasury, 70% Custodians
+
+### Files Modified:
+- `pallets/pdex/src/lib.rs` - AMM logic, fee distribution
+- `pallets/pdex/src/tokens.rs` - TokenId enum
+- `pallets/bridge/src/lib.rs` - Fee structure
+- `runtime/src/configs/mod.rs` - SwapFee 0.25%, TreasuryFeeShare 10%
+
+### Tags:
+- `pdex-v1` - pDEX integration
+- `fee-distribution-v1` - Fee distribution (90/10 split)
+
+---
+
 ### ✅ WEEK 9: COMPLETE (Dec 29-30, 2025)
 
 **Status:** ✅ COMPLETE - Full MLSAG Privacy Pipeline
