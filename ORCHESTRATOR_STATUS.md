@@ -196,10 +196,10 @@ curl -H "Content-Type: application/json" \
 | 1. Tokenomics | CHML token, genesis config | ✅ COMPLETE | 100% |
 | 2. Mobile Wallet | React Native iOS/Android | ✅ COMPLETE | 100% |
 | 3. Privacy Layer | Ring signatures, stealth addresses | ✅ COMPLETE | 100% |
-| 4. pDEX | AMM pools, private swaps | ✅ INTEGRATED | 80% |
+| 4. pDEX | AMM pools, private swaps | ✅ INTEGRATED | 100% |
 | 5. Ethereum Bridge | Lock/mint mechanism | ✅ COMPLETE | 100% |
-| 6. Staking | Delegation, rewards | ✅ COMPLETE | 100% |
-| 7. Emissions | Token minting, distribution | ✅ COMPLETE | 100% |
+| 6. Staking | Delegation, rewards | ✅ pCHML | 100% |
+| 7. Emissions | Token minting, distribution | ✅ pCHML | 100% |
 
 ### Agent 4 (pDEX) - ✅ INTEGRATED
 **Sprint Completed:** AMM Pools + Internal Token Registry
@@ -207,7 +207,21 @@ curl -H "Content-Type: application/json" \
 - Internal tokens: Removed pallet-assets dependency ✅
 - Swap/Liquidity: Add/remove/swap operations ✅
 - Runtime Integration: Pallet index 16 deployed ✅
-- Remaining: Privacy-integrated swaps (Week 11)
+- Fee Distribution: 90% LP / 10% Treasury ✅
+
+### Agent 6 (Staking) - ✅ pCHML INTEGRATED
+**Sprint Completed:** Privacy Token Integration
+- Staking uses pCHML via pDEX ✅
+- Unstaking returns pCHML ✅
+- Rewards claimed as pCHML ✅
+- Remaining: Cooldown period, node lifecycle (Week 12)
+
+### Agent 7 (Emissions) - ✅ pCHML INTEGRATED
+**Sprint Completed:** Privacy Token Minting
+- Block author detection via AuraAccountAdapter ✅
+- Validator rewards as pCHML (70% of emissions) ✅
+- LP rewards as pCHML (30% of emissions) ✅
+- Multi-validator round-robin working ✅
 
 ---
 
