@@ -64,6 +64,8 @@ pub mod pallet {
 
     /// The current storage version.
     const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
+    /// Token ID for pCHML in pDEX registry
+    const CHML_TOKEN_ID: u32 = 0;
 
     /// Balance type alias for cleaner code
     type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -75,7 +77,7 @@ pub mod pallet {
 
     /// Configuration trait of this pallet.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + pallet_pdex::Config {
         /// The overarching runtime event type.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
@@ -83,7 +85,7 @@ pub mod pallet {
         type WeightInfo: WeightInfo;
 
         /// Currency trait for minting CHML tokens.
-        type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
+        type Currency: Currency<Self::AccountId, Balance: Into<u128> + From<u128>> + ReservableCurrency<Self::AccountId>;
 
         /// Initial emission rate per block (1.407 CHML = 1_407_000_000_000_000_000).
         /// This represents Year 1 emission rate: 7,400,000 CHML / 5,259,600 blocks = 1.407 CHML/block
@@ -135,7 +137,8 @@ pub mod pallet {
 
             // Mint tokens to pallet account
             let pallet_account = Self::account_id();
-            let _imbalance = T::Currency::deposit_creating(&pallet_account, emission_rate);
+            let pdex_amount: <T as pallet_pdex::Config>::Balance = (emission_rate.into() as u128).into();
+            let _ = pallet_pdex::Pallet::<T>::do_mint(CHML_TOKEN_ID.into(), &pallet_account, pdex_amount);
             
             log::info!("[EMISSIONS] Successfully minted {:?} tokens", emission_rate);
 
@@ -294,7 +297,7 @@ pub mod pallet {
         ///
         /// Emits `LPAPYUpdated` event on success.
         #[pallet::call_index(0)]
-        #[pallet::weight(T::WeightInfo::set_lp_apy())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::set_lp_apy())]
         pub fn set_lp_apy(
             origin: OriginFor<T>,
             pool_id: u32,
@@ -328,7 +331,7 @@ pub mod pallet {
         ///
         /// Emits `ValidatorRewardsClaimed` event on success.
         #[pallet::call_index(1)]
-        #[pallet::weight(T::WeightInfo::claim_validator_rewards())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::claim_validator_rewards())]
         pub fn claim_validator_rewards(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
@@ -339,11 +342,12 @@ pub mod pallet {
 
             // Transfer rewards from pallet account to validator
             let pallet_account = Self::account_id();
-            T::Currency::transfer(
+            let pdex_rewards: <T as pallet_pdex::Config>::Balance = (rewards.into() as u128).into();
+            pallet_pdex::Pallet::<T>::do_transfer(
+                CHML_TOKEN_ID.into(),
                 &pallet_account,
                 &who,
-                rewards,
-                frame_support::traits::ExistenceRequirement::AllowDeath,
+                pdex_rewards
             )?;
 
             // Clear the rewards
@@ -364,7 +368,7 @@ pub mod pallet {
         ///
         /// Emits `LPRewardsClaimed` event on success.
         #[pallet::call_index(2)]
-        #[pallet::weight(T::WeightInfo::claim_lp_rewards())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::claim_lp_rewards())]
         pub fn claim_lp_rewards(
             origin: OriginFor<T>,
             pool_id: u32,
@@ -378,13 +382,13 @@ pub mod pallet {
 
             // Transfer rewards from pallet account to LP provider
             let pallet_account = Self::account_id();
-            T::Currency::transfer(
+            let pdex_rewards: <T as pallet_pdex::Config>::Balance = (rewards.into() as u128).into();
+            pallet_pdex::Pallet::<T>::do_transfer(
+                CHML_TOKEN_ID.into(),
                 &pallet_account,
                 &who,
-                rewards,
-                frame_support::traits::ExistenceRequirement::AllowDeath,
+                pdex_rewards
             )?;
-
             // Clear the rewards
             LPRewards::<T>::remove(&who, pool_id);
 
@@ -404,7 +408,7 @@ pub mod pallet {
         ///
         /// Emits `EmissionRateUpdated` event on success.
         #[pallet::call_index(3)]
-        #[pallet::weight(T::WeightInfo::update_emission_rate())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::update_emission_rate())]
         pub fn update_emission_rate(
             origin: OriginFor<T>,
             new_rate: BalanceOf<T>,

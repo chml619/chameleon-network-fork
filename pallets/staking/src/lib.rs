@@ -62,6 +62,8 @@ pub mod pallet {
 
     /// The current storage version.
     const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
+    /// Token ID for pCHML in pDEX registry
+    const CHML_TOKEN_ID: u32 = 0;
 
     /// Type alias for the balance type.
     type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -73,12 +75,12 @@ pub mod pallet {
 
     /// Configuration trait of this pallet.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + pallet_pdex::Config {
         /// The overarching runtime event type.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         /// The currency used for staking.
-        type Currency: ReservableCurrency<Self::AccountId>;
+        type Currency: ReservableCurrency<Self::AccountId, Balance: Into<u128> + From<u128>>;
 
         /// Weight information for extrinsics in this pallet.
         type WeightInfo: WeightInfo;
@@ -278,53 +280,60 @@ pub mod pallet {
         ///
         /// Emits `Staked` event on success.
         #[pallet::call_index(0)]
-        #[pallet::weight(T::WeightInfo::stake())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::stake())]
         pub fn stake(
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-
+            
             // Validate minimum stake amount
             ensure!(amount >= T::MinimumStake::get(), Error::<T>::StakeAmountTooLow);
-
-            // Check if user has sufficient balance
-            ensure!(
-                T::Currency::can_reserve(&who, amount),
-                Error::<T>::InsufficientBalance
+            
+            // Get staking pallet account
+            let staking_account = Self::account_id();
+            
+            // Convert amount to pDEX balance type
+            let pdex_amount: <T as pallet_pdex::Config>::Balance = (amount.into() as u128).into();
+            
+            // Check pCHML balance in pDEX
+            let user_balance = pallet_pdex::Pallet::<T>::balance_of(
+                CHML_TOKEN_ID.into(),
+                &who
             );
-
-            // Reserve the tokens
-            T::Currency::reserve(&who, amount)?;
-
+            ensure!(user_balance >= pdex_amount, Error::<T>::InsufficientBalance);
+            
+            // Transfer pCHML to staking pallet (locks the tokens)
+            pallet_pdex::Pallet::<T>::do_transfer(
+                CHML_TOKEN_ID.into(),
+                &who,
+                &staking_account,
+                pdex_amount
+            )?;
+            
             // Update staker information
             Stakers::<T>::mutate(&who, |stake_info| {
                 stake_info.amount = stake_info.amount.saturating_add(amount);
                 stake_info.last_claim_block = frame_system::Pallet::<T>::block_number();
             });
-
+            
             // Update total staked
-            let _total_staked = TotalStaked::<T>::mutate(|total| {
+            TotalStaked::<T>::mutate(|total| {
                 *total = total.saturating_add(amount);
-                *total
             });
-
+            
             // Get updated stake info for event
             let stake_info = Stakers::<T>::get(&who);
-
+            
             // Emit event
             Self::deposit_event(Event::Staked {
                 account: who,
                 amount,
                 total_staked: stake_info.amount,
             });
-
+            
             Ok(())
         }
-
-        /// Unstake CHML tokens.
-        ///
-        /// The specified amount is unreserved and returned to the caller's free balance.
         /// No waiting period is required for testnet flexibility.
         ///
         /// Parameters:
@@ -332,22 +341,33 @@ pub mod pallet {
         ///
         /// Emits `Unstaked` event on success.
         #[pallet::call_index(1)]
-        #[pallet::weight(T::WeightInfo::unstake())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::unstake())]
         pub fn unstake(
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-
+            
             // Get current stake info
             let mut stake_info = Stakers::<T>::get(&who);
             
             // Check if user has sufficient stake
             ensure!(stake_info.amount >= amount, Error::<T>::InsufficientStake);
-
-            // Unreserve the tokens
-            T::Currency::unreserve(&who, amount);
-
+            
+            // Get staking pallet account
+            let staking_account = Self::account_id();
+            
+            // Convert amount to pDEX balance type
+            let pdex_amount: <T as pallet_pdex::Config>::Balance = (amount.into() as u128).into();
+            
+            // Transfer pCHML back to user from staking pallet
+            pallet_pdex::Pallet::<T>::do_transfer(
+                CHML_TOKEN_ID.into(),
+                &staking_account,
+                &who,
+                pdex_amount
+            )?;
+            
             // Update staker information
             stake_info.amount = stake_info.amount.saturating_sub(amount);
             
@@ -357,51 +377,49 @@ pub mod pallet {
             } else {
                 Stakers::<T>::insert(&who, &stake_info);
             }
-
+            
             // Update total staked
             TotalStaked::<T>::mutate(|total| {
                 *total = total.saturating_sub(amount);
             });
-
+            
             // Emit event
             Self::deposit_event(Event::Unstaked {
                 account: who,
                 amount,
                 remaining_stake: stake_info.amount,
             });
-
+            
             Ok(())
         }
-
         /// Claim accumulated staking rewards.
         ///
         /// All accumulated rewards are transferred to the caller's free balance.
         ///
         /// Emits `RewardsClaimed` event on success.
         #[pallet::call_index(2)]
-        #[pallet::weight(T::WeightInfo::claim_rewards())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::claim_rewards())]
         pub fn claim_rewards(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
-
+            
             // Get current stake info
             let mut stake_info = Stakers::<T>::get(&who);
             
             // Check if there are rewards to claim
             ensure!(!stake_info.rewards_accumulated.is_zero(), Error::<T>::NoRewardsToClaim);
-
+            
             let rewards = stake_info.rewards_accumulated;
             
-            // Get reward pool account
-            let reward_account = Self::reward_account_id();
+            // Convert to pDEX balance type
+            let pdex_rewards: <T as pallet_pdex::Config>::Balance = (rewards.into() as u128).into();
             
-            // Transfer rewards from pool to user
-            T::Currency::transfer(
-                &reward_account,
+            // Mint pCHML rewards directly to user
+            pallet_pdex::Pallet::<T>::do_mint(
+                CHML_TOKEN_ID.into(),
                 &who,
-                rewards,
-                ExistenceRequirement::AllowDeath,
+                pdex_rewards
             )?;
-
+            
             // Reset accumulated rewards
             stake_info.rewards_accumulated = BalanceOf::<T>::zero();
             stake_info.last_claim_block = frame_system::Pallet::<T>::block_number();
@@ -412,13 +430,13 @@ pub mod pallet {
             } else {
                 Stakers::<T>::insert(&who, &stake_info);
             }
-
+            
             // Emit event
             Self::deposit_event(Event::RewardsClaimed {
                 account: who,
                 amount: rewards,
             });
-
+            
             Ok(())
         }
 
@@ -431,7 +449,7 @@ pub mod pallet {
         ///
         /// Emits `RewardRateUpdated` event on success.
         #[pallet::call_index(3)]
-        #[pallet::weight(T::WeightInfo::set_reward_rate())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::set_reward_rate())]
         pub fn set_reward_rate(
             origin: OriginFor<T>,
             rate: BalanceOf<T>,
@@ -462,41 +480,44 @@ pub mod pallet {
         ///
         /// Emits `RewardPoolFunded` event on success.
         #[pallet::call_index(4)]
-        #[pallet::weight(T::WeightInfo::fund_reward_pool())]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::fund_reward_pool())]
         pub fn fund_reward_pool(
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-
-            // Check if user has sufficient balance
-            ensure!(
-                T::Currency::free_balance(&who) >= amount,
-                Error::<T>::InsufficientBalance
+            
+            // Convert to pDEX balance type
+            let pdex_amount: <T as pallet_pdex::Config>::Balance = (amount.into() as u128).into();
+            
+            // Check pCHML balance
+            let user_balance = pallet_pdex::Pallet::<T>::balance_of(
+                CHML_TOKEN_ID.into(),
+                &who
             );
-
+            ensure!(user_balance >= pdex_amount, Error::<T>::InsufficientBalance);
+            
             // Get reward pool account
             let reward_account = Self::reward_account_id();
             
-            // Transfer tokens to reward pool
-            T::Currency::transfer(
+            // Transfer pCHML to reward pool
+            pallet_pdex::Pallet::<T>::do_transfer(
+                CHML_TOKEN_ID.into(),
                 &who,
                 &reward_account,
-                amount,
-                ExistenceRequirement::AllowDeath,
+                pdex_amount
             )?;
-
+            
             // Update reward pool storage
             RewardPool::<T>::mutate(|pool| {
                 *pool = pool.saturating_add(amount);
             });
-
+            
             // Emit event
             Self::deposit_event(Event::RewardPoolFunded {
-                amount,
                 funded_by: who,
+                amount,
             });
-
             Ok(())
         }
     }
@@ -526,6 +547,11 @@ pub mod pallet {
         }
 
         /// Get the account ID of the reward pool.
+        /// Get the staking pallet account ID for holding staked tokens.
+        pub fn account_id() -> T::AccountId {
+            T::RewardsPalletId::get().into_sub_account_truncating(b"stake")
+        }
+
         pub fn reward_account_id() -> T::AccountId {
             T::RewardsPalletId::get().into_account_truncating()
         }
@@ -542,8 +568,7 @@ pub mod pallet {
 
         /// Get the current reward pool balance.
         pub fn get_reward_pool_balance() -> BalanceOf<T> {
-            let reward_account = Self::reward_account_id();
-            T::Currency::free_balance(&reward_account)
+            RewardPool::<T>::get()
         }
     }
 }
