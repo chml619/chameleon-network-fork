@@ -162,14 +162,14 @@ curl -H "Content-Type: application/json" \
 | Agent | Focus Area | Status | Progress |
 |-------|------------|--------|----------|
 | 1. Tokenomics | CHML token, genesis config | ✅ COMPLETE | 100% |
-| 2. Mobile Wallet | React Native iOS/Android | ✅ COMPLETE | 100% |
+| 2. Mobile Wallet | React Native iOS/Android | 🔄 IN PROGRESS | 75% |
 | 3. Privacy Layer | Ring signatures, stealth addresses | ✅ COMPLETE | 100% |
-| 4. pDEX | AMM pools, private swaps | ✅ INTEGRATED | 100% |
+| 4. pDEX | AMM pools, private swaps | ✅ COMPLETE | 100% |
 | 5. Ethereum Bridge | Lock/mint mechanism | ✅ COMPLETE | 100% |
-| 6. Staking | Delegation, rewards | ✅ pCHML | 100% |
-| 7. Emissions | Token minting, distribution | ✅ pCHML | 100% |
+| 6. Staking | Delegation, rewards | ✅ COMPLETE | 100% |
+| 7. Emissions | Token minting, distribution | ✅ COMPLETE | 100% |
 
-### Agent 4 (pDEX) - ✅ INTEGRATED
+### Agent 4 (pDEX) - ✅ COMPLETE
 **Sprint Completed:** AMM Pools + Internal Token Registry
 - pallet-pdex: Constant product AMM formula ✅
 - Internal tokens: Removed pallet-assets dependency ✅
