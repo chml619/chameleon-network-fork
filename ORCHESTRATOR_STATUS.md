@@ -13,11 +13,13 @@
 
 **Week 11 Status:** ✅ pCHML INTEGRATION COMPLETE
 
-**Completed (Jan 1-2, 2026):**
+**Completed (Jan 1-3, 2026):**
 - ✅ **pCHML Integration** - All CHML on-chain is now privacy-wrapped
 - ✅ **Multi-Validator Network** - Alice (SFO) + Bob (NYC) live
 - ✅ **Block Author Detection** - AuraAccountAdapter for validator rewards
 - ✅ **Bridge pToken Integration** - Shield/unshield mints pBTC/pETH/pUSDT
+- ✅ **Staking Lifecycle** - Node status (Registered→Waiting→Active→Unbonding), 7-day cooldown
+- ✅ **Genesis Prefunding** - Dev wallets funded for staking tests (1,100-10,300 CHML)
 
 **Week 10 Completed (Dec 30-31, 2025):**
 - ✅ **pDEX AMM** - Pools, swaps, liquidity operations
