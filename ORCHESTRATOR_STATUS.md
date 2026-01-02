@@ -99,6 +99,7 @@
 - `multi-validator-v1` - Multi-validator P2P
 - `emissions-author-v1` - Block author detection
 - `pchml-integration-v1` - pCHML integration complete
+- `staking-lifecycle-v1` - Node lifecycle + 7-day unbonding cooldown
 
 ---
 
