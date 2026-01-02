@@ -27,7 +27,6 @@
 - ✅ **Fee Distribution** - 90% LP / 10% Treasury on swaps
 
 **Next Steps:**
-- 🔄 Staking enhancements: Cooldown, node lifecycle
 - 🔄 Mobile app: vNode management, staking UI
 - 🔄 Pre-mainnet: Convert gas fees to pCHML
 
