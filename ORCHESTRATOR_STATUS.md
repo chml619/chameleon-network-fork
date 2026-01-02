@@ -114,25 +114,27 @@
 
 ---
 
-## 📅 WEEKS 11-12: ROADMAP
+## 📅 WEEKS 12-14: ROADMAP
 
-### WEEK 11: Bridge + Multi-validator
+### WEEK 12: Mobile App + Staking Enhancements
 **Status:** ⏳ QUEUED
 
 **Deliverables:**
-1. Bridge pallet external chain connectors
-2. Multi-validator P2P infrastructure
-3. Privacy-integrated swaps on pDEX
-4. Fee distribution mechanism
+1. Staking cooldown period (unstaking delay)
+2. Node lifecycle (register→waiting→active→unbonding→delete)
+3. Mobile app vNode management UI
+4. Mobile app staking/unstaking UI
+5. Wallet pCHML balance display
 
-### WEEK 12: Testing + Hardening
+### WEEK 13-14: Testing + Hardening
 **Status:** ⏳ QUEUED
 
 **Deliverables:**
-1. Staking pallet testing with real validators
-2. Shield/Unshield flow complete
-3. End-to-end privacy testing
-4. Mobile app pDEX UI
+1. End-to-end privacy testing
+2. Multi-validator stress testing
+3. Security audits
+4. Convert gas fees to pCHML (Option B)
+5. Documentation finalization
 
 ---
 
