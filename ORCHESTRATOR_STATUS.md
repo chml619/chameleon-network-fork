@@ -259,15 +259,15 @@ curl -H "Content-Type: application/json" \
 | 7 | MEV pallet + Mobile enhancements | ✅ **COMPLETE** |
 | 8 | Emissions, Staking, Bridge pallets | ✅ **COMPLETE** |
 | 9 | **Privacy Layer Core** (Ring Sigs + Stealth Addr) | ✅ **COMPLETE** |
-| 10 | pDEX + Internal Token Registry | ✅ **COMPLETE** |
+| 10 | pDEX + Bridge Fees + Fee Distribution | ✅ **COMPLETE** |
+| 11 | pCHML Integration + Multi-validator | ✅ **COMPLETE** |
 
-### Phase 3: Infrastructure (Weeks 11-14) ⏳ PLANNED
+### Phase 3: Infrastructure (Weeks 12-14) ⏳ PLANNED
 
 | Week | Milestone | Status |
 |------|-----------|--------|
-| 11 | Bridge connectors + Multi-validator | ⏳ QUEUED |
-| 12 | Privacy-integrated swaps + Testing | ⏳ QUEUED |
-| 13-14 | Security audits + Bug fixes | ⏳ QUEUED |
+| 12 | Mobile App + Staking Enhancements | ⏳ QUEUED |
+| 13-14 | Testing + Gas Fee Conversion | ⏳ QUEUED |
 
 ### Phase 4: Public Testnet (Week 15+) 🎯 Target
 
@@ -275,23 +275,25 @@ curl -H "Content-Type: application/json" \
 
 ## 🎯 NEXT STEPS
 
-### Week 10 Remaining
-- [ ] **Privacy-integrated swaps**: Hide trader identity on pDEX
-- [ ] **Fee distribution**: LP rewards mechanism
-- [ ] **Mobile app**: pDEX trading UI
+### Week 12 (Mobile App + Staking)
+- [ ] Staking cooldown period (7-day unstaking delay)
+- [ ] Node lifecycle states (register→waiting→active→unbonding)
+- [ ] Mobile app vNode management UI
+- [ ] Mobile app staking/unstaking screens
+- [ ] pCHML balance display in wallet
 
-### Week 11 (Bridge + Multi-validator)
-- [ ] Bridge external chain connectors
-- [ ] Multi-validator P2P setup
-- [ ] Real validator testing
-- [ ] Shield/Unshield flow complete
-
-### Weeks 12-14 (Testing + Hardening)
+### Week 13-14 (Testing + Hardening)
+- [ ] Convert gas fees to pCHML (Option B - ~7-12 days)
 - [ ] End-to-end privacy testing
+- [ ] Multi-validator stress testing
 - [ ] Security audits
-- [ ] Performance optimization
 - [ ] Documentation finalization
-- [ ] Mobile beta program
+
+### Future (pNode Hardware)
+- [ ] pNode device specification
+- [ ] WiFi/Bluetooth configuration via mobile app
+- [ ] Pre-funded staking model (70/30 reward split)
+- [ ] Retail validator onboarding flow
 
 ---
 
