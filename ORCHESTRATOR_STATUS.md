@@ -138,42 +138,45 @@
 
 ---
 
----
-
 ## 🔄 CURRENT STATUS
 
 | Metric | Value |
 |--------|-------|
-| **Current Week** | 10 of 16 |
-| **Overall Progress** | ~65% |
+| **Current Week** | 11 of 16 |
+| **Overall Progress** | ~75% |
 | **Timeline** | 🟢 ON TRACK |
-| **Blockers** | None (pDEX version conflict resolved) |
+| **Blockers** | None |
 | **Build Server** | Contabo (178.18.243.189) |
-| **Network Endpoint** | ws://64.23.233.36:9944 |
+| **RPC Endpoint** | ws://64.23.233.36:9944 |
+| **Validators** | 2 (Alice SFO + Bob NYC) |
 
 **Progress Breakdown:**
 - Foundation (Weeks 1-6): ✅ 100%
 - Core Pallets (Weeks 7-8): ✅ 100%  
 - Privacy Layer (Week 9): ✅ 100%
-- pDEX + Integration (Week 10): ✅ 80%
-- Infrastructure (Weeks 11-14): ⏳ 0%
+- pDEX + Integration (Week 10): ✅ 100%
+- pCHML + Multi-validator (Week 11): ✅ 100%
+- Mobile App + Staking (Week 12): ⏳ 0%
+- Testing + Hardening (Weeks 13-14): ⏳ 0%
 - Testnet Launch (Week 15+): ⏳ 0%
 
 ---
 
 ## 🌐 NETWORK STATUS
 
-### Devnet Endpoint
+### Devnet Endpoints
 
-| Protocol | URL | Status |
-|----------|-----|--------|
-| HTTP RPC | `http://64.23.233.36:9944` | ✅ Active |
-| WebSocket | `ws://64.23.233.36:9944` | ✅ Active |
+| Node | Protocol | URL | Status |
+|------|----------|-----|--------|
+| Alice (SFO) | WebSocket | `ws://64.23.233.36:9944` | ✅ Active (RPC) |
+| Alice (SFO) | P2P | `/ip4/64.23.233.36/tcp/30333` | ✅ Active |
+| Bob (NYC) | WebSocket | `ws://104.131.167.75:9944` | ✅ Active |
+| Bob (NYC) | P2P | `/ip4/104.131.167.75/tcp/30333` | ✅ Active |
 
 ### Binary Info
 - **Binary:** solochain-template-node v0.1.0
-- **Commit:** 72c6a14
-- **Build:** Dec 29, 2025
+- **Commit:** cf8dcbcd
+- **Build:** Jan 2, 2026
 
 ### Quick Health Check
 ```bash
@@ -181,7 +184,7 @@ curl -H "Content-Type: application/json" \
   -d '{"id":1, "jsonrpc":"2.0", "method": "system_health"}' \
   http://64.23.233.36:9944
 
-# Expected: {"jsonrpc":"2.0","id":1,"result":{"peers":0,"isSyncing":false,"shouldHavePeers":false}}
+# Expected: {"jsonrpc":"2.0","id":1,"result":{"peers":1,"isSyncing":false,"shouldHavePeers":true}}
 ```
 
 ---
