@@ -61,6 +61,27 @@
 - Round-robin rewards: ~0.985 pCHML per block per validator
 - Emission split: 70% validators, 30% LP providers
 
+### Staking Lifecycle Enhancements
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| NodeStatus Enum | ✅ Complete | Registered, Waiting, Active, Unbonding |
+| Unbonding Period | ✅ Complete | 100,800 blocks (~7 days at 6 sec) |
+| register_node | ✅ Complete | Create node entry (call_index 5) |
+| start_unbonding | ✅ Complete | Begin cooldown (call_index 6) |
+| complete_unbonding | ✅ Complete | Release funds after cooldown (call_index 7) |
+| delete_node | ✅ Complete | Remove node from chain (call_index 8) |
+
+### Genesis Prefunding (Updated Jan 3, 2026)
+
+| Account | Balance | Purpose |
+|---------|---------|---------|
+| Alice | 1,100 CHML | Validator + staking tests |
+| Bob | 2,150 CHML | Validator + staking tests |
+| Charlie | 5,200 CHML | Additional validator tests |
+| Dave | 7,750 CHML | Full staking lifecycle tests |
+| Eve | 10,300 CHML | Multi-validator tests |
+
 ### Bridge Fee Structure
 - Shield: 0.02% OR 0.1 CHML minimum (whichever higher)
 - Unshield: 0.05% OR 0.25 CHML minimum (whichever higher)
