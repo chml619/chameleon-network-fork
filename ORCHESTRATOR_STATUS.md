@@ -1,37 +1,84 @@
 # 🦎 CHAMELEON NETWORK - ORCHESTRATOR STATUS DASHBOARD
 
 **Orchestrator:** AI Agent Coordinator  
-**Current Phase:** Week 10 - pDEX Integration  
-**Status:** ✅ pDEX Integrated  
+**Current Phase:** Week 11 - pCHML Integration Complete  
+**Status:** ✅ pCHML Integrated + Multi-validator Live  
 **Target:** Public Testnet Launch (Week 15)  
-**Last Updated:** December 31, 2025  
-**Next Milestone:** Week 11 - Bridge + Multi-validator
+**Last Updated:** January 2, 2026  
+**Next Milestone:** Week 12 - Mobile App + Staking Enhancements
 
 ---
 
 ## 📋 EXECUTIVE SUMMARY
 
-**Week 10 Status:** ✅ pDEX INTEGRATED
+**Week 11 Status:** ✅ pCHML INTEGRATION COMPLETE
 
-**Completed (Dec 30-31, 2025):**
-- ✅ **pallet-pdex** - AMM pools with constant product formula
-- ✅ **Internal Token Registry** - Replaced pallet-assets dependency
-- ✅ **Swap/Liquidity Operations** - Full add/remove/swap functionality
-- ✅ **Runtime Integration** - pDEX live on devnet at pallet index 16
+**Completed (Jan 1-2, 2026):**
+- ✅ **pCHML Integration** - All CHML on-chain is now privacy-wrapped
+- ✅ **Multi-Validator Network** - Alice (SFO) + Bob (NYC) live
+- ✅ **Block Author Detection** - AuraAccountAdapter for validator rewards
+- ✅ **Bridge pToken Integration** - Shield/unshield mints pBTC/pETH/pUSDT
+
+**Week 10 Completed (Dec 30-31, 2025):**
+- ✅ **pDEX AMM** - Pools, swaps, liquidity operations
+- ✅ **Bridge Fees** - Shield 0.02%, Unshield 0.05% with Treasury split
+- ✅ **Fee Distribution** - 90% LP / 10% Treasury on swaps
 
 **Next Steps:**
-- 🔄 Privacy-integrated swaps (hide trader identity)
-- 🔄 Week 11: Bridge connectors + Multi-validator setup
+- 🔄 Staking enhancements: Cooldown, node lifecycle
+- 🔄 Mobile app: vNode management, staking UI
+- 🔄 Pre-mainnet: Convert gas fees to pCHML
 
-**Key Decision:** Privacy is MANDATORY on-chain (not optional toggle)
+**Key Decision:** Privacy is MANDATORY on-chain - all CHML exists as pCHML (except gas fees temporarily)
 
 **Architecture:** Standalone Substrate Node (polkadot-sdk-solochain-template)
 
 ---
 
-## 🔄 WEEK 10 PROGRESS (Dec 30-31, 2025)
+## 🔄 WEEK 11 PROGRESS (Jan 1-2, 2026)
 
-**Status:** ✅ pDEX INTEGRATED
+**Status:** ✅ pCHML INTEGRATION + MULTI-VALIDATOR LIVE
+
+### pCHML Privacy Integration (MAJOR)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Staking pCHML | ✅ Complete | stake/unstake/claim use pDEX tokens |
+| Emissions pCHML | ✅ Complete | Validator rewards minted as pCHML |
+| Bridge pTokens | ✅ Complete | Shield mints pBTC/pETH/pUSDT |
+| Gas Fees | 🔄 Option A | Native CHML for gas (convert to pCHML pre-mainnet) |
+
+### Multi-Validator Network
+
+| Node | Location | Role | Peer ID |
+|------|----------|------|---------|
+| Alice | SFO (64.23.233.36) | Validator + RPC | 12D3KooWDBqAmkj... |
+| Bob | NYC (104.131.167.75) | Validator | 12D3KooWMsjhjQo... |
+
+### Block Author Detection
+- Created AuraAccountAdapter to convert Aura AuthorityId to AccountId
+- Round-robin rewards: ~0.985 pCHML per block per validator
+- Emission split: 70% validators, 30% LP providers
+
+### Bridge Fee Structure
+- Shield: 0.02% OR 0.1 CHML minimum (whichever higher)
+- Unshield: 0.05% OR 0.25 CHML minimum (whichever higher)
+- Fee split: 30% Treasury, 70% Custodians
+
+### Files Modified:
+- `pallets/staking/src/lib.rs` - pCHML integration via pDEX
+- `pallets/emissions/src/lib.rs` - pCHML minting, AuraAccountAdapter
+- `pallets/bridge/src/lib.rs` - pToken mint/burn, fee structure
+- `runtime/src/configs/mod.rs` - AuraAccountAdapter for FindAuthor
+
+### Tags:
+- `bridge-fees-v1` - Bridge fee structure
+- `bridge-ptoken-v1` - Bridge pToken integration
+- `multi-validator-v1` - Multi-validator P2P
+- `emissions-author-v1` - Block author detection
+- `pchml-integration-v1` - pCHML integration complete
+
+---
 
 ### pDEX Pallet (Index 16)
 
