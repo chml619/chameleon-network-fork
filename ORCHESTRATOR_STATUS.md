@@ -80,38 +80,6 @@
 
 ---
 
-### pDEX Pallet (Index 16)
-
-| Feature | Status | Description |
-|---------|--------|-------------|
-| AMM Pools | ✅ Complete | Constant product (x*y=k) formula |
-| Swaps | ✅ Complete | Token swaps with slippage protection |
-| Liquidity Provision | ✅ Complete | Add/remove liquidity with LP tokens |
-| Fee Collection | ✅ Complete | 0.3% swap fee |
-| Internal Token Registry | ✅ Complete | Replaces pallet-assets dependency |
-
-### Technical Implementation:
-- **Removed** pallet-assets dependency (resolved version conflict)
-- **Added** internal TokenBalances/TokenSupply storage
-- **Implemented** do_transfer, do_mint, do_burn helpers
-- **Integrated** at runtime pallet index 16
-
-### Supported Tokens:
-- CHML (native)
-- pBTC (bridged Bitcoin)
-- pETH (bridged Ethereum)
-- pUSDT (bridged USDT)
-- LP Tokens (per pool)
-
-### Files Modified:
-- `pallets/pdex/src/lib.rs` - Removed Assets trait, added internal helpers
-- `pallets/pdex/src/tokens.rs` - TokenId enum for supported tokens
-- `runtime/src/lib.rs` - Added pallet index 16
-- `runtime/src/configs/mod.rs` - pDEX config implementation
-
-### Tags:
-- `pdex-v1` - pDEX integration complete
-
 ---
 
 ## 📅 WEEKS 12-14: ROADMAP
