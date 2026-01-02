@@ -206,6 +206,7 @@ parameter_types! {
     
     // Staking - 1,750 CHML minimum
     pub const MinimumStake: Balance = 1_750_000_000_000_000; // 1750 CHML
+    pub const UnbondingPeriod: BlockNumber = 100_800; // ~7 days at 6 sec blocks
     pub const RewardsPalletId: PalletId = PalletId(*b"staking!");
     
     // Bridge
@@ -266,6 +267,7 @@ impl pallet_staking::Config for Runtime {
     type Currency = Balances;
     type WeightInfo = ();
     type MinimumStake = MinimumStake;
+    type UnbondingPeriod = UnbondingPeriod;
     type RewardsPalletId = RewardsPalletId;
 }
 

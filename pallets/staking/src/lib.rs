@@ -88,6 +88,9 @@ pub mod pallet {
         /// Minimum amount required to stake.
         #[pallet::constant]
         type MinimumStake: Get<BalanceOf<Self>>;
+        /// Cooldown period in blocks before unstaked funds are released.
+        #[pallet::constant]
+        type UnbondingPeriod: Get<BlockNumberFor<Self>>;
 
         /// The pallet ID for the reward pool account.
         #[pallet::constant]
@@ -103,17 +106,36 @@ pub mod pallet {
         pub rewards_accumulated: Balance,
         /// Last block when rewards were calculated.
         pub last_claim_block: BlockNumber,
+        /// Current node lifecycle status.
+        pub status: NodeStatus,
+        /// Block number when unbonding started (if status is Unbonding).
+        pub unbonding_block: Option<BlockNumber>,
     }
-
     impl<Balance: Default, BlockNumber: Default> Default for StakeInfo<Balance, BlockNumber> {
         fn default() -> Self {
             Self {
                 amount: Balance::default(),
                 rewards_accumulated: Balance::default(),
                 last_claim_block: BlockNumber::default(),
+                status: NodeStatus::default(),
+                unbonding_block: None,
             }
         }
     }
+    /// Node lifecycle status for validators.
+    #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen, Default)]
+    pub enum NodeStatus {
+        /// Node registered but not yet staked minimum
+        #[default]
+        Registered,
+        /// Staked and waiting in queue for activation
+        Waiting,
+        /// Active validator producing blocks
+        Active,
+        /// Unbonding - cooldown period before funds release
+        Unbonding,
+    }
+
 
     /// Hooks for automatic reward calculation.
     #[pallet::hooks]
@@ -246,6 +268,30 @@ pub mod pallet {
             /// Account that funded the pool.
             funded_by: T::AccountId,
         },
+        /// Node was registered.
+        NodeRegistered {
+            /// Account that registered the node.
+            account: T::AccountId,
+        },
+        /// Unbonding period started.
+        UnbondingStarted {
+            /// Account entering unbonding.
+            account: T::AccountId,
+            /// Block when unbonding completes.
+            unbonding_complete: BlockNumberFor<T>,
+        },
+        /// Unbonding completed and funds released.
+        UnbondingComplete {
+            /// Account that completed unbonding.
+            account: T::AccountId,
+            /// Amount released.
+            amount: BalanceOf<T>,
+        },
+        /// Node was deleted from the network.
+        NodeDeleted {
+            /// Account that deleted the node.
+            account: T::AccountId,
+        },
     }
 
     /// Errors that can be returned by this pallet.
@@ -265,6 +311,14 @@ pub mod pallet {
         InvalidRewardRate,
         /// Arithmetic overflow occurred.
         ArithmeticOverflow,
+        /// Node is not in the correct status for this operation.
+        InvalidNodeStatus,
+        /// Node is still in unbonding period.
+        StillUnbonding,
+        /// Node is already registered.
+        AlreadyRegistered,
+        /// Node not found.
+        NodeNotFound,
     }
 
     /// Dispatchable functions of this pallet.
@@ -512,12 +566,136 @@ pub mod pallet {
             RewardPool::<T>::mutate(|pool| {
                 *pool = pool.saturating_add(amount);
             });
-            
             // Emit event
             Self::deposit_event(Event::RewardPoolFunded {
                 funded_by: who,
                 amount,
             });
+            Ok(())
+        }
+        /// Register a new validator node.
+        /// 
+        /// This creates a node entry in Registered status.
+        /// User must then stake minimum amount to move to Waiting status.
+        #[pallet::call_index(5)]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::stake())]
+        pub fn register_node(origin: OriginFor<T>) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            
+            // Check if already registered
+            let stake_info = Stakers::<T>::get(&who);
+            ensure!(stake_info.amount.is_zero() && stake_info.status == NodeStatus::Registered, 
+                Error::<T>::AlreadyRegistered);
+            
+            // Create new stake info with Registered status
+            Stakers::<T>::insert(&who, StakeInfo {
+                amount: BalanceOf::<T>::zero(),
+                rewards_accumulated: BalanceOf::<T>::zero(),
+                last_claim_block: frame_system::Pallet::<T>::block_number(),
+                status: NodeStatus::Registered,
+                unbonding_block: None,
+            });
+            Self::deposit_event(Event::NodeRegistered { account: who });
+            Ok(())
+        }
+            
+        /// Start unbonding process for staked tokens.
+        /// 
+        /// This initiates the cooldown period. Funds will be released
+        /// after UnbondingPeriod blocks.
+        #[pallet::call_index(6)]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::unstake())]
+        pub fn start_unbonding(origin: OriginFor<T>) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            
+            let mut stake_info = Stakers::<T>::get(&who);
+            
+            // Must have stake and be in Active or Waiting status
+            ensure!(!stake_info.amount.is_zero(), Error::<T>::InsufficientStake);
+            ensure!(
+                stake_info.status == NodeStatus::Active || stake_info.status == NodeStatus::Waiting,
+                Error::<T>::InvalidNodeStatus
+            );
+            
+            let current_block = frame_system::Pallet::<T>::block_number();
+            let unbonding_complete = current_block.saturating_add(T::UnbondingPeriod::get());
+            
+            // Update status to Unbonding
+            stake_info.status = NodeStatus::Unbonding;
+            stake_info.unbonding_block = Some(unbonding_complete);
+            Stakers::<T>::insert(&who, stake_info);
+            
+            Self::deposit_event(Event::UnbondingStarted {
+                account: who,
+                unbonding_complete,
+            });
+            Ok(())
+        }
+        /// Complete unbonding and release staked funds.
+        /// 
+        /// Can only be called after UnbondingPeriod has passed.
+        #[pallet::call_index(7)]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::unstake())]
+        pub fn complete_unbonding(origin: OriginFor<T>) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            
+            let stake_info = Stakers::<T>::get(&who);
+            
+            // Must be in Unbonding status
+            ensure!(stake_info.status == NodeStatus::Unbonding, Error::<T>::InvalidNodeStatus);
+            
+            // Check if unbonding period has passed
+            let current_block = frame_system::Pallet::<T>::block_number();
+            let unbonding_block = stake_info.unbonding_block.ok_or(Error::<T>::InvalidNodeStatus)?;
+            ensure!(current_block >= unbonding_block, Error::<T>::StillUnbonding);
+            
+            let amount = stake_info.amount;
+            
+            // Get staking pallet account
+            let staking_account = Self::account_id();
+            
+            // Convert amount to pDEX balance type
+            let pdex_amount: <T as pallet_pdex::Config>::Balance = (amount.into() as u128).into();
+            
+            // Transfer pCHML back to user from staking pallet
+            pallet_pdex::Pallet::<T>::do_transfer(
+                CHML_TOKEN_ID.into(),
+                &staking_account,
+                &who,
+                pdex_amount
+            )?;
+            
+            // Update total staked
+            TotalStaked::<T>::mutate(|total| {
+                *total = total.saturating_sub(amount);
+            });
+            
+            // Remove staker entry
+            Stakers::<T>::remove(&who);
+            
+            Self::deposit_event(Event::UnbondingComplete {
+                account: who,
+                amount,
+            });
+            Ok(())
+        }
+            
+        /// Delete a node from the network.
+        /// 
+        /// Can only be called when node has no stake (after complete_unbonding).
+        #[pallet::call_index(8)]
+        #[pallet::weight(<T as pallet::Config>::WeightInfo::unstake())]
+        pub fn delete_node(origin: OriginFor<T>) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            
+            let stake_info = Stakers::<T>::get(&who);
+            
+            // Must have no stake remaining
+            ensure!(stake_info.amount.is_zero(), Error::<T>::InsufficientStake);
+            
+            Stakers::<T>::remove(&who);
+            // Remove from storage
+            Self::deposit_event(Event::NodeDeleted { account: who });
             Ok(())
         }
     }
