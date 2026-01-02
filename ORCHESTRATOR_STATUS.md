@@ -442,6 +442,21 @@ All CHML on Chameleon Network now exists as privacy-wrapped pCHML:
 - `bbec93de` - Bridge pToken integration
 - `b104f0e1` - Block author detection via AuraAccountAdapter
 - `cf8dcbcd` - pCHML integration for Staking and Emissions
+- `3ab6883b` - Staking enhancements: Node lifecycle + cooldown period
+- `fe2b9f6e` - Genesis: Updated dev wallet prefunding for staking tests
+
+### Staking Lifecycle (Jan 2-3, 2026)
+- NodeStatus enum: Registered → Waiting → Active → Unbonding
+- StakeInfo extended with status and unbonding_block fields
+- UnbondingPeriod: 100,800 blocks (~7 days)
+- New extrinsics: register_node, start_unbonding, complete_unbonding, delete_node
+- New events: NodeRegistered, UnbondingStarted, UnbondingComplete, NodeDeleted
+- Genesis prefunding updated for staking tests
+
+### Node Lifecycle Flow
+```
+register_node → stake (min 1,750) → Waiting → Active → start_unbonding → Unbonding (7 days) → complete_unbonding → delete_node
+```
 
 ---
 
