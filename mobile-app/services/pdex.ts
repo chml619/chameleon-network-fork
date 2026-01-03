@@ -26,6 +26,20 @@ export const PBTC_TOKEN_ID = 2;
 export const PUSDT_TOKEN_ID = 3;
 export const PUSDC_TOKEN_ID = 4;
 
+// Pool IDs for LP
+export const POOL_IDS = {
+  PCHML_PBTC: 0,
+  PCHML_PETH: 1,
+  PCHML_PUSDT: 2,
+};
+
+// Pool token colors
+export const POOL_COLORS: Record<number, string> = {
+  0: '#F7931A', // BTC orange
+  1: '#627EEA', // ETH blue
+  2: '#26A17B', // USDT green
+};
+
 export interface TokenInfo {
   symbol: string;
   name: string;
