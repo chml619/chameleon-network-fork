@@ -154,6 +154,18 @@ export default function WalletScreen() {
 
   // Extract balance for display
   const balanceNumber = formattedFreeBalance ? formattedFreeBalance.split(' ')[0] : '0';
+  const pchmlBalanceNumber = formatBalance(pchmlBalance);
+
+  // Helper function to get token balance
+  const getTokenBalance = (token: typeof TOKENS[0]): string => {
+    if (token.isNative) {
+      return balanceLoading ? '...' : `${balanceNumber} ${token.symbol}`;
+    }
+    if ((token as any).isPCHML) {
+      return `${pchmlBalanceNumber} ${token.symbol}`;
+    }
+    return `0 ${token.symbol}`;
+  };
 
   return (
     <LinearGradient
