@@ -55,9 +55,12 @@ const ACTIONS = [
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { wallet, isLoading: walletLoading, importDevAccount, privateBalance, publicBalance } = useWallet();
+  const { wallet, isLoading: walletLoading, importDevAccount, privateBalance, publicBalance, balanceLoading: contextBalanceLoading } = useWallet();
   const { connectionState, connect } = useApi();
-  const { formattedFreeBalance, isLoading: balanceLoading, refresh: refetchBalance } = useBalance(wallet?.address);
+  const { formattedFreeBalance, isLoading: hookBalanceLoading, refresh: refetchBalance } = useBalance(wallet?.address);
+  
+  // Combined balance loading state
+  const balanceLoading = contextBalanceLoading || hookBalanceLoading;
   
   // Refresh state
   const [refreshing, setRefreshing] = useState(false);
