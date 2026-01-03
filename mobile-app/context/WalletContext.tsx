@@ -396,6 +396,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     stealthHash,
     privateBalance,
     publicBalance,
+    balanceLoading,
     createWallet,
     importWallet,
     importDevAccount,
