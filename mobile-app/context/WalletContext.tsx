@@ -421,6 +421,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     stealthHash,
     privateBalance,
     publicBalance,
+    pchmlBalance,
     balanceLoading,
     createWallet,
     importWallet,
@@ -430,6 +431,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     clearError,
     refreshPrivateBalance,
     refreshPublicBalance,
+    refreshPCHMLBalance,
     refreshBalances,
   };
 
