@@ -224,7 +224,9 @@ export default function UnshieldScreen() {
               setAmount('');
               setDestinationAddress('');
               setFeeEstimate(null);
-              loadPrivateBalance(); // Refresh balance
+              loadPrivateBalance(); // Refresh private balance
+              refreshPCHMLBalance(); // Refresh pCHML balance
+              refreshBalances(); // Refresh all balances
               router.back();
             }
           }
