@@ -36,7 +36,7 @@ const TOKENS = [
 export default function WalletScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { wallet, isLoading: walletLoading, importDevAccount, logout } = useWallet();
+  const { wallet, isLoading: walletLoading, importDevAccount, logout, publicBalance, pchmlBalance } = useWallet();
   const { connectionState, connect } = useApi();
   const { formattedFreeBalance, isLoading: balanceLoading } = useBalance(wallet?.address);
 
