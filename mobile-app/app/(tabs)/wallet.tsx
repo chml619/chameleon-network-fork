@@ -223,13 +223,10 @@ export default function WalletScreen() {
                 style={[
                   styles.tokenBalance,
                   token.disabled && styles.tokenBalanceDisabled,
+                  (token as any).isPCHML && { color: '#10B981' },
                 ]}
               >
-                {token.isNative
-                  ? balanceLoading
-                    ? '...'
-                    : `${balanceNumber} ${token.symbol}`
-                  : `0 ${token.symbol}`}
+                {getTokenBalance(token)}
               </Text>
             </TouchableOpacity>
           ))}
