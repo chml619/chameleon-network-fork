@@ -1,13 +1,14 @@
 /**
  * Staking Hook
  * Manages staking state and operations
+ * Updated to support vNode management (registerNode, startUnbonding, completeUnbonding, deleteNode)
  */
 
 import { useState, useCallback, useEffect } from 'react';
 import { BN } from '@polkadot/util';
 import { useApi } from './useApi';
 import { useWallet } from '@/context/WalletContext';
-import { stakingService, StakingInfo, ValidatorInfo, StakingResult } from '@/services/staking';
+import { stakingService, StakingInfo, ValidatorInfo, StakingResult, NodeStatus } from '@/services/staking';
 import { walletService } from '@/services/wallet';
 import { chainService } from '@/services/chain';
 
@@ -21,6 +22,10 @@ export function useStaking() {
   const [isStaking, setIsStaking] = useState(false);
   const [isUnstaking, setIsUnstaking] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isStartingUnbond, setIsStartingUnbond] = useState(false);
+  const [isCompletingUnbond, setIsCompletingUnbond] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch staking info when API and wallet are available
