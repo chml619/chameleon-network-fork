@@ -2,14 +2,29 @@
  * Staking Service
  * Handles staking operations for Chameleon Network
  * 
- * Stake CHML tokens to participate in network validation
- * and earn rewards.
+ * Uses the custom Chameleon staking pallet API:
+ * - api.tx.staking.stake(amount) - Stake pCHML tokens
+ * - api.tx.staking.unstake(amount) - Unstake tokens
+ * - api.tx.staking.claimRewards() - Claim accumulated rewards
+ * - api.tx.staking.registerNode() - Register as validator node
+ * - api.tx.staking.startUnbonding() - Start 7-day unbonding cooldown
+ * - api.tx.staking.completeUnbonding() - Release funds after cooldown
+ * - api.tx.staking.deleteNode() - Remove node from chain
  */
 
 import { ApiPromise } from '@polkadot/api';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
 import { chainService } from './chain';
+
+// Minimum stake required (1,750 CHML in planck units - 18 decimals)
+const MINIMUM_STAKE = new BN('1750000000000000000');
+
+// Unbonding period in blocks (~7 days at 6 sec blocks)
+const UNBONDING_PERIOD = 100800;
+
+// Node status enum matching the chain's NodeStatus
+export type NodeStatus = 'Registered' | 'Waiting' | 'Active' | 'Unbonding' | 'None';
 
 export interface StakingInfo {
   staked: string;
@@ -21,8 +36,9 @@ export interface StakingInfo {
   unbonding: string;
   unbondingRaw: BN;
   apy: number;
-  era: number;
   minStake: string;
+  status: NodeStatus;
+  unbondingBlock: number | null;
 }
 
 export interface StakingResult {
@@ -39,6 +55,7 @@ export interface ValidatorInfo {
   totalStaked: string;
   nominators: number;
   isActive: boolean;
+  status: NodeStatus;
 }
 
 class StakingService {
