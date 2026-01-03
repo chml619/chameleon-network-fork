@@ -507,21 +507,85 @@ pub mod pallet {
 
         /// Distribute LP rewards across pools based on their APY.
         pub fn distribute_lp_rewards(total_lp_share: BalanceOf<T>) {
-            // For now, this is a simplified implementation
-            // In a real system, this would:
-            // 1. Get all active pools
-            // 2. Calculate total weighted APY
-            // 3. Distribute proportionally
-            // 4. Update individual LP provider balances based on their pool share
-            
             log::info!(
                 "[EMISSIONS] LP rewards distribution: {:?} total to distribute",
                 total_lp_share
             );
-            
-            // Placeholder: For now, just log that LP rewards are available
-            // Real implementation would require integration with the pDEX pallet
-            // to know about liquidity providers and their shares
+
+            if total_lp_share.is_zero() {
+                return;
+            }
+
+            // Get pool count from pDEX
+            let pool_count = pallet_pdex::PoolCount::<T>::get();
+            if pool_count == 0 {
+                log::info!("[EMISSIONS] No pools, skipping LP distribution");
+                return;
+            }
+
+            // Build pool info: (pool_id, total_lp, apy)
+            let mut pools_info: Vec<(u32, u128, Perbill)> = Vec::new();
+            let mut total_weighted: u128 = 0;
+
+            for pool_id in 0..pool_count {
+                if let Some(pool) = pallet_pdex::Pools::<T>::get(pool_id) {
+                    let total_lp: u128 = pool.total_lp_tokens.saturated_into();
+                    let apy = PoolAPY::<T>::get(pool_id).unwrap_or_default();
+                    
+                    if total_lp > 0 && !apy.is_zero() {
+                        let weighted = apy.mul_floor(total_lp);
+                        total_weighted = total_weighted.saturating_add(weighted);
+                        pools_info.push((pool_id, total_lp, apy));
+                    }
+                }
+            }
+
+            if total_weighted == 0 || pools_info.is_empty() {
+                log::info!("[EMISSIONS] No active pools with APY, skipping LP distribution");
+                return;
+            }
+
+            let total_share: u128 = total_lp_share.saturated_into();
+
+            // Iterate all LP token holders and distribute rewards
+            for (account, pool_id, lp_balance) in pallet_pdex::UserLPTokens::<T>::iter() {
+                let lp_amount: u128 = lp_balance.saturated_into();
+                if lp_amount == 0 {
+                    continue;
+                }
+
+                // Find pool info for this pool_id
+                if let Some((_, pool_total_lp, apy)) = pools_info.iter().find(|(pid, _, _)| *pid == pool_id) {
+                    if *pool_total_lp == 0 {
+                        continue;
+                    }
+
+                    // Calculate user's share:
+                    // user_share = total_share * apy.mul_floor(lp_amount) / total_weighted
+                    let user_weighted = apy.mul_floor(lp_amount);
+                    let user_share = user_weighted
+                        .saturating_mul(total_share)
+                        .checked_div(total_weighted)
+                        .unwrap_or(0);
+
+                    if user_share > 0 {
+                        let reward: BalanceOf<T> = user_share.saturated_into();
+                        LPRewards::<T>::mutate(&account, pool_id, |maybe_rewards| {
+                            let current = maybe_rewards.unwrap_or_default();
+                            *maybe_rewards = Some(current.saturating_add(reward));
+                        });
+                        
+                        log::info!(
+                            "[EMISSIONS] LP reward {:?} to {:?} for pool {}",
+                            reward,
+                            account,
+                            pool_id
+                        );
+                    }
+                }
+            }
+
+            log::info!("[EMISSIONS] LP rewards distributed across {} pools", pools_info.len());
         }
 
         /// Initialize the pallet with the initial emission rate.
