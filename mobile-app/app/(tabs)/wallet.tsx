@@ -25,9 +25,10 @@ import { NetworkBadge } from '@/components/NetworkBadge';
 import { formatBalance } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
-// Token list (CHML is real, others are placeholders for future)
+// Token list - CHML and pCHML are active, others are placeholders for future
 const TOKENS = [
-  { id: 'chml', symbol: 'CHML', name: 'Chameleon', icon: require('@/assets/images/Logo.png'), isNative: true },
+  { id: 'chml', symbol: 'CHML', name: 'Chameleon', icon: require('@/assets/images/Logo.png'), isNative: true, isPublic: true },
+  { id: 'pchml', symbol: 'pCHML', name: 'Shielded CHML', icon: require('@/assets/images/Logo.png'), isNative: false, isPCHML: true, color: '#10B981' },
   { id: 'peth', symbol: 'pETH', name: 'Privacy ETH', icon: null, color: '#627EEA', disabled: true },
   { id: 'pbtc', symbol: 'pBTC', name: 'Privacy BTC', icon: null, color: '#F7931A', disabled: true },
   { id: 'pusdt', symbol: 'pUSDT', name: 'Privacy USDT', icon: null, color: '#26A17B', disabled: true },
