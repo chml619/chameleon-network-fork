@@ -71,6 +71,35 @@ export interface PoolInfo {
   apy: string;
 }
 
+// Enhanced pool info for LP management
+export interface LPPoolInfo {
+  poolId: number;
+  name: string;
+  assetA: string;
+  assetB: string;
+  reserveA: BN;
+  reserveB: BN;
+  totalLpTokens: BN;
+  userLpTokens: BN;
+  apy: number;
+  color: string;
+}
+
+export interface LPPosition {
+  poolId: number;
+  poolName: string;
+  lpTokens: BN;
+  sharePercent: number;
+  pendingRewards: BN;
+  color: string;
+}
+
+export interface LPResult {
+  success: boolean;
+  txHash?: string;
+  error?: string;
+}
+
 export interface SwapResult {
   success: boolean;
   txHash?: string;
