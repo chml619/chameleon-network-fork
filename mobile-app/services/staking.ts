@@ -549,22 +549,48 @@ class StakingService {
   }
 
   /**
-   * Get list of validators
+   * Get list of validators using our custom pallet
    */
   async getValidators(api: ApiPromise): Promise<ValidatorInfo[]> {
     try {
-      const hasStakingPallet = api.query.staking !== undefined;
-      
-      if (hasStakingPallet) {
-        const validators = await api.query.staking.validators.entries();
-        return validators.map(([key, _prefs]) => ({
-          address: key.args[0].toString(),
-          name: 'Validator',
-          commission: 10,
-          totalStaked: '10,000 CHML',
-          nominators: 5,
-          isActive: true,
-        }));
+      if (this.hasCustomStakingPallet(api)) {
+        // Query all stakers from our custom pallet
+        const stakerEntries = await (api.query.staking as any).stakers.entries();
+        
+        const validators: ValidatorInfo[] = [];
+        
+        for (const [key, value] of stakerEntries) {
+          const address = key.args[0].toString();
+          const info = value.toJSON ? value.toJSON() : value;
+          
+          // Parse status
+          let status: NodeStatus = 'None';
+          const rawStatus = info.status;
+          if (rawStatus) {
+            if (typeof rawStatus === 'string') {
+              status = rawStatus as NodeStatus;
+            } else if (typeof rawStatus === 'object') {
+              const statusKey = Object.keys(rawStatus)[0];
+              if (statusKey) {
+                status = statusKey as NodeStatus;
+              }
+            }
+          }
+          
+          const stakedAmount = new BN(info.amount?.toString() || '0');
+          
+          validators.push({
+            address,
+            name: `Validator ${address.slice(0, 8)}...`,
+            commission: 10, // Default commission
+            totalStaked: chainService.formatBalance(stakedAmount.toString()),
+            nominators: 0, // Our pallet doesn't have nominators in v1
+            isActive: status === 'Active',
+            status,
+          });
+        }
+        
+        return validators;
       } else {
         // Return mock validators
         return [
@@ -575,6 +601,7 @@ class StakingService {
             totalStaked: '1,250,000 CHML',
             nominators: 45,
             isActive: true,
+            status: 'Active',
           },
           {
             address: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
@@ -583,6 +610,7 @@ class StakingService {
             totalStaked: '850,000 CHML',
             nominators: 32,
             isActive: true,
+            status: 'Active',
           },
           {
             address: '5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y',
@@ -591,6 +619,7 @@ class StakingService {
             totalStaked: '620,000 CHML',
             nominators: 28,
             isActive: true,
+            status: 'Active',
           },
           {
             address: '5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy',
@@ -599,6 +628,7 @@ class StakingService {
             totalStaked: '480,000 CHML',
             nominators: 19,
             isActive: true,
+            status: 'Waiting',
           },
           {
             address: '5HGjWAeFDfFCWPsjFQdVV2Msvz2XtMktvgocEZcCj68kUMaw',
@@ -607,6 +637,7 @@ class StakingService {
             totalStaked: '320,000 CHML',
             nominators: 15,
             isActive: false,
+            status: 'Unbonding',
           },
         ];
       }
