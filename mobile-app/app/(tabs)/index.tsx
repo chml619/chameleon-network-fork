@@ -474,25 +474,28 @@ export default function HomeScreen() {
 
           <View style={styles.balanceRow}>
             <View>
-              {balanceLoading ? (
-                <ActivityIndicator size="small" color={THEME.colors.primary} />
-              ) : (
-                <View style={styles.balanceContainer}>
-                  <View style={styles.balanceSection}>
-                    <Text style={styles.balanceLabel}>Public Balance</Text>
+              <View style={styles.balanceContainer}>
+                <View style={styles.balanceSection}>
+                  <Text style={styles.balanceLabel}>Public Balance</Text>
+                  <View style={styles.balanceValueRow}>
                     <Text style={styles.balanceAmount}>
-                      {formatBalance(publicBalance)}
+                      {formatBalance(publicBalance)} CHML
                     </Text>
+                    {balanceLoading && (
+                      <ActivityIndicator size="small" color={THEME.colors.primary} style={{ marginLeft: 8 }} />
+                    )}
                   </View>
-                  <View style={styles.balanceSection}>
-                    <Text style={styles.balanceLabel}>Private Balance</Text>
-                    <Text style={styles.balanceAmount}>
-                      {formatBalance(privateBalance)}
-                    </Text>
-                  </View>
-                  <PrivacyIndicator />
                 </View>
-              )}
+                <View style={styles.balanceSection}>
+                  <Text style={styles.balanceLabel}>Private Balance</Text>
+                  <View style={styles.balanceValueRow}>
+                    <Text style={styles.balanceAmount}>
+                      {formatBalance(privateBalance)} CHML
+                    </Text>
+                  </View>
+                </View>
+                <PrivacyIndicator />
+              </View>
               <View style={styles.growthBadge}>
                 <Text style={styles.growthText}>Shield your public balance to enable private transfers</Text>
               </View>
