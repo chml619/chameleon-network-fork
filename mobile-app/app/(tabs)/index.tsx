@@ -1101,6 +1101,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minWidth: 200,
   },
+  balanceValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   balanceLabel: {
     fontSize: THEME.fontSize.sm,
     color: THEME.colors.textSecondary,
