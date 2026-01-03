@@ -1,6 +1,6 @@
 /**
- * Tab Layout - Clean 3-tab navigation matching mockup design
- * Tabs: Home, Wallet, Trade
+ * Tab Layout - Clean 4-tab navigation matching mockup design
+ * Tabs: Home, Wallet, Trade, Power
  * Fixed: Safe area padding for Android navigation buttons
  */
 
