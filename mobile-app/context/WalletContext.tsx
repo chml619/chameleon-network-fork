@@ -49,11 +49,13 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const [stealthHash, setStealthHash] = useState<Uint8Array | null>(null);
   const [privateBalance, setPrivateBalance] = useState<BN>(new BN(0));
   const [publicBalance, setPublicBalance] = useState<BN>(new BN(0));
+  const [pchmlBalance, setPchmlBalance] = useState<BN>(new BN(0));
   const [balanceLoading, setBalanceLoading] = useState(true);
   
   // Refs to preserve balance values across re-renders and prevent reset to 0
   const publicBalanceRef = useRef<BN>(new BN(0));
   const privateBalanceRef = useRef<BN>(new BN(0));
+  const pchmlBalanceRef = useRef<BN>(new BN(0));
   const isFetchingBalance = useRef(false);
 
   // Initialize wallet from storage on app start
