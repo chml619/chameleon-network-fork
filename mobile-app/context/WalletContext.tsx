@@ -342,29 +342,38 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
   const refreshPublicBalance = useCallback(async () => {
     if (!wallet?.address) return;
+    
+    // Prevent concurrent fetches
+    if (isFetchingBalance.current) return;
+    isFetchingBalance.current = true;
 
     try {
       const api = apiService.getApi();
       if (!api) {
         // Keep existing balance during API reconnection
+        isFetchingBalance.current = false;
         return;
       }
 
       const { data: { free } } = await api.query.system.account(wallet.address) as any;
       const newBalance = new BN(free.toString());
-      balanceRef.current = newBalance;
+      
+      // Only update if we got valid data
+      publicBalanceRef.current = newBalance;
       setPublicBalance(newBalance);
       setBalanceLoading(false);
     } catch (error) {
       console.error('Error refreshing public balance:', error);
-      // Keep old balance on error - don't reset to null/0
-      // Use mock balance for demo
-      if (!balanceRef.current) {
-        const mockBalance = new BN('100000000000000000000'); // 100 CHML
-        balanceRef.current = mockBalance;
+      // Keep old balance on error - don't reset to 0
+      // Only set mock if we have nothing
+      if (publicBalanceRef.current.isZero()) {
+        const mockBalance = new BN('100000000000000000000'); // 100 CHML for demo
+        publicBalanceRef.current = mockBalance;
         setPublicBalance(mockBalance);
       }
       setBalanceLoading(false);
+    } finally {
+      isFetchingBalance.current = false;
     }
   }, [wallet?.address]);
 
