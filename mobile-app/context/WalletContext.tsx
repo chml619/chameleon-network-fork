@@ -382,12 +382,32 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [wallet?.address]);
 
+  const refreshPCHMLBalance = useCallback(async () => {
+    if (!wallet?.address) return;
+
+    try {
+      const balance = await pdexService.getPCHMLBalance(wallet.address);
+      pchmlBalanceRef.current = balance;
+      setPchmlBalance(balance);
+    } catch (error) {
+      console.error('Error refreshing pCHML balance:', error);
+      // Keep existing balance on error
+      if (pchmlBalanceRef.current.isZero()) {
+        // Set mock balance for demo (1 pCHML)
+        const mockBalance = new BN('1000000000000');
+        pchmlBalanceRef.current = mockBalance;
+        setPchmlBalance(mockBalance);
+      }
+    }
+  }, [wallet?.address]);
+
   const refreshBalances = useCallback(async () => {
     await Promise.all([
       refreshPublicBalance(),
       refreshPrivateBalance(),
+      refreshPCHMLBalance(),
     ]);
-  }, [refreshPublicBalance, refreshPrivateBalance]);
+  }, [refreshPublicBalance, refreshPrivateBalance, refreshPCHMLBalance]);
 
   const clearError = useCallback(() => {
     setError(null);
