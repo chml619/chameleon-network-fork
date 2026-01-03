@@ -1,6 +1,7 @@
 /**
  * React Context for wallet state management
  * Updated with multi-wallet support
+ * Fixed: Balance persistence across navigation using refs
  */
 
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode, useRef } from 'react';
@@ -17,8 +18,9 @@ interface WalletContextType {
   error: string | null;
   stealthMetaAddress: any | null;
   stealthHash: Uint8Array | null;
-  privateBalance: BN | null;
-  publicBalance: BN | null;
+  privateBalance: BN;
+  publicBalance: BN;
+  balanceLoading: boolean;
   createWallet: (mnemonic: string, name?: string) => Promise<void>;
   importWallet: (mnemonic: string, name?: string) => Promise<void>;
   importDevAccount: (accountName: 'alice' | 'bob' | 'charlie' | 'dave' | 'eve') => Promise<void>;
@@ -42,10 +44,14 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const [error, setError] = useState<string | null>(null);
   const [stealthMetaAddress, setStealthMetaAddress] = useState<any | null>(null);
   const [stealthHash, setStealthHash] = useState<Uint8Array | null>(null);
-  const [privateBalance, setPrivateBalance] = useState<BN | null>(null);
-  const [publicBalance, setPublicBalance] = useState<BN | null>(null);
+  const [privateBalance, setPrivateBalance] = useState<BN>(new BN(0));
+  const [publicBalance, setPublicBalance] = useState<BN>(new BN(0));
   const [balanceLoading, setBalanceLoading] = useState(true);
-  const balanceRef = useRef<BN | null>(null);
+  
+  // Refs to preserve balance values across re-renders and prevent reset to 0
+  const publicBalanceRef = useRef<BN>(new BN(0));
+  const privateBalanceRef = useRef<BN>(new BN(0));
+  const isFetchingBalance = useRef(false);
 
   // Initialize wallet from storage on app start
   useEffect(() => {
