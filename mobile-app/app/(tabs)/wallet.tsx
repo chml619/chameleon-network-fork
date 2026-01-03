@@ -22,6 +22,7 @@ import { useWallet } from '@/context/WalletContext';
 import { useBalance } from '@/hooks/useBalance';
 import { useApi } from '@/hooks/useApi';
 import { NetworkBadge } from '@/components/NetworkBadge';
+import { formatBalance } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 // Token list (CHML is real, others are placeholders for future)
