@@ -27,8 +27,6 @@ import { useWallet } from '@/context/WalletContext';
 import { useBalance } from '@/hooks/useBalance';
 import { useApi } from '@/hooks/useApi';
 import { NetworkBadge } from '@/components/NetworkBadge';
-import { MEVProtectionToggle } from '@/components/MEVProtectionToggle';
-import { PrivacyIndicator } from '@/components/PrivacyIndicator';
 import { transactionHistoryService, StoredTransaction } from '@/services/transactionHistory';
 import { notificationService } from '@/services/notifications';
 import { apiService } from '@/services/api';
@@ -42,11 +40,11 @@ const EXPLORER_BASE_URL = 'https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F64.23.23
 
 // Action items for the grid - Updated with Week 9 privacy features
 const ACTIONS = [
-  { id: 'send', label: 'Send', icon: 'arrow-up-outline', route: '/send', color: '#FF6B6B' },
+  { id: 'send', label: 'Send', icon: 'arrow-up-outline', route: '/send', color: '#FF6B6B', disabled: false },
   { id: 'receive', label: 'Receive', icon: 'arrow-down-outline', route: '/receive', color: '#4ECDC4' },
-  { id: 'trade', label: 'Trade', icon: 'swap-horizontal-outline', tab: 'trade', color: '#9B59B6' },
+  { id: 'pdex', label: 'pDEX', icon: 'swap-horizontal-outline', tab: 'trade', color: '#9B59B6' },
   { id: 'bridge', label: 'Bridge', icon: 'git-branch-outline', route: '/bridge', color: '#3498DB' },
-  { id: 'stake', label: 'Stake', icon: 'layers-outline', route: '/staking', color: '#F39C12' },
+  { id: 'stake', label: 'Stake', icon: 'layers-outline', tab: 'power', color: '#F39C12' },
   { id: 'shield', label: 'Shield', icon: 'shield-checkmark-outline', route: '/shield', color: '#10B981' },
   { id: 'unshield', label: 'Unshield', icon: 'eye-outline', route: '/unshield', color: '#F59E0B' },
   { id: 'history', label: 'History', icon: 'time-outline', route: '/history', color: '#6B7280' },
@@ -504,30 +502,17 @@ export default function HomeScreen() {
                   </View>
                 </View>
                 
-                <PrivacyIndicator />
               </View>
               <View style={styles.growthBadge}>
                 <Text style={styles.growthText}>Shield your public balance to enable private transfers</Text>
               </View>
             </View>
-            <TouchableOpacity
-              style={styles.stakingButton}
-              onPress={() => router.push('/staking')}
-            >
-              <Ionicons name="layers-outline" size={18} color={THEME.colors.white} />
-              <Text style={styles.stakingButtonText}>Staking</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Network Badge */}
           <View style={styles.networkBadgeContainer}>
             <NetworkBadge size="small" showConnectionStatus={true} />
           </View>
-        </View>
-
-        {/* MEV Protection Toggle */}
-        <View style={styles.mevContainer}>
-          <MEVProtectionToggle />
         </View>
 
         {/* Action Grid */}
@@ -961,7 +946,7 @@ const styles = StyleSheet.create({
     marginBottom: THEME.spacing.xs,
   },
   devAccountSubtitle: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.textSecondary,
     textAlign: 'center',
     marginBottom: THEME.spacing.md,
@@ -979,7 +964,7 @@ const styles = StyleSheet.create({
   },
   devAccountButtonText: {
     color: THEME.colors.primary,
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     fontWeight: THEME.fontWeight.medium,
   },
   featurePreview: {
@@ -1003,7 +988,7 @@ const styles = StyleSheet.create({
     gap: THEME.spacing.sm,
   },
   featureText: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.textSecondary,
   },
   // Header
@@ -1087,7 +1072,7 @@ const styles = StyleSheet.create({
     borderRadius: THEME.borderRadius.small,
   },
   currencyText: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.primary,
     fontWeight: THEME.fontWeight.semibold,
   },
@@ -1121,7 +1106,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   balanceLabel: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.textSecondary,
     fontWeight: THEME.fontWeight.medium,
   },
@@ -1134,7 +1119,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   growthText: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.success,
     fontWeight: THEME.fontWeight.medium,
   },
@@ -1148,7 +1133,7 @@ const styles = StyleSheet.create({
   },
   stakingButtonText: {
     color: THEME.colors.white,
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     fontWeight: THEME.fontWeight.medium,
     marginLeft: THEME.spacing.xs,
   },
@@ -1214,7 +1199,7 @@ const styles = StyleSheet.create({
     color: THEME.colors.text,
   },
   viewAllText: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.secondary,
     fontWeight: THEME.fontWeight.medium,
   },
@@ -1231,7 +1216,7 @@ const styles = StyleSheet.create({
     marginTop: THEME.spacing.md,
   },
   emptyActivitySubtext: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.textMuted,
     marginTop: THEME.spacing.xs,
   },
@@ -1271,7 +1256,7 @@ const styles = StyleSheet.create({
     color: THEME.colors.text,
   },
   transactionSubtitle: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.textSecondary,
     marginTop: 2,
   },
@@ -1345,11 +1330,11 @@ const styles = StyleSheet.create({
     marginBottom: THEME.spacing.xs,
   },
   txDetailStatusText: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     fontWeight: THEME.fontWeight.semibold,
   },
   txDetailTime: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.textSecondary,
   },
   txDetailBody: {
@@ -1368,7 +1353,7 @@ const styles = StyleSheet.create({
     borderBottomColor: THEME.colors.lightGrey,
   },
   txDetailLabel: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.textSecondary,
   },
   txDetailValueRow: {
@@ -1379,7 +1364,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   txDetailValue: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.text,
     fontFamily: 'monospace',
     maxWidth: 150,
@@ -1396,7 +1381,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   txDetailMevText: {
-    fontSize: THEME.fontSize.sm,
+    fontSize: 11,
     color: THEME.colors.primary,
     fontWeight: THEME.fontWeight.medium,
   },
