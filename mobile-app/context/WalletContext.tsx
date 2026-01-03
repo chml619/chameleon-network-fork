@@ -10,6 +10,7 @@ import { storageService } from '../services/storage';
 import { multiWalletService } from '../services/multiWallet';
 import { privacyService, generateStealthMetaAddress, generateStealthHash } from '../services/privacy';
 import { apiService } from '../services/api';
+import { pdexService } from '../services/pdex';
 import BN from 'bn.js';
 
 interface WalletContextType {
@@ -20,6 +21,7 @@ interface WalletContextType {
   stealthHash: Uint8Array | null;
   privateBalance: BN;
   publicBalance: BN;
+  pchmlBalance: BN;
   balanceLoading: boolean;
   createWallet: (mnemonic: string, name?: string) => Promise<void>;
   importWallet: (mnemonic: string, name?: string) => Promise<void>;
@@ -29,6 +31,7 @@ interface WalletContextType {
   clearError: () => void;
   refreshPrivateBalance: () => Promise<void>;
   refreshPublicBalance: () => Promise<void>;
+  refreshPCHMLBalance: () => Promise<void>;
   refreshBalances: () => Promise<void>;
 }
 
