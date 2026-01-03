@@ -31,7 +31,7 @@ import { THEME, GRADIENTS } from '@/constants/theme';
 export default function ShieldScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { wallet } = useWallet();
+  const { wallet, refreshPCHMLBalance } = useWallet();
   const { formattedFreeBalance, balance } = useBalance(wallet?.address);
   
   // Form state
