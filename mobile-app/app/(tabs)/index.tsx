@@ -1115,6 +1115,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  balanceLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   balanceLabel: {
     fontSize: THEME.fontSize.sm,
     color: THEME.colors.textSecondary,
