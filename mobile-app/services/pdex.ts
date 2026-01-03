@@ -4,12 +4,27 @@
  * 
  * pDEX enables swapping tokens without revealing trade details on-chain,
  * using zero-knowledge proofs for privacy.
+ * 
+ * Token Registry:
+ * - TokenId 0 = pCHML (privacy-wrapped native token)
+ * - TokenId 1 = pETH
+ * - TokenId 2 = pBTC
+ * - TokenId 3 = pUSDT
+ * - TokenId 4 = pUSDC
  */
 
 import { ApiPromise } from '@polkadot/api';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
 import { chainService } from './chain';
+import { apiService } from './api';
+
+// Token IDs in the pDEX pallet
+export const PCHML_TOKEN_ID = 0;
+export const PETH_TOKEN_ID = 1;
+export const PBTC_TOKEN_ID = 2;
+export const PUSDT_TOKEN_ID = 3;
+export const PUSDC_TOKEN_ID = 4;
 
 export interface TokenInfo {
   symbol: string;
