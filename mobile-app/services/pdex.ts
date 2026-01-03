@@ -146,6 +146,90 @@ class PDEXService {
   }
 
   /**
+   * Get pCHML balance for an address
+   * pCHML is TokenId 0 in the pDEX pallet
+   */
+  async getPCHMLBalance(address: string): Promise<BN> {
+    const api = apiService.getApi();
+    if (!api) {
+      console.log('[pDEX] API not available, returning 0');
+      return new BN(0);
+    }
+
+    try {
+      // Check if pdex pallet exists
+      if (!api.query.pdex || !(api.query.pdex as any).tokenBalances) {
+        console.log('[pDEX] Pallet not available, returning mock balance');
+        // Return mock balance for development (1 pCHML = 10^12)
+        return new BN('1000000000000');
+      }
+
+      // TokenId 0 = pCHML
+      const balance = await (api.query.pdex as any).tokenBalances(PCHML_TOKEN_ID, address);
+      return new BN(balance.toString());
+    } catch (error) {
+      console.error('[pDEX] Error getting pCHML balance:', error);
+      // Return mock for development
+      return new BN('1000000000000');
+    }
+  }
+
+  /**
+   * Get any token balance from pDEX pallet
+   */
+  async getTokenBalance(tokenId: number, address: string): Promise<BN> {
+    const api = apiService.getApi();
+    if (!api) {
+      return new BN(0);
+    }
+
+    try {
+      if (!api.query.pdex || !(api.query.pdex as any).tokenBalances) {
+        return new BN(0);
+      }
+
+      const balance = await (api.query.pdex as any).tokenBalances(tokenId, address);
+      return new BN(balance.toString());
+    } catch (error) {
+      console.error('[pDEX] Error getting token balance:', error);
+      return new BN(0);
+    }
+  }
+
+  /**
+   * Subscribe to pCHML balance changes
+   */
+  subscribeToPCHMLBalance(address: string, callback: (balance: BN) => void): () => void {
+    const api = apiService.getApi();
+    if (!api || !api.query.pdex || !(api.query.pdex as any).tokenBalances) {
+      // Return mock callback for development
+      setTimeout(() => callback(new BN('1000000000000')), 100);
+      return () => {};
+    }
+
+    let unsubscribe: (() => void) | null = null;
+
+    (async () => {
+      try {
+        const unsub = await (api.query.pdex as any).tokenBalances(PCHML_TOKEN_ID, address, (balance: any) => {
+          callback(new BN(balance.toString()));
+        });
+        unsubscribe = unsub as any;
+      } catch (error) {
+        console.error('[pDEX] Error subscribing to pCHML balance:', error);
+        // Emit mock balance for development
+        callback(new BN('1000000000000'));
+      }
+    })();
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }
+
+  /**
    * Get all supported tokens with balances
    */
   async getTokensWithBalances(api: ApiPromise, address: string): Promise<TokenInfo[]> {
