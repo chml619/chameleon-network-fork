@@ -475,8 +475,12 @@ export default function HomeScreen() {
           <View style={styles.balanceRow}>
             <View>
               <View style={styles.balanceContainer}>
+                {/* Public CHML Balance */}
                 <View style={styles.balanceSection}>
-                  <Text style={styles.balanceLabel}>Public Balance</Text>
+                  <View style={styles.balanceLabelRow}>
+                    <Ionicons name="eye-outline" size={14} color={THEME.colors.textSecondary} />
+                    <Text style={styles.balanceLabel}>Public Balance</Text>
+                  </View>
                   <View style={styles.balanceValueRow}>
                     <Text style={styles.balanceAmount}>
                       {formatBalance(publicBalance)} CHML
@@ -486,14 +490,20 @@ export default function HomeScreen() {
                     )}
                   </View>
                 </View>
+                
+                {/* pCHML (Shielded) Balance */}
                 <View style={styles.balanceSection}>
-                  <Text style={styles.balanceLabel}>Private Balance</Text>
+                  <View style={styles.balanceLabelRow}>
+                    <Ionicons name="shield-checkmark" size={14} color="#10B981" />
+                    <Text style={[styles.balanceLabel, { color: '#10B981' }]}>Shielded Balance</Text>
+                  </View>
                   <View style={styles.balanceValueRow}>
-                    <Text style={styles.balanceAmount}>
-                      {formatBalance(privateBalance)} CHML
+                    <Text style={[styles.balanceAmount, { color: '#10B981' }]}>
+                      {formatBalance(pchmlBalance)} pCHML
                     </Text>
                   </View>
                 </View>
+                
                 <PrivacyIndicator />
               </View>
               <View style={styles.growthBadge}>
