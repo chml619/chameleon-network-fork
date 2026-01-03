@@ -110,18 +110,27 @@ export function WalletProvider({ children }: WalletProviderProps) {
     try {
       const api = apiService.getApi();
       if (!api) {
-        // Use mock balance for demo
-        setPrivateBalance(new BN('1000000000000000000')); // 1 CHML
+        // Use mock balance for demo - but preserve existing if we have it
+        if (privateBalanceRef.current.isZero()) {
+          const mockBalance = new BN('1000000000000000000'); // 1 CHML
+          privateBalanceRef.current = mockBalance;
+          setPrivateBalance(mockBalance);
+        }
         return;
       }
 
       privacyService.setApi(api);
       const balance = await privacyService.getPrivateBalance(stealthHash);
+      privateBalanceRef.current = balance;
       setPrivateBalance(balance);
     } catch (error) {
       console.error('Error refreshing private balance:', error);
-      // Use mock balance for demo
-      setPrivateBalance(new BN('1000000000000000000')); // 1 CHML
+      // Keep existing balance on error - don't reset to 0
+      if (privateBalanceRef.current.isZero()) {
+        const mockBalance = new BN('1000000000000000000'); // 1 CHML for demo
+        privateBalanceRef.current = mockBalance;
+        setPrivateBalance(mockBalance);
+      }
     }
   }, [stealthHash]);
 
