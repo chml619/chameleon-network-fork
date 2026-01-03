@@ -233,8 +233,9 @@ class StakingService {
       unbonding: chainService.formatBalance(this.mockStakingData.unbonding.toString()),
       unbondingRaw: this.mockStakingData.unbonding,
       apy: 12.5,
-      era: 1,
-      minStake: '100 CHML',
+      minStake: chainService.formatBalance(MINIMUM_STAKE.toString()),
+      status: this.mockStakingData.status,
+      unbondingBlock: this.mockStakingData.unbondingBlock,
     };
   }
 
