@@ -7,7 +7,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// 	http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{AccountId, BalancesConfig, RuntimeGenesisConfig, SudoConfig};
+use crate::{AccountId, BalancesConfig, RuntimeGenesisConfig, SudoConfig, PdexConfig};
 use alloc::{vec, vec::Vec};
 use frame_support::build_struct_json_patch;
 use serde_json::Value;
@@ -24,81 +24,116 @@ use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_genesis_builder::{self, PresetId};
 use sp_keyring::Sr25519Keyring;
 
+// Token IDs for pDEX
+const PCHML_ID: u32 = 0;
+const PETH_ID: u32 = 1;
+const PBTC_ID: u32 = 2;
+const PUSDT_ID: u32 = 3;
+
 // Returns the genesis config presets populated with given parameters.
 fn testnet_genesis(
-	initial_authorities: Vec<(AuraId, GrandpaId)>,
-	root: AccountId,
+        initial_authorities: Vec<(AuraId, GrandpaId)>,
+        root: AccountId,
 ) -> Value {
-	// Pre-funded dev wallets with specific CHML amounts
-	// Using 12 decimals: 1 CHML = 1_000_000_000_000
-	let endowed_accounts: Vec<(AccountId, u128)> = vec![
-		(Sr25519Keyring::Alice.to_account_id(), 1_100_000_000_000_000),   // 1,100 CHML
-		(Sr25519Keyring::Bob.to_account_id(), 2_150_000_000_000_000),     // 2,150 CHML
-		(Sr25519Keyring::Charlie.to_account_id(), 5_200_000_000_000_000), // 5,200 CHML
-		(Sr25519Keyring::Dave.to_account_id(), 7_750_000_000_000_000),    // 7,750 CHML
-		(Sr25519Keyring::Eve.to_account_id(), 10_300_000_000_000_000),     // 10,300 CHML
-	];
+        // Pre-funded dev wallets with specific CHML amounts
+        // Using 12 decimals: 1 CHML = 1_000_000_000_000
+        let endowed_accounts: Vec<(AccountId, u128)> = vec![
+                (Sr25519Keyring::Alice.to_account_id(), 1_100_000_000_000_000),   // 1,100 CHML
+                (Sr25519Keyring::Bob.to_account_id(), 2_150_000_000_000_000),     // 2,150 CHML
+                (Sr25519Keyring::Charlie.to_account_id(), 5_200_000_000_000_000), // 5,200 CHML
+                (Sr25519Keyring::Dave.to_account_id(), 7_750_000_000_000_000),    // 7,750 CHML
+                (Sr25519Keyring::Eve.to_account_id(), 10_300_000_000_000_000),    // 10,300 CHML
+        ];
 
-	build_struct_json_patch!(RuntimeGenesisConfig {
-		balances: BalancesConfig {
-			balances: endowed_accounts,
-		},
-		aura: pallet_aura::GenesisConfig {
-			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect::<Vec<_>>(),
-		},
-		grandpa: pallet_grandpa::GenesisConfig {
-			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>(),
-		},
-		sudo: SudoConfig { key: Some(root) },
-	})
+        // Pre-funded pToken balances for dev wallets
+        // Format: (account, token_id, balance)
+        // Using 12 decimals for all pTokens
+        let pdex_token_balances: Vec<(AccountId, u32, u128)> = vec![
+                // Alice: 1.1452 pBTC, 15.67234 pETH, 75,350 pUSDT
+                (Sr25519Keyring::Alice.to_account_id(), PBTC_ID, 1_145_200_000_000),
+                (Sr25519Keyring::Alice.to_account_id(), PETH_ID, 15_672_340_000_000),
+                (Sr25519Keyring::Alice.to_account_id(), PUSDT_ID, 75_350_000_000_000_000),
+                // Bob: 0.75 pBTC, 9.5 pETH, 25,000 pUSDT
+                (Sr25519Keyring::Bob.to_account_id(), PBTC_ID, 750_000_000_000),
+                (Sr25519Keyring::Bob.to_account_id(), PETH_ID, 9_500_000_000_000),
+                (Sr25519Keyring::Bob.to_account_id(), PUSDT_ID, 25_000_000_000_000_000),
+                // Charlie: 0.85 pBTC, 12.1 pETH, 7,200 pUSDT
+                (Sr25519Keyring::Charlie.to_account_id(), PBTC_ID, 850_000_000_000),
+                (Sr25519Keyring::Charlie.to_account_id(), PETH_ID, 12_100_000_000_000),
+                (Sr25519Keyring::Charlie.to_account_id(), PUSDT_ID, 7_200_000_000_000_000),
+                // Dave: 0.95 pBTC, 14.5 pETH, 38,000 pUSDT
+                (Sr25519Keyring::Dave.to_account_id(), PBTC_ID, 950_000_000_000),
+                (Sr25519Keyring::Dave.to_account_id(), PETH_ID, 14_500_000_000_000),
+                (Sr25519Keyring::Dave.to_account_id(), PUSDT_ID, 38_000_000_000_000_000),
+                // Eve: 1.25 pBTC, 19.7 pETH, 45,212 pUSDT
+                (Sr25519Keyring::Eve.to_account_id(), PBTC_ID, 1_250_000_000_000),
+                (Sr25519Keyring::Eve.to_account_id(), PETH_ID, 19_700_000_000_000),
+                (Sr25519Keyring::Eve.to_account_id(), PUSDT_ID, 45_212_000_000_000_000),
+        ];
+
+        build_struct_json_patch!(RuntimeGenesisConfig {
+                balances: BalancesConfig {
+                        balances: endowed_accounts,
+                },
+                aura: pallet_aura::GenesisConfig {
+                        authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect::<Vec<_>>(),
+                },
+                grandpa: pallet_grandpa::GenesisConfig {
+                        authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>(),
+                },
+                sudo: SudoConfig { key: Some(root) },
+                pdex: PdexConfig {
+                        token_balances: pdex_token_balances,
+                },
+        })
 }
 
 /// Return the development genesis config.
 pub fn development_config_genesis() -> Value {
-	testnet_genesis(
-		vec![(
-			sp_keyring::Sr25519Keyring::Alice.public().into(),
-			sp_keyring::Ed25519Keyring::Alice.public().into(),
-		)],
-		sp_keyring::Sr25519Keyring::Alice.to_account_id(),
-	)
+        testnet_genesis(
+                vec![(
+                        sp_keyring::Sr25519Keyring::Alice.public().into(),
+                        sp_keyring::Ed25519Keyring::Alice.public().into(),
+                )],
+                sp_keyring::Sr25519Keyring::Alice.to_account_id(),
+        )
 }
 
 /// Return the local genesis config preset.
 pub fn local_config_genesis() -> Value {
-	testnet_genesis(
-		vec![
-			(
-				sp_keyring::Sr25519Keyring::Alice.public().into(),
-				sp_keyring::Ed25519Keyring::Alice.public().into(),
-			),
-			(
-				sp_keyring::Sr25519Keyring::Bob.public().into(),
-				sp_keyring::Ed25519Keyring::Bob.public().into(),
-			),
-		],
-		Sr25519Keyring::Alice.to_account_id(),
-	)
+        testnet_genesis(
+                vec![
+                        (
+                                sp_keyring::Sr25519Keyring::Alice.public().into(),
+                                sp_keyring::Ed25519Keyring::Alice.public().into(),
+                        ),
+                        (
+                                sp_keyring::Sr25519Keyring::Bob.public().into(),
+                                sp_keyring::Ed25519Keyring::Bob.public().into(),
+                        ),
+                ],
+                Sr25519Keyring::Alice.to_account_id(),
+        )
 }
 
 /// Provides the JSON representation of predefined genesis config for given `id`.
 pub fn get_preset(id: &PresetId) -> Option<Vec<u8>> {
-	let patch = match id.as_ref() {
-		sp_genesis_builder::DEV_RUNTIME_PRESET => development_config_genesis(),
-		sp_genesis_builder::LOCAL_TESTNET_RUNTIME_PRESET => local_config_genesis(),
-		_ => return None,
-	};
-	Some(
-		serde_json::to_string(&patch)
-			.expect("serialization to json is expected to work. qed.")
-			.into_bytes(),
-	)
+        let patch = match id.as_ref() {
+                sp_genesis_builder::DEV_RUNTIME_PRESET => development_config_genesis(),
+                sp_genesis_builder::LOCAL_TESTNET_RUNTIME_PRESET => local_config_genesis(),
+                _ => return None,
+        };
+        Some(
+                serde_json::to_string(&patch)
+                        .expect("serialization to json is expected to work. qed.")
+                        .into_bytes(),
+        )
 }
 
 /// List of supported presets.
 pub fn preset_names() -> Vec<PresetId> {
-	vec![
-		PresetId::from(sp_genesis_builder::DEV_RUNTIME_PRESET),
-		PresetId::from(sp_genesis_builder::LOCAL_TESTNET_RUNTIME_PRESET),
-	]
+        vec![
+                PresetId::from(sp_genesis_builder::DEV_RUNTIME_PRESET),
+                PresetId::from(sp_genesis_builder::LOCAL_TESTNET_RUNTIME_PRESET),
+        ]
 }

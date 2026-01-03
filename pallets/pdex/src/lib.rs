@@ -59,7 +59,7 @@ pub mod pallet {
     };
     use frame_system::pallet_prelude::*;
     use sp_runtime::{
-        traits::{AccountIdConversion, Saturating, Zero, CheckedAdd, CheckedSub, CheckedMul, CheckedDiv},
+        traits::{AccountIdConversion, Saturating, Zero, CheckedAdd, CheckedSub, CheckedMul, CheckedDiv, SaturatedConversion},
         Permill,
     };
     use sp_std::vec::Vec;
@@ -942,6 +942,34 @@ pub mod pallet {
         /// Get token balance
         pub fn balance_of(asset_id: T::AssetId, who: &T::AccountId) -> T::Balance {
             TokenBalances::<T>::get(who, asset_id)
+        }
+
+    }
+
+
+    // ============== GENESIS CONFIGURATION ==============
+    
+    /// Genesis configuration for pre-funding pToken balances
+    #[pallet::genesis_config]
+    #[derive(frame_support::DefaultNoBound)]
+    pub struct GenesisConfig<T: Config> {
+        /// Initial token balances: (account, asset_id, balance)
+        pub token_balances: Vec<(T::AccountId, u32, u128)>,
+    }
+
+    #[pallet::genesis_build]
+    impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
+        fn build(&self) {
+            for (account, asset_id, balance) in &self.token_balances {
+                let asset: T::AssetId = (*asset_id).into();
+                let bal: T::Balance = (*balance).into();
+                TokenBalances::<T>::insert(account, asset, bal);
+                TokenSupply::<T>::mutate(asset, |s| *s = s.saturating_add(bal));
+                log::info!(
+                    "[pDEX] Genesis: Funded account with token {} balance {}",
+                    asset_id, balance
+                );
+            }
         }
     }
 }
