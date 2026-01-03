@@ -67,11 +67,15 @@ class StakingService {
     rewards: BN;
     unbonding: BN;
     lastRewardUpdate: number;
+    status: NodeStatus;
+    unbondingBlock: number | null;
   } = {
     staked: new BN(0),
     rewards: new BN(0),
     unbonding: new BN(0),
     lastRewardUpdate: Date.now(),
+    status: 'None',
+    unbondingBlock: null,
   };
 
   private constructor() {}
@@ -84,14 +88,21 @@ class StakingService {
   }
 
   /**
+   * Check if our custom Chameleon staking pallet is available
+   * Our pallet uses api.query.staking.stakers instead of Substrate's ledger
+   */
+  private hasCustomStakingPallet(api: ApiPromise): boolean {
+    return api.query.staking !== undefined && 
+           typeof (api.query.staking as any).stakers === 'function';
+  }
+
+  /**
    * Get staking information for an account
    */
   async getStakingInfo(api: ApiPromise, address: string): Promise<StakingInfo> {
     try {
-      // Check if staking pallet exists
-      const hasStakingPallet = api.query.staking !== undefined;
-      
-      if (hasStakingPallet) {
+      // Check if our custom staking pallet exists (uses stakers storage)
+      if (this.hasCustomStakingPallet(api)) {
         return this.getRealStakingInfo(api, address);
       } else {
         return this.getMockStakingInfo(api, address);
