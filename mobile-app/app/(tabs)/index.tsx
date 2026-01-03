@@ -49,7 +49,7 @@ const ACTIONS = [
   { id: 'stake', label: 'Stake', icon: 'layers-outline', route: '/staking', color: '#F39C12' },
   { id: 'shield', label: 'Shield', icon: 'shield-checkmark-outline', route: '/shield', color: '#10B981' },
   { id: 'unshield', label: 'Unshield', icon: 'eye-outline', route: '/unshield', color: '#F59E0B' },
-  { id: 'power', label: 'Power', icon: 'flash-outline', disabled: true },
+  { id: 'history', label: 'History', icon: 'time-outline', route: '/history', color: '#6B7280' },
 ];
 
 export default function HomeScreen() {
