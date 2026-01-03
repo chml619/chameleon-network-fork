@@ -108,6 +108,15 @@ export default function TabLayout() {
           tabBarIcon: renderTabIcon('swap-vertical', 'swap-vertical-outline'),
         }}
       />
+
+      {/* Power Tab */}
+      <Tabs.Screen
+        name="power"
+        options={{
+          title: 'Power',
+          tabBarIcon: renderTabIcon('flash', 'flash-outline'),
+        }}
+      />
     </Tabs>
   );
 }
