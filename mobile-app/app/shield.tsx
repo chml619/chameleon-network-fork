@@ -110,7 +110,8 @@ export default function ShieldScreen() {
     const maxAmount = balanceBN.sub(feeBN);
     
     if (maxAmount.gt(new BN(0))) {
-      const formatted = transactionService.formatAmount(maxAmount).split(' ')[0];
+      // Use centralized formatBalance utility, remove commas for input field
+      const formatted = formatBalance(maxAmount);
       setAmount(formatted.replace(/,/g, ''));
     }
   };
