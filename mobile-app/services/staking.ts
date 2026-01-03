@@ -114,7 +114,8 @@ class StakingService {
   }
 
   /**
-   * Get real staking info from blockchain
+   * Get real staking info from blockchain using our custom pallet
+   * Queries api.query.staking.stakers(address) which returns StakeInfo struct
    */
   private async getRealStakingInfo(api: ApiPromise, address: string): Promise<StakingInfo> {
     try {
@@ -122,22 +123,69 @@ class StakingService {
       const accountInfo = await api.query.system.account(address);
       const freeBalance = new BN((accountInfo as any).data.free.toString());
       
-      // Get staking ledger
-      const ledger = await api.query.staking.ledger(address) as any;
-      const stakingLedger = ledger?.isSome ? ledger.unwrap() : null;
+      // Query our custom staking pallet's stakers storage
+      const stakerInfo = await (api.query.staking as any).stakers(address);
       
-      const staked = stakingLedger ? new BN(stakingLedger.active.toString()) : new BN(0);
-      const unbonding = stakingLedger ? new BN(stakingLedger.total.toString()).sub(staked) : new BN(0);
+      let staked = new BN(0);
+      let rewards = new BN(0);
+      let unbonding = new BN(0);
+      let status: NodeStatus = 'None';
+      let unbondingBlock: number | null = null;
       
-      // Get current era
-      const currentEra = await api.query.staking.currentEra() as any;
-      const era = currentEra?.isSome ? currentEra.unwrap().toNumber() : 0;
+      // Parse StakeInfo struct if it exists
+      if (stakerInfo && !stakerInfo.isEmpty) {
+        const info = stakerInfo.toJSON ? stakerInfo.toJSON() : stakerInfo;
+        
+        // Extract fields from StakeInfo { amount, rewards_accumulated, last_claim_block, status, unbonding_block }
+        staked = new BN(info.amount?.toString() || '0');
+        rewards = new BN(info.rewards_accumulated?.toString() || info.rewardsAccumulated?.toString() || '0');
+        
+        // Parse status enum
+        const rawStatus = info.status;
+        if (rawStatus) {
+          if (typeof rawStatus === 'string') {
+            status = rawStatus as NodeStatus;
+          } else if (typeof rawStatus === 'object') {
+            // Handle enum variant object like { Active: null } or { Unbonding: null }
+            const statusKey = Object.keys(rawStatus)[0];
+            if (statusKey) {
+              status = statusKey as NodeStatus;
+            }
+          }
+        }
+        
+        // Parse unbonding_block
+        const rawUnbondingBlock = info.unbonding_block ?? info.unbondingBlock;
+        if (rawUnbondingBlock && rawUnbondingBlock !== 0) {
+          unbondingBlock = Number(rawUnbondingBlock);
+          // If in unbonding status, calculate remaining unbonding amount
+          if (status === 'Unbonding') {
+            unbonding = staked; // The staked amount is being unbonded
+          }
+        }
+      }
       
-      // Get pending rewards (simplified)
-      const rewards = new BN(0); // TODO: Calculate actual rewards
-      
-      // Get minimum stake
-      const minNominatorBond = await api.query.staking.minNominatorBond();
+      // Get total staked and reward rate for APY calculation
+      let apy = 12.5; // Default APY estimate
+      try {
+        const totalStaked = await (api.query.staking as any).totalStaked();
+        const rewardRate = await (api.query.staking as any).rewardRate();
+        
+        if (totalStaked && rewardRate && !totalStaked.isZero()) {
+          // Calculate APY based on reward rate
+          // APY = (rewardRate * blocks_per_year / totalStaked) * 100
+          const blocksPerYear = 365 * 24 * 60 * 10; // ~6 sec blocks
+          const totalStakedBN = new BN(totalStaked.toString());
+          const rewardRateBN = new BN(rewardRate.toString());
+          
+          if (!totalStakedBN.isZero()) {
+            const yearlyRewards = rewardRateBN.muln(blocksPerYear);
+            apy = yearlyRewards.muln(100).div(totalStakedBN).toNumber();
+          }
+        }
+      } catch (e) {
+        console.log('[Staking] Could not calculate APY, using default:', e);
+      }
       
       return {
         staked: chainService.formatBalance(staked.toString()),
@@ -148,9 +196,10 @@ class StakingService {
         rewardsRaw: rewards,
         unbonding: chainService.formatBalance(unbonding.toString()),
         unbondingRaw: unbonding,
-        apy: 12.5, // TODO: Calculate real APY
-        era,
-        minStake: chainService.formatBalance(minNominatorBond.toString()),
+        apy,
+        minStake: chainService.formatBalance(MINIMUM_STAKE.toString()),
+        status,
+        unbondingBlock,
       };
     } catch (error) {
       console.error('[Staking] Error fetching real staking info:', error);
