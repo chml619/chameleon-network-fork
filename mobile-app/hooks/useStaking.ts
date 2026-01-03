@@ -175,6 +175,152 @@ export function useStaking() {
     }
   }, [stakingInfo]);
 
+  // Register as a validator node
+  const registerNode = useCallback(async (): Promise<StakingResult> => {
+    if (!api || !wallet?.address) {
+      return { success: false, error: 'Wallet not connected' };
+    }
+    
+    setIsRegistering(true);
+    setError(null);
+    
+    try {
+      const keyPair = walletService.getKeyPair();
+      if (!keyPair) {
+        throw new Error('Wallet not unlocked');
+      }
+      
+      const result = await stakingService.registerNode(api, keyPair);
+      
+      if (result.success) {
+        await fetchStakingInfo();
+      } else {
+        setError(result.error || 'Node registration failed');
+      }
+      
+      return result;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Node registration failed';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setIsRegistering(false);
+    }
+  }, [api, wallet?.address, fetchStakingInfo]);
+
+  // Start the 7-day unbonding cooldown period
+  const startUnbonding = useCallback(async (): Promise<StakingResult> => {
+    if (!api || !wallet?.address) {
+      return { success: false, error: 'Wallet not connected' };
+    }
+    
+    setIsStartingUnbond(true);
+    setError(null);
+    
+    try {
+      const keyPair = walletService.getKeyPair();
+      if (!keyPair) {
+        throw new Error('Wallet not unlocked');
+      }
+      
+      const result = await stakingService.startUnbonding(api, keyPair);
+      
+      if (result.success) {
+        await fetchStakingInfo();
+      } else {
+        setError(result.error || 'Start unbonding failed');
+      }
+      
+      return result;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Start unbonding failed';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setIsStartingUnbond(false);
+    }
+  }, [api, wallet?.address, fetchStakingInfo]);
+
+  // Complete unbonding after cooldown period
+  const completeUnbonding = useCallback(async (): Promise<StakingResult> => {
+    if (!api || !wallet?.address) {
+      return { success: false, error: 'Wallet not connected' };
+    }
+    
+    setIsCompletingUnbond(true);
+    setError(null);
+    
+    try {
+      const keyPair = walletService.getKeyPair();
+      if (!keyPair) {
+        throw new Error('Wallet not unlocked');
+      }
+      
+      const result = await stakingService.completeUnbonding(api, keyPair);
+      
+      if (result.success) {
+        await fetchStakingInfo();
+      } else {
+        setError(result.error || 'Complete unbonding failed');
+      }
+      
+      return result;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Complete unbonding failed';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setIsCompletingUnbond(false);
+    }
+  }, [api, wallet?.address, fetchStakingInfo]);
+
+  // Delete/remove node from the chain
+  const deleteNode = useCallback(async (): Promise<StakingResult> => {
+    if (!api || !wallet?.address) {
+      return { success: false, error: 'Wallet not connected' };
+    }
+    
+    setIsDeleting(true);
+    setError(null);
+    
+    try {
+      const keyPair = walletService.getKeyPair();
+      if (!keyPair) {
+        throw new Error('Wallet not unlocked');
+      }
+      
+      const result = await stakingService.deleteNode(api, keyPair);
+      
+      if (result.success) {
+        await fetchStakingInfo();
+      } else {
+        setError(result.error || 'Delete node failed');
+      }
+      
+      return result;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Delete node failed';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [api, wallet?.address, fetchStakingInfo]);
+
+  // Get node status
+  const getNodeStatus = useCallback(async (): Promise<NodeStatus> => {
+    if (!api || !wallet?.address) {
+      return 'None';
+    }
+    
+    try {
+      return await stakingService.getNodeStatus(api, wallet.address);
+    } catch (err) {
+      console.error('[Staking Hook] Error getting node status:', err);
+      return 'None';
+    }
+  }, [api, wallet?.address]);
+
   return {
     stakingInfo,
     validators,
@@ -182,10 +328,19 @@ export function useStaking() {
     isStaking,
     isUnstaking,
     isClaiming,
+    isRegistering,
+    isStartingUnbond,
+    isCompletingUnbond,
+    isDeleting,
     error,
     stake,
     unstake,
     claimRewards,
+    registerNode,
+    startUnbonding,
+    completeUnbonding,
+    deleteNode,
+    getNodeStatus,
     calculateEstimatedRewards,
     refetch: fetchStakingInfo,
   };
