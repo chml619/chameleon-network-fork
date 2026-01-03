@@ -183,7 +183,8 @@ export default function SendScreen() {
     const maxAmount = balanceBN.sub(feeBN);
     
     if (maxAmount.gt(new BN(0))) {
-      const formatted = chainService.formatBalance(maxAmount.toString()).split(' ')[0];
+      // Use centralized formatBalance utility, remove commas for input field
+      const formatted = formatBalance(maxAmount);
       setAmount(formatted.replace(/,/g, ''));
     }
   };
