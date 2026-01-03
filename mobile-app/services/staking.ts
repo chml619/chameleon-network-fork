@@ -262,7 +262,8 @@ class StakingService {
   }
 
   /**
-   * Stake tokens
+   * Stake tokens using our custom pallet
+   * Uses api.tx.staking.stake(amount)
    */
   async stake(
     api: ApiPromise,
@@ -270,17 +271,16 @@ class StakingService {
     amount: BN
   ): Promise<StakingResult> {
     try {
-      const hasStakingPallet = api.tx.staking !== undefined;
-      
-      if (hasStakingPallet) {
-        // Real staking
-        const tx = api.tx.staking.bond(amount, 'Staked');
+      if (this.hasCustomStakingPallet(api)) {
+        // Use our custom staking pallet's stake extrinsic
+        const tx = api.tx.staking.stake(amount);
         return this.signAndSend(tx, keyPair);
       } else {
         // Mock staking for development
-        console.log('[Staking] Pallet not deployed, using mock');
+        console.log('[Staking] Custom pallet not deployed, using mock');
         this.mockStakingData.staked = this.mockStakingData.staked.add(amount);
         this.mockStakingData.lastRewardUpdate = Date.now();
+        this.mockStakingData.status = 'Waiting';
         
         // Add some initial rewards for demo (0.1% of staked amount)
         const initialRewards = amount.divn(1000);
@@ -304,7 +304,8 @@ class StakingService {
   }
 
   /**
-   * Unstake tokens
+   * Unstake tokens using our custom pallet
+   * Uses api.tx.staking.unstake(amount)
    */
   async unstake(
     api: ApiPromise,
@@ -312,14 +313,13 @@ class StakingService {
     amount: BN
   ): Promise<StakingResult> {
     try {
-      const hasStakingPallet = api.tx.staking !== undefined;
-      
-      if (hasStakingPallet) {
-        const tx = api.tx.staking.unbond(amount);
+      if (this.hasCustomStakingPallet(api)) {
+        // Use our custom staking pallet's unstake extrinsic
+        const tx = api.tx.staking.unstake(amount);
         return this.signAndSend(tx, keyPair);
       } else {
         // Mock unstaking
-        console.log('[Staking] Pallet not deployed, using mock');
+        console.log('[Staking] Custom pallet not deployed, using mock');
         const unstakeAmount = BN.min(amount, this.mockStakingData.staked);
         this.mockStakingData.staked = this.mockStakingData.staked.sub(unstakeAmount);
         this.mockStakingData.unbonding = this.mockStakingData.unbonding.add(unstakeAmount);
@@ -340,25 +340,21 @@ class StakingService {
   }
 
   /**
-   * Claim staking rewards
+   * Claim staking rewards using our custom pallet
+   * Uses api.tx.staking.claimRewards() - NO arguments
    */
   async claimRewards(
     api: ApiPromise,
     keyPair: KeyringPair
   ): Promise<StakingResult> {
     try {
-      const hasStakingPallet = api.tx.staking !== undefined;
-      
-      if (hasStakingPallet) {
-        // Get current era and payout
-        const currentEra = await api.query.staking.currentEra() as any;
-        const era = currentEra?.isSome ? currentEra.unwrap().toNumber() - 1 : 0;
-        
-        const tx = api.tx.staking.payoutStakers(keyPair.address, era);
+      if (this.hasCustomStakingPallet(api)) {
+        // Use our custom staking pallet's claimRewards extrinsic (no arguments)
+        const tx = api.tx.staking.claimRewards();
         return this.signAndSend(tx, keyPair);
       } else {
         // Mock claim
-        console.log('[Staking] Pallet not deployed, using mock');
+        console.log('[Staking] Custom pallet not deployed, using mock');
         
         // Add some rewards to available balance (simulate claiming)
         const claimedAmount = this.mockStakingData.rewards;
@@ -376,6 +372,179 @@ class StakingService {
         success: false,
         error: error instanceof Error ? error.message : 'Claim failed',
       };
+    }
+  }
+
+  /**
+   * Register as a validator node
+   * Uses api.tx.staking.registerNode()
+   */
+  async registerNode(
+    api: ApiPromise,
+    keyPair: KeyringPair
+  ): Promise<StakingResult> {
+    try {
+      if (this.hasCustomStakingPallet(api)) {
+        const tx = api.tx.staking.registerNode();
+        return this.signAndSend(tx, keyPair);
+      } else {
+        // Mock registration
+        console.log('[Staking] Custom pallet not deployed, using mock');
+        this.mockStakingData.status = 'Registered';
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        return {
+          success: true,
+          txHash: '0x' + Math.random().toString(16).slice(2, 66),
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Node registration failed',
+      };
+    }
+  }
+
+  /**
+   * Start the 7-day unbonding cooldown period
+   * Uses api.tx.staking.startUnbonding()
+   */
+  async startUnbonding(
+    api: ApiPromise,
+    keyPair: KeyringPair
+  ): Promise<StakingResult> {
+    try {
+      if (this.hasCustomStakingPallet(api)) {
+        const tx = api.tx.staking.startUnbonding();
+        return this.signAndSend(tx, keyPair);
+      } else {
+        // Mock start unbonding
+        console.log('[Staking] Custom pallet not deployed, using mock');
+        this.mockStakingData.status = 'Unbonding';
+        this.mockStakingData.unbondingBlock = Date.now(); // Use timestamp for mock
+        this.mockStakingData.unbonding = this.mockStakingData.staked;
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        return {
+          success: true,
+          txHash: '0x' + Math.random().toString(16).slice(2, 66),
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Start unbonding failed',
+      };
+    }
+  }
+
+  /**
+   * Complete unbonding and release funds after cooldown period
+   * Uses api.tx.staking.completeUnbonding()
+   */
+  async completeUnbonding(
+    api: ApiPromise,
+    keyPair: KeyringPair
+  ): Promise<StakingResult> {
+    try {
+      if (this.hasCustomStakingPallet(api)) {
+        const tx = api.tx.staking.completeUnbonding();
+        return this.signAndSend(tx, keyPair);
+      } else {
+        // Mock complete unbonding
+        console.log('[Staking] Custom pallet not deployed, using mock');
+        this.mockStakingData.status = 'None';
+        this.mockStakingData.unbondingBlock = null;
+        this.mockStakingData.staked = new BN(0);
+        this.mockStakingData.unbonding = new BN(0);
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        return {
+          success: true,
+          txHash: '0x' + Math.random().toString(16).slice(2, 66),
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Complete unbonding failed',
+      };
+    }
+  }
+
+  /**
+   * Delete/remove node from the chain
+   * Uses api.tx.staking.deleteNode()
+   */
+  async deleteNode(
+    api: ApiPromise,
+    keyPair: KeyringPair
+  ): Promise<StakingResult> {
+    try {
+      if (this.hasCustomStakingPallet(api)) {
+        const tx = api.tx.staking.deleteNode();
+        return this.signAndSend(tx, keyPair);
+      } else {
+        // Mock delete node
+        console.log('[Staking] Custom pallet not deployed, using mock');
+        this.mockStakingData.status = 'None';
+        this.mockStakingData.staked = new BN(0);
+        this.mockStakingData.rewards = new BN(0);
+        this.mockStakingData.unbonding = new BN(0);
+        this.mockStakingData.unbondingBlock = null;
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        return {
+          success: true,
+          txHash: '0x' + Math.random().toString(16).slice(2, 66),
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Delete node failed',
+      };
+    }
+  }
+
+  /**
+   * Get the current node status for an address
+   * Queries api.query.staking.stakers(address) and returns status
+   */
+  async getNodeStatus(api: ApiPromise, address: string): Promise<NodeStatus> {
+    try {
+      if (this.hasCustomStakingPallet(api)) {
+        const stakerInfo = await (api.query.staking as any).stakers(address);
+        
+        if (stakerInfo && !stakerInfo.isEmpty) {
+          const info = stakerInfo.toJSON ? stakerInfo.toJSON() : stakerInfo;
+          const rawStatus = info.status;
+          
+          if (rawStatus) {
+            if (typeof rawStatus === 'string') {
+              return rawStatus as NodeStatus;
+            } else if (typeof rawStatus === 'object') {
+              const statusKey = Object.keys(rawStatus)[0];
+              if (statusKey) {
+                return statusKey as NodeStatus;
+              }
+            }
+          }
+        }
+        
+        return 'None';
+      } else {
+        // Return mock status
+        return this.mockStakingData.status;
+      }
+    } catch (error) {
+      console.error('[Staking] Error getting node status:', error);
+      return 'None';
     }
   }
 
