@@ -30,6 +30,7 @@ import { notificationService } from '@/services/notifications';
 import { chainService } from '@/services/chain';
 import { walletService, DEV_ACCOUNT_ADDRESSES } from '@/services/wallet';
 import { apiService } from '@/services/api';
+import { pdexService, PCHML_TOKEN_ID, PETH_TOKEN_ID, PBTC_TOKEN_ID, PUSDT_TOKEN_ID } from '@/services/pdex';
 import { privacyService, generateStealthHash } from '@/services/privacy';
 import { TransactionStatus } from '@/components/TransactionStatus';
 import { truncateAddress } from '@/utils/address';
@@ -37,6 +38,14 @@ import { formatBalance, parseAmount } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 // Quick test accounts for easy selection
+// Supported tokens for sending
+const TOKENS = [
+  { id: "CHML", symbol: "pCHML", name: "Chameleon", color: "#6366F1", icon: "diamond-outline", assetId: 0 },
+  { id: "BTC", symbol: "pBTC", name: "Bitcoin", color: "#F7931A", icon: "logo-bitcoin", assetId: 2 },
+  { id: "ETH", symbol: "pETH", name: "Ethereum", color: "#627EEA", icon: "logo-electron", assetId: 1 },
+  { id: "USDT", symbol: "pUSDT", name: "Tether", color: "#26A17B", icon: "logo-usd", assetId: 3 },
+];
+
 const QUICK_TEST_ACCOUNTS = [
   { name: 'Alice', address: DEV_ACCOUNT_ADDRESSES.alice, color: '#FF6B6B' },
   { name: 'Bob', address: DEV_ACCOUNT_ADDRESSES.bob, color: '#4ECDC4' },
@@ -54,6 +63,9 @@ export default function SendScreen() {
   // Form state
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
+  const [selectedToken, setSelectedToken] = useState(TOKENS[0]);
+  const [showTokenSelector, setShowTokenSelector] = useState(false);
+  const [tokenBalance, setTokenBalance] = useState<string>("0");
   const [isValidAddress, setIsValidAddress] = useState(false);
   const [feeEstimate, setFeeEstimate] = useState<any>(null);
   const [isEstimatingFee, setIsEstimatingFee] = useState(false);
@@ -88,6 +100,24 @@ export default function SendScreen() {
   useEffect(() => {
     checkTransferMode();
   }, [wallet?.address]);
+
+  // Fetch token balance when token changes
+  useEffect(() => {
+    const fetchTokenBalance = async () => {
+      if (!wallet?.address) return;
+      try {
+        const api = apiService.getApi();
+        if (!api) return;
+        const balance = await api.query.pdex.tokenBalances(wallet.address, selectedToken.assetId) as any;
+        const balStr = balance.toString();
+        setTokenBalance(balStr);
+      } catch (error) {
+        console.error("[Send] Error fetching token balance:", error);
+        setTokenBalance("0");
+      }
+    };
+    fetchTokenBalance();
+  }, [wallet?.address, selectedToken]);
 
   const checkTransferMode = async () => {
     if (!wallet?.address) {
@@ -305,64 +335,23 @@ export default function SendScreen() {
       }
       
       const amountBN = parseAmount(amount);
-      const formattedAmount = `${amount} CHML`;
-      
-      // Set API for privacy service
-      privacyService.setApi(api);
-      
-      // Check if sender has shielded notes for private transfer
-      const senderStealthMeta = {
-        spendPubkey: keyPair.publicKey,
-        viewPubkey: keyPair.publicKey, // Simplified for demo
-      };
-      const inputStealthHash = generateStealthHash(senderStealthMeta);
-      
-      const hasShieldedNotes = await privacyService.hasShieldedNotes(inputStealthHash);
-      
-      let txHash: string;
-      let transferType: string;
-      
-      if (hasShieldedNotes) {
-        console.log('[Send] Using confidential transfer (private)');
-        transferType = 'Private Transfer';
-        
-        // For recipient, if it's a stealth hash use it directly, otherwise generate one
-        let outputStealthHash: Uint8Array;
-        if (recipient.startsWith('0x') && recipient.length === 66) {
-          // It's already a stealth hash
-          outputStealthHash = new Uint8Array(Buffer.from(recipient.slice(2), 'hex'));
-        } else {
-          // Generate stealth hash for regular address (simplified)
-          const recipientStealthMeta = {
-            spendPubkey: new Uint8Array(32), // Would be derived from recipient's public key
-            viewPubkey: new Uint8Array(32),
-          };
-          outputStealthHash = generateStealthHash(recipientStealthMeta);
-        }
-        
-        // Generate ephemeral key for the transaction
-        const ephemeralPubkey = keyPair.publicKey; // Simplified for demo
-        
-        // Use confidential transfer
-        txHash = await privacyService.confidentialTransfer(
-          keyPair,
-          inputStealthHash,
-          outputStealthHash,
-          amountBN,
-          ephemeralPubkey
-        );
-      } else {
-        console.log('[Send] Using public transfer (no shielded notes available)');
-        transferType = 'Public Transfer';
-        
-        // Fall back to regular public transfer
-        txHash = await privacyService.publicTransfer(
-          keyPair,
-          recipient,
-          amountBN
-        );
+      const formattedAmount = `${amount} ${selectedToken.symbol}`;
+
+      console.log("[Send] Transferring " + selectedToken.symbol + " via pDEX");
+      console.log(`[Send] Transferring ${selectedToken.symbol} via pDEX`);
+      const result = await pdexService.transfer(
+        keyPair,
+        selectedToken.assetId,
+        recipient,
+        amountBN
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || "Transfer failed");
       }
-      
+
+      const txHash = result.txHash || "";
+      const transferType = "pToken Transfer";
       // Create transaction result
       const txResult = {
         hash: txHash,
@@ -522,6 +511,31 @@ export default function SendScreen() {
           </ScrollView>
         </View>
 
+        {/* Token Selector */}
+        <View style={styles.inputSection}>
+          <Text style={styles.inputLabel}>Token</Text>
+          <TouchableOpacity
+            style={styles.inputContainer}
+            onPress={() => setShowTokenSelector(true)}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={[styles.tokenIcon, { backgroundColor: selectedToken.color + "20" }]}>
+                {selectedToken.id === "CHML" ? (
+                  <Ionicons name="diamond" size={20} color={selectedToken.color} />
+                ) : (
+                  <Ionicons name={selectedToken.icon as any} size={20} color={selectedToken.color} />
+                )}
+              </View>
+              <Text style={styles.tokenText}>{selectedToken.symbol}</Text>
+              <View style={{ flex: 1 }} />
+              <Ionicons name="chevron-down" size={20} color={THEME.colors.textMuted} />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.availableText}>
+            Balance: {formatBalance(new BN(tokenBalance))} {selectedToken.symbol}
+          </Text>
+        </View>
+
         {/* Amount Input */}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>Amount</Text>
@@ -655,6 +669,45 @@ export default function SendScreen() {
                 Tx: {transactionResult.hash.slice(0, 10)}...
               </Text>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Token Selector Modal */}
+      <Modal visible={showTokenSelector} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Token</Text>
+              <TouchableOpacity onPress={() => setShowTokenSelector(false)}>
+                <Ionicons name="close" size={24} color={THEME.colors.text} />
+              </TouchableOpacity>
+            </View>
+            {TOKENS.map((token) => (
+              <TouchableOpacity
+                key={token.id}
+                style={styles.tokenOption}
+                onPress={() => {
+                  setSelectedToken(token);
+                  setShowTokenSelector(false);
+                }}
+              >
+                <View style={[styles.tokenIcon, { backgroundColor: token.color + "20" }]}>
+                  {token.id === "CHML" ? (
+                    <Ionicons name="diamond" size={20} color={token.color} />
+                  ) : (
+                    <Ionicons name={token.icon as any} size={20} color={token.color} />
+                  )}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.tokenName}>{token.symbol}</Text>
+                  <Text style={styles.tokenSubtext}>{token.name}</Text>
+                </View>
+                {selectedToken.id === token.id && (
+                  <Ionicons name="checkmark-circle" size={24} color={THEME.colors.primary} />
+                )}
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </Modal>
@@ -961,5 +1014,40 @@ const styles = StyleSheet.create({
     color: THEME.colors.textMuted,
     fontFamily: 'monospace',
     marginTop: THEME.spacing.md,
+  },
+  tokenIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: THEME.spacing.sm,
+  },
+  tokenText: {
+    fontSize: THEME.fontSize.lg,
+    fontWeight: THEME.fontWeight.semibold,
+    color: THEME.colors.text,
+  },
+  tokenOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: THEME.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: THEME.colors.border,
+  },
+  tokenName: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.semibold,
+    color: THEME.colors.text,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: THEME.spacing.md,
+  },
+  tokenSubtext: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textMuted,
   },
 });

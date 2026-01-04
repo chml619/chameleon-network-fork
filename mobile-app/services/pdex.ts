@@ -798,6 +798,43 @@ class PDEXService {
       });
     });
   }
+
+  /**
+   * Transfer pTokens to another account
+   * @param keyPair - Sender keypair
+   * @param assetId - Token ID (0=pCHML, 1=pETH, 2=pBTC, 3=pUSDT)
+   * @param to - Recipient address
+   * @param amount - Amount to transfer (with decimals)
+   */
+  async transfer(
+    keyPair: KeyringPair,
+    assetId: number,
+    to: string,
+    amount: BN
+  ): Promise<{ success: boolean; txHash?: string; error?: string }> {
+    const api = apiService.getApi();
+    if (!api) {
+      return { success: false, error: "Not connected to network" };
+    }
+    try {
+      const tx = api.tx.pdex.transfer(assetId, to, amount.toString());
+      return new Promise((resolve) => {
+        tx.signAndSend(keyPair, ({ status, dispatchError, txHash }: any) => {
+          if (status.isInBlock || status.isFinalized) {
+            if (dispatchError) {
+              resolve({ success: false, txHash: txHash?.toHex(), error: "Transfer failed" });
+            } else {
+              resolve({ success: true, txHash: txHash?.toHex() });
+            }
+          }
+        }).catch((error: Error) => {
+          resolve({ success: false, error: error.message });
+        });
+      });
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 export const pdexService = PDEXService.getInstance();
