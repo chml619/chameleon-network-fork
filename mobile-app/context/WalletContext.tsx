@@ -372,7 +372,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
       // Keep old balance on error - don't reset to 0
       // Only set mock if we have nothing
       if (publicBalanceRef.current.isZero()) {
-        const mockBalance = new BN('100000000000000000000'); // 100 CHML for demo
+        const mockBalance = new BN('1100000000000000'); // 1100 CHML mock
         publicBalanceRef.current = mockBalance;
         setPublicBalance(mockBalance);
       }

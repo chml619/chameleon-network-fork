@@ -93,6 +93,11 @@ export default function RootLayout() {
               <Stack.Screen name="receive" />
               <Stack.Screen name="staking" />
               <Stack.Screen name="bridge" />
+              <Stack.Screen name="shield" options={{ presentation: "modal" }} />
+              <Stack.Screen name="unshield" options={{ presentation: "modal" }} />
+              <Stack.Screen name="history" options={{ presentation: "modal" }} />
+              <Stack.Screen name="notifications" options={{ presentation: "modal" }} />
+              <Stack.Screen name="manage-wallets" options={{ presentation: "modal" }} />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="dark" />

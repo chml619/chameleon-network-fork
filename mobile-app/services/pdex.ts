@@ -208,7 +208,7 @@ class PDEXService {
       }
 
       // TokenId 0 = pCHML
-      const balance = await (api.query.pdex as any).tokenBalances(PCHML_TOKEN_ID, address);
+      const balance = await (api.query.pdex as any).tokenBalances(address, PCHML_TOKEN_ID);
       return new BN(balance.toString());
     } catch (error) {
       console.error('[pDEX] Error getting pCHML balance:', error);

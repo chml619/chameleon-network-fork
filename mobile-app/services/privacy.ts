@@ -31,7 +31,14 @@ export function generateStealthMetaAddress(seed: string): StealthMetaAddress {
 
 // Generate stealth hash for receiving payments
 export function generateStealthHash(metaAddress: StealthMetaAddress): Uint8Array {
-  const combined = new Uint8Array([...metaAddress.spendPubkey, ...metaAddress.viewPubkey]);
+  // Ensure we have proper Uint8Arrays
+  const spend = metaAddress.spendPubkey instanceof Uint8Array 
+    ? metaAddress.spendPubkey 
+    : new Uint8Array(Object.values(metaAddress.spendPubkey));
+  const view = metaAddress.viewPubkey instanceof Uint8Array 
+    ? metaAddress.viewPubkey 
+    : new Uint8Array(Object.values(metaAddress.viewPubkey));
+  const combined = new Uint8Array([...spend, ...view]);
   return blake2AsU8a(combined, 256);
 }
 

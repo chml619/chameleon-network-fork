@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Modal,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,8 +29,6 @@ import { apiService } from '@/services/api';
 import { transactionService } from '@/services/transaction';
 import { formatBalance, parseAmount } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
-
-// Token definitions (same as shield)
 const TOKENS = [
   { id: 'CHML', symbol: 'pCHML', name: 'Chameleon', color: '#6366F1', icon: 'diamond-outline', assetId: 0, requiresBridge: false },
   { id: 'BTC', symbol: 'pBTC', name: 'Bitcoin', color: '#F7931A', icon: 'logo-bitcoin', assetId: 2, requiresBridge: true },
@@ -306,7 +305,11 @@ export default function UnshieldScreen() {
           >
             <View style={styles.tokenSelectorLeft}>
               <View style={[styles.tokenIcon, { backgroundColor: selectedToken.color + '20' }]}>
-                <Ionicons name={selectedToken.icon as any} size={20} color={selectedToken.color} />
+                {selectedToken.id === "CHML" ? (
+                  <Image source={require("@/assets/images/Logo.png")} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                ) : (
+                  <Ionicons name={selectedToken.icon as any} size={20} color={selectedToken.color} />
+                )}
               </View>
               <View>
                 <Text style={styles.tokenSymbol}>{selectedToken.symbol}</Text>
@@ -544,6 +547,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    paddingBottom: 100,
     padding: THEME.spacing.lg,
   },
   devnetWarning: {
