@@ -551,14 +551,14 @@ export default function HomeScreen() {
               </View>
               <View style={styles.privateAssetRow}>
                 <View style={[styles.assetIcon, { backgroundColor: "#627EEA20" }]}>
-                  <Ionicons name="diamond" size={16} color="#627EEA" />
+                  <Ionicons name="logo-electron" size={16} color="#627EEA" />
                 </View>
                 <Text style={styles.assetSymbol}>pETH</Text>
                 <Text style={styles.assetBalance}>{formatBalance(pTokenBalances.pETH)}</Text>
               </View>
               <View style={styles.privateAssetRow}>
                 <View style={[styles.assetIcon, { backgroundColor: "#26A17B20" }]}>
-                  <Ionicons name="cash-outline" size={16} color="#26A17B" />
+                  <Ionicons name="logo-usd" size={16} color="#26A17B" />
                 </View>
                 <Text style={styles.assetSymbol}>pUSDT</Text>
                 <Text style={styles.assetBalance}>{formatBalance(pTokenBalances.pUSDT)}</Text>

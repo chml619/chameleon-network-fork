@@ -32,8 +32,8 @@ import { THEME, GRADIENTS } from '@/constants/theme';
 const TOKENS = [
   { id: 'CHML', symbol: 'pCHML', name: 'Chameleon', color: '#6366F1', icon: 'diamond-outline', assetId: 0, requiresBridge: false },
   { id: 'BTC', symbol: 'pBTC', name: 'Bitcoin', color: '#F7931A', icon: 'logo-bitcoin', assetId: 2, requiresBridge: true },
-  { id: 'ETH', symbol: 'pETH', name: 'Ethereum', color: '#627EEA', icon: 'diamond', assetId: 1, requiresBridge: true },
-  { id: 'USDT', symbol: 'pUSDT', name: 'Tether', color: '#26A17B', icon: 'cash-outline', assetId: 3, requiresBridge: true },
+  { id: 'ETH', symbol: 'pETH', name: 'Ethereum', color: '#627EEA', icon: 'logo-electron', assetId: 1, requiresBridge: true },
+  { id: 'USDT', symbol: 'pUSDT', name: 'Tether', color: '#26A17B', icon: 'logo-usd', assetId: 3, requiresBridge: true },
 ];
 
 export default function UnshieldScreen() {
@@ -501,7 +501,11 @@ export default function UnshieldScreen() {
                 onPress={() => handleTokenSelect(token)}
               >
                 <View style={[styles.tokenIcon, { backgroundColor: token.color + '20' }]}>
-                  <Ionicons name={token.icon as any} size={20} color={token.color} />
+                  {token.id === "CHML" ? (
+                    <Image source={require("@/assets/images/Logo.png")} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                  ) : (
+                    <Ionicons name={token.icon as any} size={20} color={token.color} />
+                  )}
                 </View>
                 <View style={styles.tokenOptionInfo}>
                   <Text style={styles.tokenOptionSymbol}>{token.symbol}</Text>
