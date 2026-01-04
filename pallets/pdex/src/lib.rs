@@ -285,6 +285,17 @@ pub mod pallet {
             /// Key image (prevents replay).
             key_image: [u8; 32],
         },
+        /// Tokens were transferred between accounts.
+        Transfer {
+            /// Asset that was transferred.
+            asset_id: T::AssetId,
+            /// Sender account.
+            from: T::AccountId,
+            /// Recipient account.
+            to: T::AccountId,
+            /// Amount transferred.
+            amount: T::Balance,
+        },
     }
 
     /// Errors that can be returned by this pallet.
@@ -787,6 +798,36 @@ pub mod pallet {
 
                 Ok(())
             })
+        }
+
+        /// Transfer pTokens between accounts.
+        ///
+        /// Transfers tokens from sender to recipient.
+        /// Works for any token in the pDEX registry (pCHML, pBTC, pETH, pUSDT).
+        ///
+        /// Parameters:
+        /// - `asset_id`: Token to transfer (0=pCHML, 1=pETH, 2=pBTC, 3=pUSDT)
+        /// - `to`: Recipient account
+        /// - `amount`: Amount to transfer
+        #[pallet::call_index(5)]
+        #[pallet::weight(Weight::from_parts(50_000_000, 0))]
+        pub fn transfer(
+            origin: OriginFor<T>,
+            asset_id: T::AssetId,
+            to: T::AccountId,
+            amount: T::Balance,
+        ) -> DispatchResult {
+            let from = ensure_signed(origin)?;
+            ensure!(from != to, Error::<T>::InvalidAmounts);
+            ensure!(!amount.is_zero(), Error::<T>::InvalidAmounts);
+            Self::do_transfer(asset_id, &from, &to, amount)?;
+            Self::deposit_event(Event::Transfer {
+                asset_id,
+                from,
+                to,
+                amount,
+            });
+            Ok(())
         }
     }
 
