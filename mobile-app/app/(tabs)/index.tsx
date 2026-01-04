@@ -75,6 +75,9 @@ export default function HomeScreen() {
   // Notification state
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
+
+  // Private token balances state
+  const [pTokenBalances, setPTokenBalances] = useState<{pBTC: string, pETH: string, pUSDT: string}>({pBTC: "0", pETH: "0", pUSDT: "0"});
   // Load unread notification count
   const loadUnreadCount = useCallback(async () => {
     try {
@@ -85,6 +88,27 @@ export default function HomeScreen() {
     }
   }, []);
 
+
+  // Load pToken balances from pDEX
+  const loadPTokenBalances = useCallback(async () => {
+    if (!wallet?.address) return;
+    const api = apiService.getApi();
+    if (!api) return;
+    try {
+      const [pBTC, pETH, pUSDT] = await Promise.all([
+        api.query.pdex.tokenBalances(wallet.address, 2),
+        api.query.pdex.tokenBalances(wallet.address, 1),
+        api.query.pdex.tokenBalances(wallet.address, 3),
+      ]);
+      setPTokenBalances({
+        pBTC: pBTC.toString(),
+        pETH: pETH.toString(),
+        pUSDT: pUSDT.toString(),
+      });
+    } catch (error) {
+      console.error("[Home] Error loading pToken balances:", error);
+    }
+  }, [wallet?.address]);
   // Check for incoming transactions
   const checkIncomingTransactions = useCallback(async () => {
     if (!wallet?.address) return;
@@ -208,7 +232,9 @@ export default function HomeScreen() {
       checkIncomingTransactions();
       // Load unread notification count
       loadUnreadCount();
-    }, [loadTransactionHistory, checkIncomingTransactions, loadUnreadCount])
+      // Load pToken balances
+      loadPTokenBalances();
+    }, [loadTransactionHistory, checkIncomingTransactions, loadUnreadCount, loadPTokenBalances])
   );
 
   // Pull-to-refresh handler
@@ -226,6 +252,8 @@ export default function HomeScreen() {
       await checkIncomingTransactions();
       
       // Refresh transaction history
+      // Refresh pToken balances
+      await loadPTokenBalances();
       await loadTransactionHistory();
       
       // Attempt reconnect if disconnected
@@ -237,7 +265,7 @@ export default function HomeScreen() {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchBalance, loadTransactionHistory, checkIncomingTransactions, connectionState.status, connect]);
+  }, [refetchBalance, loadTransactionHistory, checkIncomingTransactions, loadPTokenBalances, connectionState.status, connect]);
 
   // Handle transaction tap - show detail modal
   const handleTransactionTap = (transaction: StoredTransaction) => {
@@ -509,6 +537,34 @@ export default function HomeScreen() {
             </View>
           </View>
 
+
+          {/* Private Assets Card */}
+          <View style={styles.privateAssetsCard}>
+            <Text style={styles.privateAssetsTitle}>Private Assets</Text>
+            <View style={styles.privateAssetsList}>
+              <View style={styles.privateAssetRow}>
+                <View style={[styles.assetIcon, { backgroundColor: "#F7931A20" }]}>
+                  <Ionicons name="logo-bitcoin" size={16} color="#F7931A" />
+                </View>
+                <Text style={styles.assetSymbol}>pBTC</Text>
+                <Text style={styles.assetBalance}>{formatBalance(pTokenBalances.pBTC)}</Text>
+              </View>
+              <View style={styles.privateAssetRow}>
+                <View style={[styles.assetIcon, { backgroundColor: "#627EEA20" }]}>
+                  <Ionicons name="diamond" size={16} color="#627EEA" />
+                </View>
+                <Text style={styles.assetSymbol}>pETH</Text>
+                <Text style={styles.assetBalance}>{formatBalance(pTokenBalances.pETH)}</Text>
+              </View>
+              <View style={styles.privateAssetRow}>
+                <View style={[styles.assetIcon, { backgroundColor: "#26A17B20" }]}>
+                  <Ionicons name="cash-outline" size={16} color="#26A17B" />
+                </View>
+                <Text style={styles.assetSymbol}>pUSDT</Text>
+                <Text style={styles.assetBalance}>{formatBalance(pTokenBalances.pUSDT)}</Text>
+              </View>
+            </View>
+          </View>
           {/* Network Badge */}
           <View style={styles.networkBadgeContainer}>
             <NetworkBadge size="small" showConnectionStatus={true} />
@@ -1413,5 +1469,45 @@ const styles = StyleSheet.create({
     fontSize: THEME.fontSize.base,
     fontWeight: THEME.fontWeight.semibold,
     textAlign: 'center',
+  },
+  privateAssetsCard: {
+    backgroundColor: THEME.colors.white,
+    borderRadius: THEME.borderRadius.large,
+    padding: THEME.spacing.md,
+    marginTop: THEME.spacing.md,
+    ...THEME.shadows.small,
+  },
+  privateAssetsTitle: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.semibold,
+    color: THEME.colors.text,
+    marginBottom: THEME.spacing.sm,
+  },
+  privateAssetsList: {
+    gap: THEME.spacing.xs,
+  },
+  privateAssetRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: THEME.spacing.xs,
+  },
+  assetIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: THEME.spacing.sm,
+  },
+  assetSymbol: {
+    flex: 1,
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.text,
+    fontWeight: THEME.fontWeight.medium,
+  },
+  assetBalance: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+    fontWeight: THEME.fontWeight.medium,
   },
 });
