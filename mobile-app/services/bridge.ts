@@ -418,7 +418,6 @@ class BridgeService {
       });
     });
   }
-}
 
   /**
    * Initiate deposit from external chain (shield external tokens)
@@ -483,4 +482,5 @@ class BridgeService {
     }
   }
 
+}
 export const bridgeService = BridgeService.getInstance();

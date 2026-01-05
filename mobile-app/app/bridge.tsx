@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: THEME.spacing.md,
-    paddingBottom: THEME.spacing.xxl,
+    paddingBottom: THEME.spacing.xl * 2,
   },
   devnetWarning: {
     flexDirection: 'row',
