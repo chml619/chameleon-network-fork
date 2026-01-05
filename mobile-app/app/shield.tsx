@@ -27,6 +27,7 @@ import { privacyService, generateStealthHash } from '@/services/privacy';
 import { walletService } from '@/services/wallet';
 import { apiService } from '@/services/api';
 import { transactionService } from '@/services/transaction';
+import { bridgeService } from '@/services/bridge';
 import { formatBalance, parseAmount } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 const TOKENS = [
@@ -146,9 +147,6 @@ export default function ShieldScreen() {
     if (!wallet?.address) {
       return 'No wallet connected';
     }
-    if (selectedToken.requiresBridge) {
-      return 'Bridge required';
-    }
     if (!amount || parseFloat(amount) <= 0) {
       return 'Enter amount';
     }
@@ -180,7 +178,7 @@ export default function ShieldScreen() {
       Alert.alert('Shield Error', error);
       return;
     }
-
+    if (!wallet?.address || (!selectedToken.requiresBridge && !feeEstimate)) return;
     if (!wallet?.address || !feeEstimate) return;
 
     setIsShielding(true);
@@ -196,24 +194,39 @@ export default function ShieldScreen() {
         throw new Error('Not connected to network');
       }
 
-      privacyService.setApi(api);
       const amountBN = parseAmount(amount);
+      let txHash: string;
+      let successMessage: string;
 
-      const stealthMetaAddress = {
-        spendPubkey: keyPair.publicKey,
-        viewPubkey: keyPair.publicKey,
-      };
-      const outputStealthHash = generateStealthHash(stealthMetaAddress);
-
-      const txHash = await privacyService.shield(
-        keyPair,
-        amountBN,
-        outputStealthHash
-      );
-
+      if (selectedToken.requiresBridge) {
+        // External token - use bridge deposit
+        const chainMap: Record<string, "Bitcoin" | "Ethereum" | "Polygon"> = {
+          BTC: "Bitcoin", ETH: "Ethereum", USDT: "Ethereum",
+        };
+        const assetMap: Record<string, "BTC" | "ETH" | "USDT"> = {
+          BTC: "BTC", ETH: "ETH", USDT: "USDT",
+        };
+        const chain = chainMap[selectedToken.id];
+        const asset = assetMap[selectedToken.id];
+        const result = await bridgeService.initiateDeposit(
+          api, keyPair, chain, asset, amountBN, wallet.address
+        );
+        if (!result.success) {
+          throw new Error(result.error || "Bridge deposit failed");
+        }
+        txHash = result.txHash || "";
+        successMessage = "Bridge deposit initiated! Deposit ID: " + result.bridgeId + ". Send " + amount + " " + selectedToken.id + " to complete.";
+      } else {
+        // CHML - use privacy shield
+        privacyService.setApi(api);
+        const stealthMetaAddress = { spendPubkey: keyPair.publicKey, viewPubkey: keyPair.publicKey };
+        const outputStealthHash = generateStealthHash(stealthMetaAddress);
+        txHash = await privacyService.shield(keyPair, amountBN, outputStealthHash);
+        successMessage = "Tokens shielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
+      }
       Alert.alert(
         'Shield Successful',
-        `Tokens shielded successfully!\nTransaction: ${txHash.slice(0, 10)}...`,
+        successMessage,
         [
           {
             text: 'OK',

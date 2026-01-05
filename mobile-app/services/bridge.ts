@@ -420,4 +420,67 @@ class BridgeService {
   }
 }
 
+  /**
+   * Initiate deposit from external chain (shield external tokens)
+   * Calls bridge.initiate_deposit on blockchain
+   */
+  async initiateDeposit(
+    api: ApiPromise,
+    keyPair: KeyringPair,
+    chain: "Bitcoin" | "Ethereum" | "Polygon",
+    asset: "BTC" | "ETH" | "USDT",
+    amount: BN,
+    destinationAddress: string
+  ): Promise<BridgeResult> {
+    try {
+      // Map chain/asset strings to enum values expected by pallet
+      const chainEnum = { Bitcoin: 0, Ethereum: 1, Polygon: 2 }[chain];
+      const assetEnum = { BTC: 0, ETH: 1, USDT: 2 }[asset];
+      
+      const tx = api.tx.bridge.initiateDeposit(
+        chainEnum,
+        assetEnum,
+        amount.toString(),
+        destinationAddress
+      );
+      return this.signAndSend(tx, keyPair);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Deposit initiation failed",
+      };
+    }
+  }
+
+  /**
+   * Initiate withdrawal to external chain (unshield to external wallet)
+   * Calls bridge.initiate_withdrawal on blockchain
+   */
+  async initiateWithdrawal(
+    api: ApiPromise,
+    keyPair: KeyringPair,
+    chain: "Bitcoin" | "Ethereum" | "Polygon",
+    asset: "BTC" | "ETH" | "USDT",
+    amount: BN,
+    externalAddress: string
+  ): Promise<BridgeResult> {
+    try {
+      const chainEnum = { Bitcoin: 0, Ethereum: 1, Polygon: 2 }[chain];
+      const assetEnum = { BTC: 0, ETH: 1, USDT: 2 }[asset];
+      
+      const tx = api.tx.bridge.initiateWithdrawal(
+        chainEnum,
+        assetEnum,
+        amount.toString(),
+        externalAddress
+      );
+      return this.signAndSend(tx, keyPair);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Withdrawal initiation failed",
+      };
+    }
+  }
+
 export const bridgeService = BridgeService.getInstance();

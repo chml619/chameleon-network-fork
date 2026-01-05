@@ -26,6 +26,7 @@ import { useWallet } from '@/context/WalletContext';
 import { privacyService, generateStealthHash } from '@/services/privacy';
 import { walletService } from '@/services/wallet';
 import { apiService } from '@/services/api';
+import { bridgeService } from '@/services/bridge';
 import { transactionService } from '@/services/transaction';
 import { formatBalance, parseAmount } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
@@ -170,9 +171,6 @@ export default function UnshieldScreen() {
     if (!wallet?.address) {
       return 'No wallet connected';
     }
-    if (selectedToken.requiresBridge) {
-      return 'Bridge withdrawal required';
-    }
     if (!amount || parseFloat(amount) <= 0) {
       return 'Enter amount';
     }
@@ -212,34 +210,46 @@ export default function UnshieldScreen() {
       if (!api) {
         throw new Error('Not connected to network');
       }
-
-      privacyService.setApi(api);
       const amountBN = parseAmount(amount);
+      let txHash: string;
+      let successMessage: string;
 
-      // Generate input stealth hash (spending from our private balance)
-      const stealthMetaAddress = {
-        spendPubkey: keyPair.publicKey,
-        viewPubkey: keyPair.publicKey,
-      };
-      const inputStealthHash = generateStealthHash(stealthMetaAddress);
-
-      // Unshield the tokens to destination address
-      const txHash = await privacyService.unshield(
-        keyPair,
-        inputStealthHash,
-        amountBN,
-        destinationAddress
-      );
+      if (selectedToken.requiresBridge) {
+        // External token - use bridge withdrawal
+        const chainMap: Record<string, "Bitcoin" | "Ethereum" | "Polygon"> = {
+          BTC: "Bitcoin", ETH: "Ethereum", USDT: "Ethereum",
+        };
+        const assetMap: Record<string, "BTC" | "ETH" | "USDT"> = {
+          BTC: "BTC", ETH: "ETH", USDT: "USDT",
+        };
+        const chain = chainMap[selectedToken.id];
+        const asset = assetMap[selectedToken.id];
+        const result = await bridgeService.initiateWithdrawal(
+          api, keyPair, chain, asset, amountBN, destinationAddress
+        );
+        if (!result.success) {
+          throw new Error(result.error || "Bridge withdrawal failed");
+        }
+        txHash = result.txHash || "";
+        successMessage = "Bridge withdrawal initiated! Your " + amount + " " + selectedToken.id + " will be sent to " + destinationAddress.slice(0,10) + "...";
+      } else {
+        // CHML - use privacy unshield
+        privacyService.setApi(api);
+        const stealthMetaAddress = { spendPubkey: keyPair.publicKey, viewPubkey: keyPair.publicKey };
+        const inputStealthHash = generateStealthHash(stealthMetaAddress);
+        txHash = await privacyService.unshield(keyPair, inputStealthHash, amountBN, destinationAddress);
+        successMessage = "Tokens unshielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
+      }
 
       Alert.alert(
-        'Unshield Successful',
-        `Tokens unshielded successfully!\nTransaction: ${txHash.slice(0, 10)}...`,
+        "Unshield Successful",
+        successMessage,
         [
           {
-            text: 'OK',
+            text: "OK",
             onPress: () => {
-              setAmount('');
-              setDestinationAddress('');
+              setAmount("");
+              setDestinationAddress("");
               setFeeEstimate(null);
               loadPrivateBalance();
               refreshBalances();

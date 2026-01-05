@@ -1,294 +1,155 @@
 /**
- * Bridge Screen
- * Cross-chain asset bridging with privacy preservation
+ * Bridge Landing Page
+ * Shows available bridges and links to Shield/Unshield
  */
-
 import React from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
-  ActivityIndicator,
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useBridge } from '@/hooks/useBridge';
-import { useWallet } from '@/context/WalletContext';
-import { ChainSelector } from '@/components/ChainSelector';
-import { FeatureBadge } from '@/components/FeatureBadge';
-import { MockViewBanner } from '@/components/MockViewBanner';
 import { THEME, GRADIENTS } from '@/constants/theme';
+
+const AVAILABLE_BRIDGES = [
+  { id: 'BTC', name: 'Bitcoin', symbol: 'BTC', icon: 'logo-bitcoin', color: '#F7931A', status: 'active' },
+  { id: 'ETH', name: 'Ethereum', symbol: 'ETH', icon: 'logo-electron', color: '#627EEA', status: 'active' },
+  { id: 'USDT', name: 'USDT (ERC-20)', symbol: 'USDT', icon: 'logo-usd', color: '#26A17B', status: 'active' },
+];
+
+const COMING_SOON_BRIDGES = [
+  { id: 'BNB', name: 'Binance Smart Chain', symbol: 'BNB', icon: 'diamond-outline', color: '#F3BA2F', status: 'coming_soon' },
+  { id: 'SOL', name: 'Solana', symbol: 'SOL', icon: 'planet-outline', color: '#9945FF', status: 'coming_soon' },
+];
 
 export default function BridgeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { wallet } = useWallet();
-  const {
-    supportedChains,
-    bridgeableAssets,
-    sourceChain,
-    destChain,
-    selectedAsset,
-    amount,
-    destAddress,
-    quote,
-    isLoadingQuote,
-    isBridging,
-    pendingBridges,
-    error,
-    setSourceChain,
-    setDestChain,
-    setSelectedAsset,
-    setAmount,
-    setDestAddress,
-    swapChains,
-    initiateBridge,
-  } = useBridge();
-
-  const handleBridge = async () => {
-    if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount');
-      return;
-    }
-
-    if (!destAddress) {
-      Alert.alert('Error', 'Please enter a destination address');
-      return;
-    }
-
-    Alert.alert(
-      'Confirm Bridge',
-      `Bridge ${amount} ${selectedAsset?.symbol} from ${sourceChain.name} to ${destChain.name}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Bridge',
-          onPress: async () => {
-            const result = await initiateBridge();
-            if (result.success) {
-              Alert.alert(
-                'Bridge Initiated',
-                `Your bridge transaction has been submitted. Estimated time: ${quote?.fee.estimatedTime}`,
-                [{ text: 'OK', onPress: () => router.back() }]
-              );
-            } else {
-              Alert.alert('Error', result.error || 'Bridge failed');
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  if (!wallet) {
-    return (
-      <LinearGradient
-        colors={GRADIENTS.background.colors}
-        style={[styles.container, { paddingTop: insets.top }]}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={24} color={THEME.colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Bridge</Text>
-          <View style={{ width: 24 }} />
-        </View>
-        <View style={styles.centerContent}>
-          <Ionicons name="wallet-outline" size={64} color={THEME.colors.textMuted} />
-          <Text style={styles.noWalletText}>Connect a wallet to use the bridge</Text>
-        </View>
-      </LinearGradient>
-    );
-  }
 
   return (
     <LinearGradient
       colors={GRADIENTS.background.colors}
       style={[styles.container, { paddingTop: insets.top }]}
     >
-      {/* Mock View Banner */}
-      <MockViewBanner screenId="bridge" featureName="Bridge" />
-      
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color={THEME.colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Cross-Chain Bridge</Text>
-        <FeatureBadge type="beta" />
+        <Text style={styles.headerTitle}>Cross-Chain Bridges</Text>
+        <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Bridge Card */}
-        <View style={styles.bridgeCard}>
-          {/* From Chain */}
-          <View style={styles.chainSection}>
-            <Text style={styles.sectionLabel}>From</Text>
-            <ChainSelector
-              selectedChain={sourceChain}
-              chains={supportedChains}
-              onSelectChain={setSourceChain}
-            />
-            
-            {/* Amount Input */}
-            <View style={styles.amountContainer}>
-              <TextInput
-                style={styles.amountInput}
-                placeholder="0.00"
-                placeholderTextColor={THEME.colors.textMuted}
-                value={amount}
-                onChangeText={setAmount}
-                keyboardType="decimal-pad"
-              />
-              {bridgeableAssets.length > 0 && (
-                <TouchableOpacity
-                  style={styles.assetSelector}
-                  onPress={() => {
-                    // Show asset selector
-                    if (bridgeableAssets.length > 1) {
-                      const buttons: any[] = bridgeableAssets.map(asset => ({
-                        text: `${asset.symbol} - ${asset.name}`,
-                        onPress: () => setSelectedAsset(asset),
-                      }));
-                      buttons.push({ text: 'Cancel', style: 'cancel' });
-                      
-                      Alert.alert(
-                        'Select Asset',
-                        'Choose the asset you want to bridge',
-                        buttons
-                      );
-                    }
-                  }}
-                >
-                  <Text style={styles.assetText}>
-                    {selectedAsset?.symbol || 'Select'}
-                  </Text>
-                  <Ionicons name="chevron-down" size={16} color={THEME.colors.text} />
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-
-          {/* Swap Button */}
-          <TouchableOpacity style={styles.swapButton} onPress={swapChains}>
-            <View style={styles.swapIconContainer}>
-              <Ionicons name="swap-vertical" size={24} color={THEME.colors.white} />
-            </View>
-          </TouchableOpacity>
-
-          {/* To Chain */}
-          <View style={styles.chainSection}>
-            <Text style={styles.sectionLabel}>To</Text>
-            <ChainSelector
-              selectedChain={destChain}
-              chains={supportedChains}
-              onSelectChain={setDestChain}
-            />
-            
-            {/* Output Preview */}
-            <View style={styles.outputContainer}>
-              <Text style={styles.outputAmount}>
-                {isLoadingQuote ? '...' : quote?.amountOut || '0'}
-              </Text>
-            </View>
-          </View>
-
-          {/* Destination Address */}
-          <View style={styles.addressSection}>
-            <Text style={styles.sectionLabel}>Destination Address</Text>
-            <TextInput
-              style={styles.addressInput}
-              placeholder="Enter destination address"
-              placeholderTextColor={THEME.colors.textMuted}
-              value={destAddress}
-              onChangeText={setDestAddress}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-        </View>
-
-        {/* Quote Details */}
-        {quote && (
-          <View style={styles.quoteCard}>
-            <View style={styles.quoteRow}>
-              <Text style={styles.quoteLabel}>Bridge Fee ({quote.fee.percentageFee})</Text>
-              <Text style={styles.quoteValue}>{quote.fee.totalFee}</Text>
-            </View>
-            <View style={styles.quoteRow}>
-              <Text style={styles.quoteLabel}>Estimated Time</Text>
-              <Text style={styles.quoteValue}>{quote.fee.estimatedTime}</Text>
-            </View>
-            <View style={styles.quoteRow}>
-              <Text style={styles.quoteLabel}>You&apos;ll Receive</Text>
-              <Text style={[styles.quoteValue, styles.quoteValueHighlight]}>
-                {quote.amountOut}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Bridge Button */}
-        <TouchableOpacity
-          style={[
-            styles.bridgeButton,
-            (!amount || !destAddress || isBridging) && styles.bridgeButtonDisabled
-          ]}
-          onPress={handleBridge}
-          disabled={!amount || !destAddress || isBridging}
-        >
-          {isBridging ? (
-            <ActivityIndicator color={THEME.colors.white} />
-          ) : (
-            <>
-              <Ionicons name="git-branch" size={20} color={THEME.colors.white} />
-              <Text style={styles.bridgeButtonText}>Start Bridge</Text>
-            </>
-          )}
-        </TouchableOpacity>
-
-        {/* Pending Bridges */}
-        {pendingBridges.length > 0 && (
-          <View style={styles.pendingSection}>
-            <Text style={styles.pendingSectionTitle}>Pending Bridges</Text>
-            {pendingBridges.map(bridge => (
-              <View key={bridge.id} style={styles.pendingCard}>
-                <View style={styles.pendingInfo}>
-                  <Text style={styles.pendingAmount}>
-                    {bridge.amount} {bridge.asset}
-                  </Text>
-                  <Text style={styles.pendingRoute}>
-                    {bridge.sourceChain} → {bridge.destChain}
-                  </Text>
-                </View>
-                <View style={styles.pendingStatus}>
-                  <ActivityIndicator size="small" color={THEME.colors.primary} />
-                  <Text style={styles.pendingStatusText}>
-                    {bridge.status.charAt(0).toUpperCase() + bridge.status.slice(1)}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Info Note */}
-        <View style={styles.infoNote}>
-          <Ionicons name="information-circle" size={20} color={THEME.colors.secondary} />
-          <Text style={styles.infoText}>
-            Cross-chain bridges use secure smart contracts to lock assets on the source 
-            chain and mint equivalent privacy tokens on Chameleon Network.
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Devnet Warning */}
+        <View style={styles.devnetWarning}>
+          <Ionicons name="warning" size={18} color="#F59E0B" />
+          <Text style={styles.devnetWarningText}>
+            Devnet Mode - Test tokens only
           </Text>
         </View>
 
-        {/* Bottom Spacing */}
-        <View style={{ height: 100 }} />
+        {/* Info Card */}
+        <View style={styles.infoCard}>
+          <Ionicons name="git-branch-outline" size={28} color={THEME.colors.primary} />
+          <Text style={styles.infoTitle}>Bridge Assets to Chameleon</Text>
+          <Text style={styles.infoDescription}>
+            Transfer assets from external blockchains to Chameleon Network. 
+            All bridged assets are automatically converted to privacy tokens (pBTC, pETH, pUSDT).
+          </Text>
+        </View>
+
+        {/* Available Bridges */}
+        <Text style={styles.sectionTitle}>Available Bridges</Text>
+        {AVAILABLE_BRIDGES.map((bridge) => (
+          <View key={bridge.id} style={styles.bridgeCard}>
+            <View style={[styles.bridgeIcon, { backgroundColor: bridge.color + '20' }]}>
+              <Ionicons name={bridge.icon as any} size={24} color={bridge.color} />
+            </View>
+            <View style={styles.bridgeInfo}>
+              <Text style={styles.bridgeName}>{bridge.name}</Text>
+              <Text style={styles.bridgeSymbol}>{bridge.symbol} → p{bridge.symbol}</Text>
+            </View>
+            <View style={styles.statusBadge}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusText}>Active</Text>
+            </View>
+          </View>
+        ))}
+
+        {/* Action Buttons */}
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push('/shield')}
+          >
+            <LinearGradient
+              colors={['#6366F1', '#8B5CF6']}
+              style={styles.actionButtonGradient}
+            >
+              <Ionicons name="arrow-down-circle" size={24} color={THEME.colors.white} />
+              <Text style={styles.actionButtonText}>Deposit (Shield)</Text>
+              <Text style={styles.actionButtonSubtext}>Bridge assets into Chameleon</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push('/unshield')}
+          >
+            <LinearGradient
+              colors={['#10B981', '#059669']}
+              style={styles.actionButtonGradient}
+            >
+              <Ionicons name="arrow-up-circle" size={24} color={THEME.colors.white} />
+              <Text style={styles.actionButtonText}>Withdraw (Unshield)</Text>
+              <Text style={styles.actionButtonSubtext}>Bridge assets out of Chameleon</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        {/* Coming Soon */}
+        <Text style={styles.sectionTitle}>Coming Soon</Text>
+        {COMING_SOON_BRIDGES.map((bridge) => (
+          <View key={bridge.id} style={[styles.bridgeCard, styles.bridgeCardDisabled]}>
+            <View style={[styles.bridgeIcon, { backgroundColor: bridge.color + '10' }]}>
+              <Ionicons name={bridge.icon as any} size={24} color={bridge.color + '60'} />
+            </View>
+            <View style={styles.bridgeInfo}>
+              <Text style={[styles.bridgeName, styles.textDisabled]}>{bridge.name}</Text>
+              <Text style={[styles.bridgeSymbol, styles.textDisabled]}>{bridge.symbol} → p{bridge.symbol}</Text>
+            </View>
+            <View style={styles.comingSoonBadge}>
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
+          </View>
+        ))}
+
+        {/* How it Works */}
+        <View style={styles.howItWorks}>
+          <Text style={styles.howItWorksTitle}>How Bridging Works</Text>
+          <View style={styles.step}>
+            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>1</Text></View>
+            <Text style={styles.stepText}>Select token and enter amount to bridge</Text>
+          </View>
+          <View style={styles.step}>
+            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
+            <Text style={styles.stepText}>Send tokens to the bridge deposit address</Text>
+          </View>
+          <View style={styles.step}>
+            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>3</Text></View>
+            <Text style={styles.stepText}>Receive privacy tokens (pBTC, pETH, etc.) automatically</Text>
+          </View>
+        </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -298,22 +159,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  centerContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noWalletText: {
-    fontSize: THEME.fontSize.lg,
-    color: THEME.colors.textSecondary,
-    marginTop: THEME.spacing.md,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: THEME.spacing.md,
-    paddingVertical: THEME.spacing.md,
+    paddingVertical: THEME.spacing.sm,
   },
   backButton: {
     padding: THEME.spacing.xs,
@@ -323,186 +174,180 @@ const styles = StyleSheet.create({
     fontWeight: THEME.fontWeight.bold,
     color: THEME.colors.text,
   },
-  // Bridge Card
-  bridgeCard: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: THEME.spacing.md,
+    paddingBottom: THEME.spacing.xxl,
+  },
+  devnetWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    padding: THEME.spacing.sm,
+    borderRadius: THEME.borderRadius.medium,
+    marginBottom: THEME.spacing.md,
+  },
+  devnetWarningText: {
+    marginLeft: THEME.spacing.xs,
+    color: '#92400E',
+    fontSize: THEME.fontSize.sm,
+  },
+  infoCard: {
     backgroundColor: THEME.colors.white,
-    marginHorizontal: THEME.spacing.md,
     borderRadius: THEME.borderRadius.large,
     padding: THEME.spacing.lg,
+    alignItems: 'center',
+    marginBottom: THEME.spacing.lg,
     ...THEME.shadows.medium,
   },
-  chainSection: {
-    marginBottom: THEME.spacing.md,
-  },
-  sectionLabel: {
-    fontSize: THEME.fontSize.sm,
-    fontWeight: THEME.fontWeight.semibold,
-    color: THEME.colors.text,
-    marginBottom: THEME.spacing.sm,
-  },
-  amountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: THEME.spacing.sm,
-  },
-  amountInput: {
-    flex: 1,
-    fontSize: THEME.fontSize['2xl'],
+  infoTitle: {
+    fontSize: THEME.fontSize.lg,
     fontWeight: THEME.fontWeight.bold,
     color: THEME.colors.text,
-    padding: 0,
+    marginTop: THEME.spacing.sm,
+    textAlign: 'center',
   },
-  assetSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: THEME.colors.lightGrey,
-    paddingHorizontal: THEME.spacing.md,
-    paddingVertical: THEME.spacing.sm,
-    borderRadius: THEME.borderRadius.full,
+  infoDescription: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+    textAlign: 'center',
+    marginTop: THEME.spacing.xs,
+    lineHeight: 20,
   },
-  assetText: {
+  sectionTitle: {
     fontSize: THEME.fontSize.base,
     fontWeight: THEME.fontWeight.semibold,
     color: THEME.colors.text,
+    marginBottom: THEME.spacing.sm,
+    marginTop: THEME.spacing.md,
+  },
+  bridgeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: THEME.colors.white,
+    borderRadius: THEME.borderRadius.medium,
+    padding: THEME.spacing.md,
+    marginBottom: THEME.spacing.sm,
+    ...THEME.shadows.small,
+  },
+  bridgeCardDisabled: {
+    opacity: 0.7,
+  },
+  bridgeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bridgeInfo: {
+    flex: 1,
+    marginLeft: THEME.spacing.md,
+  },
+  bridgeName: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.semibold,
+    color: THEME.colors.text,
+  },
+  bridgeSymbol: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textMuted,
+    marginTop: 2,
+  },
+  textDisabled: {
+    color: THEME.colors.textMuted,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#D1FAE5',
+    paddingHorizontal: THEME.spacing.sm,
+    paddingVertical: THEME.spacing.xs,
+    borderRadius: THEME.borderRadius.small,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
     marginRight: THEME.spacing.xs,
   },
-  swapButton: {
-    alignItems: 'center',
-    marginVertical: THEME.spacing.sm,
-  },
-  swapIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: THEME.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  outputContainer: {
-    marginTop: THEME.spacing.sm,
-  },
-  outputAmount: {
-    fontSize: THEME.fontSize['2xl'],
-    fontWeight: THEME.fontWeight.bold,
-    color: THEME.colors.textSecondary,
-  },
-  addressSection: {
-    marginTop: THEME.spacing.md,
-    paddingTop: THEME.spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: THEME.colors.border,
-  },
-  addressInput: {
-    backgroundColor: THEME.colors.lightGrey,
-    borderRadius: THEME.borderRadius.medium,
-    paddingHorizontal: THEME.spacing.md,
-    paddingVertical: THEME.spacing.md,
-    fontSize: THEME.fontSize.sm,
-    color: THEME.colors.text,
-  },
-  // Quote Card
-  quoteCard: {
-    backgroundColor: THEME.colors.white,
-    marginHorizontal: THEME.spacing.md,
-    marginTop: THEME.spacing.md,
-    borderRadius: THEME.borderRadius.medium,
-    padding: THEME.spacing.md,
-    ...THEME.shadows.small,
-  },
-  quoteRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: THEME.spacing.sm,
-  },
-  quoteLabel: {
-    fontSize: THEME.fontSize.sm,
-    color: THEME.colors.textSecondary,
-  },
-  quoteValue: {
-    fontSize: THEME.fontSize.sm,
+  statusText: {
+    fontSize: THEME.fontSize.xs,
+    color: '#059669',
     fontWeight: THEME.fontWeight.medium,
-    color: THEME.colors.text,
   },
-  quoteValueHighlight: {
-    color: THEME.colors.primary,
-    fontWeight: THEME.fontWeight.bold,
+  comingSoonBadge: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: THEME.spacing.sm,
+    paddingVertical: THEME.spacing.xs,
+    borderRadius: THEME.borderRadius.small,
   },
-  // Bridge Button
-  bridgeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: THEME.colors.primary,
-    marginHorizontal: THEME.spacing.md,
+  comingSoonText: {
+    fontSize: THEME.fontSize.xs,
+    color: THEME.colors.textMuted,
+    fontWeight: THEME.fontWeight.medium,
+  },
+  actionButtons: {
     marginTop: THEME.spacing.lg,
-    borderRadius: THEME.borderRadius.full,
-    paddingVertical: THEME.spacing.md,
     gap: THEME.spacing.sm,
   },
-  bridgeButtonDisabled: {
-    backgroundColor: THEME.colors.lightGrey,
+  actionButton: {
+    borderRadius: THEME.borderRadius.medium,
+    overflow: 'hidden',
   },
-  bridgeButtonText: {
+  actionButtonGradient: {
+    padding: THEME.spacing.lg,
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    fontSize: THEME.fontSize.lg,
+    fontWeight: THEME.fontWeight.bold,
     color: THEME.colors.white,
-    fontSize: THEME.fontSize.lg,
-    fontWeight: THEME.fontWeight.semibold,
+    marginTop: THEME.spacing.xs,
   },
-  // Pending
-  pendingSection: {
-    marginHorizontal: THEME.spacing.md,
-    marginTop: THEME.spacing.xl,
+  actionButtonSubtext: {
+    fontSize: THEME.fontSize.sm,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: THEME.spacing.xs,
   },
-  pendingSectionTitle: {
-    fontSize: THEME.fontSize.lg,
+  howItWorks: {
+    backgroundColor: THEME.colors.white,
+    borderRadius: THEME.borderRadius.large,
+    padding: THEME.spacing.lg,
+    marginTop: THEME.spacing.lg,
+    ...THEME.shadows.medium,
+  },
+  howItWorksTitle: {
+    fontSize: THEME.fontSize.base,
     fontWeight: THEME.fontWeight.bold,
     color: THEME.colors.text,
     marginBottom: THEME.spacing.md,
   },
-  pendingCard: {
-    backgroundColor: THEME.colors.white,
-    borderRadius: THEME.borderRadius.medium,
-    padding: THEME.spacing.md,
+  step: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: THEME.spacing.sm,
-    ...THEME.shadows.small,
   },
-  pendingInfo: {},
-  pendingAmount: {
-    fontSize: THEME.fontSize.base,
-    fontWeight: THEME.fontWeight.semibold,
-    color: THEME.colors.text,
-  },
-  pendingRoute: {
-    fontSize: THEME.fontSize.sm,
-    color: THEME.colors.textSecondary,
-  },
-  pendingStatus: {
-    flexDirection: 'row',
+  stepNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: THEME.colors.primary,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: THEME.spacing.sm,
+    marginRight: THEME.spacing.sm,
   },
-  pendingStatusText: {
+  stepNumberText: {
     fontSize: THEME.fontSize.sm,
-    color: THEME.colors.primary,
+    fontWeight: THEME.fontWeight.bold,
+    color: THEME.colors.white,
   },
-  // Info Note
-  infoNote: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: THEME.colors.white,
-    marginHorizontal: THEME.spacing.md,
-    marginTop: THEME.spacing.lg,
-    borderRadius: THEME.borderRadius.medium,
-    padding: THEME.spacing.md,
-    ...THEME.shadows.small,
-  },
-  infoText: {
+  stepText: {
     flex: 1,
-    marginLeft: THEME.spacing.sm,
     fontSize: THEME.fontSize.sm,
     color: THEME.colors.textSecondary,
-    lineHeight: 20,
   },
 });
