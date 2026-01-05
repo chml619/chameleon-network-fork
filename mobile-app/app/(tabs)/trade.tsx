@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Image,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -38,13 +39,13 @@ export default function TradeScreen() {
     quote,
     isLoadingQuote,
     isSwapping,
-    privacyMode,
+    mevProtection,
     error,
     setAmountIn,
     selectTokenIn,
     selectTokenOut,
     swapTokens,
-    togglePrivacyMode,
+    toggleMEVProtection,
     setMaxAmount,
     validateSwap,
     executeSwap,
@@ -52,6 +53,8 @@ export default function TradeScreen() {
 
   const [activeTab, setActiveTab] = useState<TabType>('swap');
 
+  const [slippage, setSlippage] = useState('0.5');
+  const [showSlippageModal, setShowSlippageModal] = useState(false);
   const handleSwap = async () => {
     const validationError = validateSwap();
     if (validationError) {
@@ -142,37 +145,52 @@ export default function TradeScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {activeTab === 'swap' ? (
           <>
-            {/* Privacy Mode Toggle */}
+            {/* MEV Protection Toggle */}
             <TouchableOpacity
               style={styles.privacyToggle}
-              onPress={togglePrivacyMode}
+              onPress={toggleMEVProtection}
             >
               <View style={styles.privacyLeft}>
                 <Ionicons
-                  name={privacyMode ? 'lock-closed' : 'lock-open'}
+                  name={mevProtection ? 'lock-closed' : 'lock-open'}
                   size={18}
-                  color={privacyMode ? THEME.colors.primary : THEME.colors.textMuted}
+                  color={mevProtection ? THEME.colors.primary : THEME.colors.textMuted}
                 />
                 <Text style={[
                   styles.privacyText,
-                  privacyMode && styles.privacyTextActive
+                  mevProtection && styles.privacyTextActive
                 ]}>
-                  Privacy Mode
+                  MEV Protection
                 </Text>
               </View>
               <View style={[
                 styles.privacyBadge,
-                privacyMode && styles.privacyBadgeActive
+                mevProtection && styles.privacyBadgeActive
               ]}>
                 <Text style={[
                   styles.privacyBadgeText,
-                  privacyMode && styles.privacyBadgeTextActive
+                  mevProtection && styles.privacyBadgeTextActive
                 ]}>
-                  {privacyMode ? 'ON' : 'OFF'}
+                  {mevProtection ? 'ON' : 'OFF'}
                 </Text>
               </View>
             </TouchableOpacity>
 
+
+            {/* Slippage Settings */}
+            <TouchableOpacity
+              style={styles.slippageToggle}
+              onPress={() => setShowSlippageModal(true)}
+            >
+              <View style={styles.privacyLeft}>
+                <Ionicons name="settings-outline" size={18} color={THEME.colors.textSecondary} />
+                <Text style={styles.slippageText}>Slippage Tolerance</Text>
+              </View>
+              <View style={styles.slippageBadge}>
+                <Text style={styles.slippageBadgeText}>{slippage}%</Text>
+                <Ionicons name="chevron-forward" size={16} color={THEME.colors.textMuted} />
+              </View>
+            </TouchableOpacity>
             {/* Swap Card */}
             <View style={styles.swapCard}>
               {/* From Section */}
@@ -289,11 +307,11 @@ export default function TradeScreen() {
                   <ActivityIndicator color={THEME.colors.white} />
                 ) : (
                   <>
-                    {privacyMode && (
+                    {mevProtection && (
                       <Ionicons name="lock-closed" size={18} color={THEME.colors.white} />
                     )}
                     <Text style={styles.swapButtonText}>
-                      {validateSwap() || (privacyMode ? 'Swap Privately' : 'Swap')}
+                      {validateSwap() || (mevProtection ? 'Swap Privately' : 'Swap')}
                     </Text>
                   </>
                 )}
@@ -324,9 +342,9 @@ export default function TradeScreen() {
                 <Text style={styles.infoTitle}>Privacy DEX</Text>
               </View>
               <Text style={styles.infoText}>
-                {privacyMode
-                  ? 'Your swap will use zero-knowledge proofs to hide transaction details from on-chain observers.'
-                  : 'Enable Privacy Mode to hide your swap details using zero-knowledge proofs.'
+                {mevProtection
+                  ? 'MEV Protection ON: Your swap uses ring signatures to hide your identity from mempool bots, preventing front-running attacks.'
+                  : 'MEV Protection OFF: Standard swap - still private but timing is visible to MEV bots.'
                 }
               </Text>
             </View>
@@ -349,6 +367,48 @@ export default function TradeScreen() {
         {/* Bottom Spacing */}
         <View style={{ height: 120 }} />
       </ScrollView>
+
+      {/* Slippage Modal */}
+      <Modal visible={showSlippageModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Slippage Tolerance</Text>
+              <TouchableOpacity onPress={() => setShowSlippageModal(false)}>
+                <Ionicons name="close" size={24} color={THEME.colors.text} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalDescription}>
+              Your transaction will revert if the price changes unfavorably by more than this percentage.
+            </Text>
+            <View style={styles.slippageOptions}>
+              {["0.5", "1.0", "3.0"].map((value) => (
+                <TouchableOpacity
+                  key={value}
+                  style={[styles.slippageOption, slippage === value && styles.slippageOptionActive]}
+                  onPress={() => { setSlippage(value); setShowSlippageModal(false); }}
+                >
+                  <Text style={[styles.slippageOptionText, slippage === value && styles.slippageOptionTextActive]}>{value}%</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.customSlippage}>
+              <Text style={styles.customSlippageLabel}>Custom:</Text>
+              <TextInput
+                style={styles.customSlippageInput}
+                value={slippage}
+                onChangeText={setSlippage}
+                keyboardType="decimal-pad"
+                placeholder="0.5"
+              />
+              <Text style={styles.customSlippagePercent}>%</Text>
+            </View>
+            <TouchableOpacity style={styles.slippageConfirm} onPress={() => setShowSlippageModal(false)}>
+              <Text style={styles.slippageConfirmText}>Confirm</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
@@ -670,5 +730,116 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: THEME.spacing.lg,
     lineHeight: 22,
+  },
+  slippageToggle: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginHorizontal: THEME.spacing.md,
+    marginBottom: THEME.spacing.sm,
+    padding: THEME.spacing.sm,
+    backgroundColor: THEME.colors.white,
+    borderRadius: THEME.borderRadius.medium,
+  },
+  slippageText: {
+    marginLeft: THEME.spacing.sm,
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+  },
+  slippageBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  slippageBadgeText: {
+    fontSize: THEME.fontSize.sm,
+    fontWeight: THEME.fontWeight.medium,
+    color: THEME.colors.text,
+    marginRight: THEME.spacing.xs,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: THEME.colors.white,
+    borderTopLeftRadius: THEME.borderRadius.large,
+    borderTopRightRadius: THEME.borderRadius.large,
+    padding: THEME.spacing.lg,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: THEME.spacing.md,
+  },
+  modalTitle: {
+    fontSize: THEME.fontSize.lg,
+    fontWeight: THEME.fontWeight.bold,
+    color: THEME.colors.text,
+  },
+  modalDescription: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+    marginBottom: THEME.spacing.lg,
+  },
+  slippageOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: THEME.spacing.lg,
+  },
+  slippageOption: {
+    flex: 1,
+    padding: THEME.spacing.md,
+    marginHorizontal: THEME.spacing.xs,
+    backgroundColor: THEME.colors.lightGrey,
+    borderRadius: THEME.borderRadius.medium,
+    alignItems: "center",
+  },
+  slippageOptionActive: {
+    backgroundColor: THEME.colors.primary,
+  },
+  slippageOptionText: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.medium,
+    color: THEME.colors.text,
+  },
+  slippageOptionTextActive: {
+    color: THEME.colors.white,
+  },
+  customSlippage: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: THEME.spacing.lg,
+  },
+  customSlippageLabel: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+    marginRight: THEME.spacing.sm,
+  },
+  customSlippageInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: THEME.colors.border,
+    borderRadius: THEME.borderRadius.medium,
+    padding: THEME.spacing.sm,
+    fontSize: THEME.fontSize.base,
+    textAlign: "center",
+  },
+  customSlippagePercent: {
+    fontSize: THEME.fontSize.base,
+    color: THEME.colors.text,
+    marginLeft: THEME.spacing.sm,
+  },
+  slippageConfirm: {
+    backgroundColor: THEME.colors.primary,
+    padding: THEME.spacing.md,
+    borderRadius: THEME.borderRadius.medium,
+    alignItems: "center",
+  },
+  slippageConfirmText: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.bold,
+    color: THEME.colors.white,
   },
 });

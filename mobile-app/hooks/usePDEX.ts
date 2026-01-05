@@ -21,7 +21,7 @@ export function usePDEX() {
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
-  const [privacyMode, setPrivacyMode] = useState(pdexService.isPrivacyModeEnabled());
+  const [mevProtection, setPrivacyMode] = useState(pdexService.isMEVProtectionEnabled());
   const [error, setError] = useState<string | null>(null);
 
   // Fetch token balances
@@ -112,11 +112,11 @@ export function usePDEX() {
     }
   }, [selectedTokenIn.symbol, swapTokens]);
 
-  const togglePrivacyMode = useCallback(() => {
-    const newMode = !privacyMode;
+  const toggleMEVProtection = useCallback(() => {
+    const newMode = !mevProtection;
     setPrivacyMode(newMode);
     pdexService.setPrivacyMode(newMode);
-  }, [privacyMode]);
+  }, [mevProtection]);
 
   const setMaxAmount = useCallback(() => {
     if (selectedTokenIn.balance) {
@@ -206,13 +206,13 @@ export function usePDEX() {
     quote,
     isLoadingQuote,
     isSwapping,
-    privacyMode,
+    mevProtection,
     error,
     setAmountIn,
     selectTokenIn,
     selectTokenOut,
     swapTokens,
-    togglePrivacyMode,
+    toggleMEVProtection,
     setMaxAmount,
     validateSwap,
     executeSwap,
