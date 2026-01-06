@@ -94,19 +94,24 @@ export default function HomeScreen() {
     if (!wallet?.address) return;
     const api = apiService.getApi();
     if (!api) return;
+    
     try {
+      // Fetch all balances in parallel
       const [pBTC, pETH, pUSDT] = await Promise.all([
-        api.query.pdex.tokenBalances(wallet.address, 2),
-        api.query.pdex.tokenBalances(wallet.address, 1),
-        api.query.pdex.tokenBalances(wallet.address, 3),
+        api.query.pdex.tokenBalances(wallet.address, 2).catch(() => '0'),
+        api.query.pdex.tokenBalances(wallet.address, 1).catch(() => '0'),
+        api.query.pdex.tokenBalances(wallet.address, 3).catch(() => '0'),
       ]);
+      
+      // Only update state if we got valid responses
       setPTokenBalances({
-        pBTC: pBTC.toString(),
-        pETH: pETH.toString(),
-        pUSDT: pUSDT.toString(),
+        pBTC: pBTC.toString() || '0',
+        pETH: pETH.toString() || '0',
+        pUSDT: pUSDT.toString() || '0',
       });
     } catch (error) {
       console.error("[Home] Error loading pToken balances:", error);
+      // Keep existing values on error - don't reset to 0
     }
   }, [wallet?.address]);
   // Check for incoming transactions
