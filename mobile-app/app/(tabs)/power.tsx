@@ -124,10 +124,10 @@ export default function PowerScreen() {
   // Load LP data
   useEffect(() => {
     loadLPData();
-  }, [connectionState.api, wallet?.address]);
+  }, [api, wallet?.address]);
 
   const loadLPData = async () => {
-    if (!connectionState.api || !wallet?.address) return;
+    if (!api || !wallet?.address) return;
     setIsLoadingLP(true);
     try {
       // Mock LP rewards for now - will connect to emissions pallet
@@ -144,7 +144,7 @@ export default function PowerScreen() {
   };
 
   const handleClaimLPRewards = async () => {
-    if (!connectionState.api || !wallet) return;
+    if (!api || !wallet) return;
     
     // For now, we'll mock the keyPair requirement
     // const keyPair = await walletService.getOrDeriveKeyPair();
