@@ -197,28 +197,8 @@ class PDEXService {
    * pCHML is TokenId 0 in the pDEX pallet
    */
   async getPCHMLBalance(address: string): Promise<BN> {
-    const api = apiService.getApi();
-    if (!api) {
-      console.log('[pDEX] API not available, returning 0');
-      return new BN(0);
-    }
-
-    try {
-      // Check if pdex pallet exists
-      if (!api.query.pdex || !(api.query.pdex as any).tokenBalances) {
-        console.log('[pDEX] Pallet not available, returning mock balance');
-        // Return mock balance for development (1 pCHML = 10^12)
-        return new BN('1000000000000');
-      }
-
-      // TokenId 0 = pCHML
-      const balance = await (api.query.pdex as any).tokenBalances(address, PCHML_TOKEN_ID);
-      return new BN(balance.toString());
-    } catch (error) {
-      console.error('[pDEX] Error getting pCHML balance:', error);
-      // Return mock for development
-      return new BN('1000000000000');
-    }
+    // Use cached getTokenBalance for pCHML (TokenId 0)
+    return this.getTokenBalance(PCHML_TOKEN_ID, address);
   }
 
   /**
