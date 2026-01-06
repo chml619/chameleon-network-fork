@@ -95,7 +95,7 @@ export default function BridgeScreen() {
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => router.push('/shield')}
+            onPress={() => router.push('/shield' as any)}
           >
             <LinearGradient
               colors={['#6366F1', '#8B5CF6']}
