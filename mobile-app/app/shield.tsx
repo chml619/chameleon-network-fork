@@ -160,7 +160,8 @@ export default function ShieldScreen() {
       return 'Insufficient balance';
     }
 
-    if (feeEstimate && feeEstimate.partialFee) {
+    // For CHML, check fee. For bridge tokens, no fee check needed
+    if (!selectedToken.requiresBridge && feeEstimate && feeEstimate.partialFee) {
       const amountBN = parseAmount(amount);
       const feeBN = new BN(feeEstimate.partialFee);
       const totalBN = amountBN.add(feeBN);
