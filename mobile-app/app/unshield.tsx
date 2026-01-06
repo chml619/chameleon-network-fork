@@ -255,6 +255,21 @@ export default function UnshieldScreen() {
         const inputStealthHash = generateStealthHash(stealthMetaAddress);
         txHash = await privacyService.unshield(keyPair, inputStealthHash, amountBN, destinationAddress);
         successMessage = "Tokens unshielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
+        
+        // Save unshield to transaction history
+        try {
+          await transactionHistoryService.saveTransaction(wallet.address, {
+            hash: txHash,
+            from: wallet.address,
+            to: destinationAddress,
+            amount: amountBN.toString(),
+            formattedAmount: `${amount} ${selectedToken.symbol} → ${amount} ${selectedToken.outputSymbol}`,
+            status: 'finalized',
+            usedMEVProtection: false,
+          });
+        } catch (e) {
+          console.error('[Unshield] Failed to save to history:', e);
+        }
       }
 
       Alert.alert(
