@@ -3,7 +3,7 @@
  * Shows QR code and address for receiving tokens
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
   StyleSheet,
   Share,
   ScrollView,
+  Modal,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
