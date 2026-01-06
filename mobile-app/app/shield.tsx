@@ -187,9 +187,9 @@ export default function ShieldScreen() {
     setIsShielding(true);
 
     try {
-      const keyPair = walletService.getKeyPair();
+      const keyPair = await walletService.getOrDeriveKeyPair();
       if (!keyPair) {
-        throw new Error('Wallet not unlocked');
+        throw new Error('Wallet not unlocked. Please try re-importing your wallet.');
       }
 
       const api = apiService.getApi();
