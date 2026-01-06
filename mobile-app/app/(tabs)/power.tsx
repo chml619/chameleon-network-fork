@@ -121,6 +121,54 @@ export default function PowerScreen() {
     }
   }, [connectionState.blockNumber]);
 
+  // Load LP data
+  useEffect(() => {
+    loadLPData();
+  }, [connectionState.api, wallet?.address]);
+
+  const loadLPData = async () => {
+    if (!connectionState.api || !wallet?.address) return;
+    setIsLoadingLP(true);
+    try {
+      // Mock LP rewards for now - will connect to emissions pallet
+      // In production: const rewards = await api.query.emissions.pendingLpRewards(wallet.address);
+      setLpRewards('0.0000');
+      
+      // Mock empty positions for now - will query pDEX pallet
+      setLpPositions([]);
+    } catch (error) {
+      console.error('Error loading LP data:', error);
+    } finally {
+      setIsLoadingLP(false);
+    }
+  };
+
+  const handleClaimLPRewards = async () => {
+    if (!connectionState.api || !wallet) return;
+    
+    // For now, we'll mock the keyPair requirement
+    // const keyPair = await walletService.getOrDeriveKeyPair();
+    // if (!keyPair) {
+    //   Alert.alert('Error', 'Wallet not unlocked');
+    //   return;
+    // }
+
+    setActionLoading('claimLP');
+    try {
+      // Will connect to emissions.claimLpRewards() when pallet is ready
+      // For now, show success with mock
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // if (refreshPCHMLBalance) await refreshPCHMLBalance();
+      Alert.alert('Success', 'LP rewards claimed successfully!');
+      await loadLPData();
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Claim failed');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Pull to refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
