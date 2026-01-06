@@ -41,33 +41,21 @@ export default function ReceiveScreen() {
   const [selectedToken, setSelectedToken] = useState(TOKENS[0]);
   const [showTokenSelector, setShowTokenSelector] = useState(false);
 
-  // Generate stealth address for receiving
-  const getStealthAddress = (): string => {
+  // Get the receive address (same for all pTokens on Chameleon)
+  const getReceiveAddress = (): string => {
     if (!wallet?.address) return '';
     
     try {
-      const keyPair = walletService.getKeyPair();
-      if (!keyPair) {
-        // Fallback to regular address if wallet is locked
-        return wallet.address;
-      }
-      
-      // Generate stealth meta-address from wallet
-      const stealthMeta = {
-        spendPubkey: keyPair.publicKey,
-        viewPubkey: keyPair.publicKey, // Simplified for demo
-      };
-      
-      const stealthHash = generateStealthHash(stealthMeta);
-      return '0x' + Buffer.from(stealthHash).toString('hex');
+      // For pTokens, we use the regular Chameleon address
+      // All pTokens (pCHML, pBTC, pETH, pUSDT) are received at the same address
+      return wallet.address;
     } catch (error) {
-      console.error('Error generating stealth address:', error);
-      return wallet.address; // Fallback to regular address
+      console.error('Error getting receive address:', error);
+      return '';
     }
   };
 
-  const stealthAddress = getStealthAddress();
-  const isStealthAddress = stealthAddress.startsWith('0x');
+  const receiveAddress = getReceiveAddress();
 
   const handleCopyAddress = async () => {
     if (stealthAddress) {
