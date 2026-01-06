@@ -38,6 +38,8 @@ export default function ReceiveScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { wallet } = useWallet();
+  const [selectedToken, setSelectedToken] = useState(TOKENS[0]);
+  const [showTokenSelector, setShowTokenSelector] = useState(false);
 
   // Generate stealth address for receiving
   const getStealthAddress = (): string => {
