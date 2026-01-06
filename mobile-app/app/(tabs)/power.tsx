@@ -47,6 +47,16 @@ const UNBONDING_PERIOD = 100800;
 
 type SectionType = 'validate' | 'liquidity';
 
+// Add this interface before the component
+interface LPPosition {
+  poolId: number;
+  poolName: string;
+  tokenA: string;
+  tokenB: string;
+  liquidity: string;
+  sharePercent: string;
+}
+
 export default function PowerScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
