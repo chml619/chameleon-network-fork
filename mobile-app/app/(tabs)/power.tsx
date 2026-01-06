@@ -653,143 +653,94 @@ export default function PowerScreen() {
         {/* LIQUIDITY SECTION */}
         {activeSection === 'liquidity' && (
           <>
-            {/* Your LP Positions */}
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleRow}>
-                  <Ionicons name="wallet" size={24} color={THEME.colors.primary} />
-                  <Text style={styles.cardTitle}>Your LP Positions</Text>
+            {/* LP Rewards Section */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionTitleRow}>
+                  <Ionicons name="water" size={24} color={THEME.colors.primary} />
+                  <Text style={styles.sectionTitle}>Liquidity Provisioning</Text>
                 </View>
-                {!totalPendingRewards.isZero() && (
-                  <View style={[styles.statusBadge, { backgroundColor: '#10B98120' }]}>
-                    <Text style={[styles.statusText, { color: '#10B981' }]}>
-                      {formatBalance(totalPendingRewards)} pending
-                    </Text>
+              </View>
+              
+              {/* LP Rewards Card */}
+              <View style={styles.lpRewardsCard}>
+                <View style={styles.lpRewardsHeader}>
+                  <Text style={styles.lpRewardsLabel}>Pending LP Rewards</Text>
+                  <View style={styles.apyBadge}>
+                    <Text style={styles.apyText}>~12% APY</Text>
                   </View>
-                )}
+                </View>
+                <Text style={styles.lpRewardsAmount}>{lpRewards} pCHML</Text>
+                <Text style={styles.lpRewardsSubtext}>30% of block emissions distributed to LPs</Text>
+                
+                <TouchableOpacity
+                  style={[styles.claimLPButton, (actionLoading === 'claimLP' || parseFloat(lpRewards) <= 0) && styles.buttonDisabled]}
+                  onPress={handleClaimLPRewards}
+                  disabled={actionLoading === 'claimLP' || parseFloat(lpRewards) <= 0}
+                >
+                  {actionLoading === 'claimLP' ? (
+                    <ActivityIndicator color={THEME.colors.white} size="small" />
+                  ) : (
+                    <>
+                      <Ionicons name="download" size={18} color={THEME.colors.white} />
+                      <Text style={styles.claimLPButtonText}>Claim Rewards</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
               </View>
 
-              {liquidityLoading ? (
+              {/* LP Positions */}
+              <Text style={styles.subsectionTitle}>Your Liquidity Positions</Text>
+              
+              {isLoadingLP ? (
                 <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color={THEME.colors.primary} />
-                  <Text style={styles.loadingText}>Loading positions...</Text>
+                  <ActivityIndicator size="small" color={THEME.colors.primary} />
                 </View>
-              ) : !hasPositions ? (
-                <View style={styles.statusContent}>
-                  <Ionicons name="water-outline" size={48} color={THEME.colors.textMuted} />
-                  <Text style={styles.statusMessage}>No LP positions yet</Text>
-                  <Text style={styles.statusSubMessage}>
-                    Add liquidity to start earning rewards
+              ) : lpPositions.length === 0 ? (
+                <View style={styles.emptyLP}>
+                  <View style={styles.emptyLPIcon}>
+                    <Ionicons name="water-outline" size={40} color={THEME.colors.textMuted} />
+                  </View>
+                  <Text style={styles.emptyLPText}>No liquidity positions yet</Text>
+                  <Text style={styles.emptyLPSubtext}>
+                    Provide liquidity to earn trading fees and LP rewards
                   </Text>
+                  <TouchableOpacity
+                    style={styles.addLiquidityButton}
+                    onPress={() => router.push('/add-liquidity' as any)}
+                  >
+                    <Ionicons name="add-circle" size={20} color={THEME.colors.primary} />
+                    <Text style={styles.addLiquidityText}>Add Liquidity</Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
-                <View style={styles.positionsList}>
-                  {positions.map((position) => (
-                    <View key={position.poolId} style={[styles.positionCard, { borderLeftColor: position.color }]}>
-                      <View style={styles.positionHeader}>
-                        <Text style={styles.positionName}>{position.poolName}</Text>
-                        <View style={[styles.apyBadge, { backgroundColor: '#10B98120' }]}>
-                          <Text style={styles.apyText}>{position.sharePercent.toFixed(2)}% share</Text>
-                        </View>
+                <>
+                  {lpPositions.map((position) => (
+                    <TouchableOpacity
+                      key={position.poolId}
+                      style={styles.lpPositionCard}
+                      onPress={() => router.push(`/pool-detail?poolId=${position.poolId}` as any)}
+                    >
+                      <View style={styles.lpPositionInfo}>
+                        <Text style={styles.lpPoolName}>{position.tokenA}/{position.tokenB}</Text>
+                        <Text style={styles.lpSharePercent}>{position.sharePercent}% pool share</Text>
                       </View>
-                      <View style={styles.positionStats}>
-                        <View style={styles.positionStat}>
-                          <Text style={styles.positionStatLabel}>LP Tokens</Text>
-                          <Text style={styles.positionStatValue}>{formatBalance(position.lpTokens)}</Text>
-                        </View>
-                        <View style={styles.positionStat}>
-                          <Text style={styles.positionStatLabel}>Pending Rewards</Text>
-                          <Text style={[styles.positionStatValue, { color: '#10B981' }]}>
-                            {formatBalance(position.pendingRewards)} CHML
-                          </Text>
-                        </View>
+                      <View style={styles.lpPositionRight}>
+                        <Text style={styles.lpLiquidity}>{position.liquidity} LP</Text>
+                        <Ionicons name="chevron-forward" size={20} color={THEME.colors.textMuted} />
                       </View>
-                      <View style={styles.positionActions}>
-                        <TouchableOpacity
-                          style={[styles.positionButton, styles.claimButton]}
-                          onPress={() => handleClaimLPRewards(position.poolId)}
-                          disabled={lpClaiming || position.pendingRewards.isZero()}
-                        >
-                          {lpClaiming ? (
-                            <ActivityIndicator size="small" color="#10B981" />
-                          ) : (
-                            <Text style={styles.claimButtonText}>Claim</Text>
-                          )}
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[styles.positionButton, styles.removeButton]}
-                          onPress={() => handleRemoveLiquidity(position.poolId, position.lpTokens)}
-                          disabled={isRemoving}
-                        >
-                          <Text style={styles.removeButtonText}>Remove</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
+                    </TouchableOpacity>
                   ))}
-                </View>
+                  
+                  <TouchableOpacity
+                    style={styles.addMoreLiquidity}
+                    onPress={() => router.push('/add-liquidity' as any)}
+                  >
+                    <Ionicons name="add" size={18} color={THEME.colors.primary} />
+                    <Text style={styles.addMoreText}>Add More Liquidity</Text>
+                  </TouchableOpacity>
+                </>
               )}
-            </View>
-
-            {/* Available Pools */}
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Available Pools</Text>
-              {liquidityLoading ? (
-                <ActivityIndicator size="small" color={THEME.colors.primary} />
-              ) : (
-                <View style={styles.poolsList}>
-                  {pools.map((pool) => (
-                    <View key={pool.poolId} style={[styles.poolCard, { borderLeftColor: pool.color }]}>
-                      <View style={styles.poolHeader}>
-                        <Text style={styles.poolName}>{pool.name}</Text>
-                        <View style={[styles.apyBadge, { backgroundColor: '#10B98120' }]}>
-                          <Text style={styles.apyText}>{pool.apy.toFixed(1)}% APY</Text>
-                        </View>
-                      </View>
-                      <View style={styles.poolStats}>
-                        <Text style={styles.poolStatText}>
-                          TVL: {formatBalance(pool.reserveA)} + {formatBalance(pool.reserveB)}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        style={[styles.actionButton, styles.primaryButton, { marginTop: 12 }]}
-                        onPress={() => handleAddLiquidity(pool.poolId)}
-                        disabled={isAdding}
-                      >
-                        {isAdding ? (
-                          <ActivityIndicator size="small" color={THEME.colors.white} />
-                        ) : (
-                          <>
-                            <Ionicons name="add" size={18} color={THEME.colors.white} />
-                            <Text style={styles.actionButtonText}>Add Liquidity</Text>
-                          </>
-                        )}
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
-
-            {/* LP Info Card */}
-            <View style={styles.infoCard}>
-              <View style={styles.infoHeader}>
-                <Ionicons name="information-circle" size={20} color={THEME.colors.primary} />
-                <Text style={styles.infoTitle}>About Liquidity Provision</Text>
-              </View>
-              <Text style={styles.infoText}>
-                Provide liquidity to earn 30% of block rewards. Higher APY pools earn proportionally more.
-                Rewards accumulate per block and can be claimed anytime.
-              </Text>
-              <View style={styles.infoDetails}>
-                <View style={styles.infoRow}>
-                  <Ionicons name="pie-chart-outline" size={16} color={THEME.colors.textSecondary} />
-                  <Text style={styles.infoDetailText}>30% of emissions go to LP providers</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Ionicons name="time-outline" size={16} color={THEME.colors.textSecondary} />
-                  <Text style={styles.infoDetailText}>Rewards accumulate every block</Text>
-                </View>
-              </View>
             </View>
           </>
         )}
