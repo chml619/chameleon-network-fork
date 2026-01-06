@@ -433,7 +433,7 @@ export default function ShieldScreen() {
                 <Text style={styles.previewTitle}>Preview</Text>
                 <View style={styles.previewRow}>
                   <Text style={styles.previewLabel}>You will receive:</Text>
-                  <Text style={styles.previewAmount}>{amount} pCHML (Private)</Text>
+                  <Text style={styles.previewAmount}>{amount} {selectedToken.outputSymbol} (Private)</Text>
                 </View>
                 <View style={styles.privacyBadge}>
                   <Ionicons name="eye-off" size={16} color={THEME.colors.success} />
