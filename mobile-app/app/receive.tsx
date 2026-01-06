@@ -25,6 +25,14 @@ import { QRCode } from '@/components/QRCode';
 import { generateStealthMetaAddress, generateStealthHash, formatStealthHash } from '@/services/privacy';
 import { walletService } from '@/services/wallet';
 import { THEME, GRADIENTS } from '@/constants/theme';
+import { Image } from 'react-native';
+
+const TOKENS = [
+  { id: "CHML", symbol: "pCHML", name: "Chameleon", color: "#6366F1", icon: "diamond-outline" },
+  { id: "BTC", symbol: "pBTC", name: "Bitcoin", color: "#F7931A", icon: "logo-bitcoin" },
+  { id: "ETH", symbol: "pETH", name: "Ethereum", color: "#627EEA", icon: "logo-electron" },
+  { id: "USDT", symbol: "pUSDT", name: "Tether", color: "#26A17B", icon: "logo-usd" },
+];
 
 export default function ReceiveScreen() {
   const router = useRouter();
