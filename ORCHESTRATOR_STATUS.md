@@ -480,8 +480,8 @@ curl -H "Content-Type: application/json" \
 | Phase 13 | Polish & Tech Debt | 1-2 hrs | ⏳ QUEUED |
 
 ### Key Bugs Identified (From Testing Jan 6):
-1. pToken balances slow to load (8-10 sec delay)
-2. pCHML balance switching between 0 and 1
+1. ✅ pToken balances slow to load (8-10 sec delay) - **FIXED: Added 5-second balance caching**
+2. ✅ pCHML balance switching between 0 and 1 - **FIXED: Corrected token decimals (12 not 18)**
 3. "Wallet not unlocked" errors on send/swap
 4. Token selector showing wrong available balance
 5. Bridge page creates recursive loop
