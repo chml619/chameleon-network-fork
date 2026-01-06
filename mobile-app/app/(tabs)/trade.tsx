@@ -77,6 +77,24 @@ export default function TradeScreen() {
           text: 'Swap',
           onPress: async () => {
             const result = await executeSwap();
+            
+            // Save swap to transaction history
+            if (wallet?.address && result) {
+              try {
+                await transactionHistoryService.saveTransaction(wallet.address, {
+                  hash: result.txHash || `swap_${Date.now()}`,
+                  from: wallet.address,
+                  to: wallet.address,
+                  amount: amountIn,
+                  formattedAmount: `${amountIn} ${selectedTokenIn.symbol} → ${result.amountOut || quote.amountOut} ${selectedTokenOut.symbol}`,
+                  status: result.success ? 'finalized' : 'failed',
+                  usedMEVProtection: mevProtection,
+                });
+              } catch (e) {
+                console.error('[Trade] Failed to save to history:', e);
+              }
+            }
+            
             if (result.success) {
               Alert.alert('Success', 'Swap completed successfully!');
             } else {
