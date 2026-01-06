@@ -128,15 +128,37 @@
 
 ## 📅 WEEKS 12-14: ROADMAP
 
-### WEEK 12: Mobile App + Staking Enhancements
-**Status:** ⏳ QUEUED
+### WEEK 12: Mobile App Integration (Jan 4-6, 2026)
+**Status:** 🔄 IN PROGRESS - Phases 0-5 Complete, Phases 6-13 Remaining
 
-**Deliverables:**
-1. Staking cooldown period (unstaking delay)
-2. Node lifecycle (register→waiting→active→unbonding→delete)
-3. Mobile app vNode management UI
-4. Mobile app staking/unstaking UI
-5. Wallet pCHML balance display
+**Completed Phases (Jan 4-6):**
+- ✅ **Phase 0:** pToken Genesis Funding (pBTC, pETH, pUSDT balances)
+- ✅ **Phase 1:** Home Screen Fixes (balance display, quick actions)
+- ✅ **Phase 2:** Shield/Unshield Rework (token selector, bridge flow)
+- ✅ **Phase 3:** Send/Receive Multi-Token (pDEX transfer extrinsic)
+- ✅ **Phase 4:** Bridge Functionality (BTC/ETH/USDT deposit/withdraw)
+- ✅ **Phase 5:** Trade/pDEX with MEV Protection (slippage, real blockchain calls)
+
+**Bug Fix Phases (From Testing):**
+- 🔄 **Phase 6:** Balance & Core Data Fixes (~2-3 hrs)
+- ⏳ **Phase 7:** Shield/Unshield & Bridge Fixes (~3-4 hrs)
+- ⏳ **Phase 8:** Send/Receive Fixes (~1-2 hrs)
+- ⏳ **Phase 9:** Trade/pDEX Fixes + Genesis Pools (~2-3 hrs)
+
+**Feature Phases:**
+- ⏳ **Phase 10:** Wallet Tab Enhancement (~2-3 hrs)
+- ⏳ **Phase 11:** Power Tab - vNode Staking & LP Rewards (~5-6 hrs)
+- ⏳ **Phase 12:** Liquidity Pools Full Implementation (~3-4 hrs)
+- ⏳ **Phase 13:** Polish & Tech Debt (~1-2 hrs)
+
+**Estimated Remaining:** ~20-28 hours (3-5 working days)
+
+**GitHub Commits (Week 12):**
+- `9430ea37` - pDEX transfer extrinsic (call_index 5)
+- `d3ff3a86` - Phase 3: Send/Receive Multi-Token support
+- `72d876dc` - Phase 4: Bridge functionality for external tokens
+- `8903c4ac` - Phase 5: Trade/pDEX with MEV Protection
+- `289f1ed6` - Fix bridge.ts class structure and naming issues
 
 ### WEEK 13-14: Testing + Hardening
 **Status:** ⏳ QUEUED
