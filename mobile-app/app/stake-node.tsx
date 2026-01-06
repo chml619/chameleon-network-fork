@@ -106,7 +106,7 @@ export default function StakeNodeScreen() {
 
   return (
     <LinearGradient
-      colors={GRADIENTS.background.colors as [string, string, ...string[]]}
+      colors={GRADIENTS.background.colors}
       style={[styles.container, { paddingTop: insets.top }]}
     >
       {/* Header */}
