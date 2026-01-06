@@ -41,7 +41,7 @@ const TOKENS = [
 export default function ShieldScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { wallet, refreshPCHMLBalance } = useWallet();
+  const { wallet, refreshBalances, refreshPCHMLBalance } = useWallet();
   const { formattedFreeBalance, balance } = useBalance(wallet?.address);
 
   // Token selector state
