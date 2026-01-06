@@ -118,30 +118,47 @@ export default function ReceiveScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
+          {/* Token Selector */}
+          <View style={styles.tokenSelectorSection}>
+            <Text style={styles.sectionLabel}>Token to Receive</Text>
+            <TouchableOpacity
+              style={styles.tokenSelector}
+              onPress={() => setShowTokenSelector(true)}
+            >
+              <View style={styles.tokenSelectorLeft}>
+                <View style={[styles.tokenIcon, { backgroundColor: selectedToken.color + '20' }]}>
+                  {selectedToken.id === "CHML" ? (
+                    <Image source={require("@/assets/images/Logo.png")} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                  ) : (
+                    <Ionicons name={selectedToken.icon as any} size={20} color={selectedToken.color} />
+                  )}
+                </View>
+                <View>
+                  <Text style={styles.tokenSymbol}>{selectedToken.symbol}</Text>
+                  <Text style={styles.tokenName}>{selectedToken.name}</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-down" size={20} color={THEME.colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+
           {/* QR Code Card */}
           <View style={styles.qrCard}>
-            <Text style={styles.qrTitle}>Share this address to receive private payments</Text>
+            <Text style={styles.qrTitle}>Send {selectedToken.symbol} to this address</Text>
             
             <View style={styles.qrContainer}>
-              <QRCode value={stealthAddress} size={200} />
+              <QRCode value={receiveAddress} size={200} />
             </View>
 
-            <Text style={styles.addressLabel}>
-              {isStealthAddress ? 'Your Stealth Address' : 'Your Address'}
-            </Text>
+            <Text style={styles.addressLabel}>Your Chameleon Address</Text>
             <Text style={styles.addressText}>
-              {isStealthAddress 
-                ? formatStealthHash(new Uint8Array(Buffer.from(stealthAddress.slice(2), 'hex')))
-                : `${stealthAddress.slice(0, 8)}...${stealthAddress.slice(-8)}`
-              }
+              {receiveAddress ? `${receiveAddress.slice(0, 12)}...${receiveAddress.slice(-12)}` : 'Loading...'}
             </Text>
 
-            {isStealthAddress && (
-              <View style={styles.privacyBadge}>
-                <Ionicons name="eye-off" size={16} color={THEME.colors.success} />
-                <Text style={styles.privacyText}>Fully Private & Untraceable</Text>
-              </View>
-            )}
+            <View style={styles.privacyBadge}>
+              <Ionicons name="shield-checkmark" size={16} color={THEME.colors.success} />
+              <Text style={styles.privacyText}>All pTokens use this address</Text>
+            </View>
 
             {/* Action Buttons */}
             <View style={styles.actionRow}>
@@ -161,18 +178,67 @@ export default function ReceiveScreen() {
             </View>
           </View>
 
-          {/* Info Note */}
+          {/* Multi-Token Info */}
           <View style={styles.infoNote}>
-            <Ionicons name="information-circle-outline" size={20} color={THEME.colors.secondary} />
+            <Ionicons name="information-circle-outline" size={20} color={THEME.colors.primary} />
             <Text style={styles.infoText}>
-              {isStealthAddress 
-                ? 'This stealth address ensures your privacy. Payments to this address are completely untraceable.'
-                : 'Only send CHML tokens to this address. Sending other tokens may result in permanent loss.'
-              }
+              You can receive pCHML, pBTC, pETH, and pUSDT at this same address. 
+              All tokens are automatically private on Chameleon Network.
             </Text>
           </View>
         </View>
       </ScrollView>
+
+      {/* Token Selector Modal */}
+      <Modal
+        visible={showTokenSelector}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowTokenSelector(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowTokenSelector(false)}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Token</Text>
+              <TouchableOpacity onPress={() => setShowTokenSelector(false)}>
+                <Ionicons name="close" size={24} color={THEME.colors.text} />
+              </TouchableOpacity>
+            </View>
+            {TOKENS.map((token) => (
+              <TouchableOpacity
+                key={token.id}
+                style={[
+                  styles.tokenOption,
+                  selectedToken.id === token.id && styles.tokenOptionSelected,
+                ]}
+                onPress={() => {
+                  setSelectedToken(token);
+                  setShowTokenSelector(false);
+                }}
+              >
+                <View style={[styles.tokenIcon, { backgroundColor: token.color + '20' }]}>
+                  {token.id === "CHML" ? (
+                    <Image source={require("@/assets/images/Logo.png")} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                  ) : (
+                    <Ionicons name={token.icon as any} size={20} color={token.color} />
+                  )}
+                </View>
+                <View style={styles.tokenOptionInfo}>
+                  <Text style={styles.tokenOptionSymbol}>{token.symbol}</Text>
+                  <Text style={styles.tokenOptionName}>{token.name}</Text>
+                </View>
+                {selectedToken.id === token.id && (
+                  <Ionicons name="checkmark-circle" size={24} color={THEME.colors.primary} />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </LinearGradient>
   );
 }
