@@ -25,7 +25,6 @@ import { QRCode } from '@/components/QRCode';
 import { generateStealthMetaAddress, generateStealthHash, formatStealthHash } from '@/services/privacy';
 import { walletService } from '@/services/wallet';
 import { THEME, GRADIENTS } from '@/constants/theme';
-import { Image } from 'react-native';
 
 const TOKENS = [
   { id: "CHML", symbol: "pCHML", name: "Chameleon", color: "#6366F1", icon: "diamond-outline" },
