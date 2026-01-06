@@ -338,6 +338,7 @@ export function useStaking() {
     isCompletingUnbond,
     isDeleting,
     error,
+    nodeStatus,
     stake,
     unstake,
     claimRewards,
@@ -348,5 +349,6 @@ export function useStaking() {
     getNodeStatus,
     calculateEstimatedRewards,
     refetch: fetchStakingInfo,
+    refreshStakingInfo: fetchStakingInfo,
   };
 }
