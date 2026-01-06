@@ -3,7 +3,7 @@
  * Shows QR code and address for receiving tokens
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
