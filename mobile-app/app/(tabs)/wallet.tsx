@@ -24,14 +24,15 @@ import { useApi } from '@/hooks/useApi';
 import { NetworkBadge } from '@/components/NetworkBadge';
 import { formatBalance } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
+import { pdexService } from '@/services/pdex';
 
-// Token list - CHML and pCHML are active, others are placeholders for future
+// Token list - all tokens are now active and navigable
 const TOKENS = [
-  { id: 'chml', symbol: 'CHML', name: 'Chameleon', icon: require('@/assets/images/Logo.png'), isNative: true, isPublic: true },
-  { id: 'pchml', symbol: 'pCHML', name: 'Shielded CHML', icon: require('@/assets/images/Logo.png'), isNative: false, isPCHML: true, color: '#10B981' },
-  { id: 'peth', symbol: 'pETH', name: 'Privacy ETH', icon: null, color: '#627EEA', disabled: true },
-  { id: 'pbtc', symbol: 'pBTC', name: 'Privacy BTC', icon: null, color: '#F7931A', disabled: true },
-  { id: 'pusdt', symbol: 'pUSDT', name: 'Privacy USDT', icon: null, color: '#26A17B', disabled: true },
+  { id: 'chml', symbol: 'CHML', name: 'Chameleon (Public)', icon: require('@/assets/images/Logo.png'), isNative: true, isPublic: true, color: '#22B958' },
+  { id: 'pchml', symbol: 'pCHML', name: 'Privacy CHML', icon: require('@/assets/images/Logo.png'), isNative: false, isPCHML: true, color: '#6366F1' },
+  { id: 'peth', symbol: 'pETH', name: 'Privacy ETH', icon: null, color: '#627EEA', tokenId: 1 },
+  { id: 'pbtc', symbol: 'pBTC', name: 'Privacy BTC', icon: null, color: '#F7931A', tokenId: 2 },
+  { id: 'pusdt', symbol: 'pUSDT', name: 'Privacy USDT', icon: null, color: '#26A17B', tokenId: 3 },
 ];
 
 export default function WalletScreen() {
