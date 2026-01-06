@@ -276,12 +276,16 @@ export default function ShieldScreen() {
         [
           {
             text: 'OK',
-            onPress: () => {
+            onPress: async () => {
               setAmount('');
               setFeeEstimate(null);
-              loadBalance();
-              refreshPCHMLBalance();
-              router.back();
+              // Refresh all balances including pTokens
+              await refreshBalances();
+              await refreshPCHMLBalance();
+              // Small delay to ensure state updates propagate
+              setTimeout(() => {
+                router.back();
+              }, 100);
             }
           }
         ]
