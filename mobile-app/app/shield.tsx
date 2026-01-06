@@ -28,6 +28,7 @@ import { walletService } from '@/services/wallet';
 import { apiService } from '@/services/api';
 import { transactionService } from '@/services/transaction';
 import { bridgeService } from '@/services/bridge';
+import { transactionHistoryService } from '@/services/transactionHistory';
 import { formatBalance, parseAmount } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 const TOKENS = [
