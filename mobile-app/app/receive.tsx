@@ -58,17 +58,17 @@ export default function ReceiveScreen() {
   const receiveAddress = getReceiveAddress();
 
   const handleCopyAddress = async () => {
-    if (stealthAddress) {
-      await Clipboard.setStringAsync(stealthAddress);
+    if (receiveAddress) {
+      await Clipboard.setStringAsync(receiveAddress);
       Alert.alert('Copied!', 'Address copied to clipboard');
     }
   };
 
   const handleShare = async () => {
-    if (stealthAddress) {
+    if (receiveAddress) {
       try {
         await Share.share({
-          message: `My Chameleon stealth address: ${stealthAddress}`,
+          message: `Send ${selectedToken.symbol} to my Chameleon address: ${receiveAddress}`,
         });
       } catch (error) {
         console.error('Error sharing:', error);
