@@ -241,6 +241,21 @@ export default function ShieldScreen() {
         const outputStealthHash = generateStealthHash(stealthMetaAddress);
         txHash = await privacyService.shield(keyPair, amountBN, outputStealthHash);
         successMessage = "Tokens shielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
+        
+        // Save to transaction history
+        try {
+          await transactionHistoryService.saveTransaction(wallet.address, {
+            hash: txHash,
+            from: wallet.address,
+            to: wallet.address,
+            amount: amountBN.toString(),
+            formattedAmount: `${amount} ${selectedToken.symbol} → ${amount} ${selectedToken.outputSymbol}`,
+            status: 'finalized',
+            usedMEVProtection: false,
+          });
+        } catch (e) {
+          console.error('[Shield] Failed to save to history:', e);
+        }
       }
       Alert.alert(
         'Shield Successful',
