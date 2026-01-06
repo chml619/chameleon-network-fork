@@ -46,6 +46,10 @@ export function useStaking() {
     try {
       const info = await stakingService.getStakingInfo(api, wallet.address);
       setStakingInfo(info);
+      
+      // Also fetch node status
+      const status = await stakingService.getNodeStatus(api, wallet.address);
+      setNodeStatus(status);
     } catch (err) {
       console.error('[Staking Hook] Error fetching info:', err);
       setError('Failed to fetch staking info');
