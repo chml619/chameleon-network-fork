@@ -219,16 +219,15 @@ export default function WalletScreen() {
           {TOKENS.map((token) => (
             <TouchableOpacity
               key={token.id}
-              style={[
-                styles.tokenCard,
-                token.disabled && styles.tokenCardDisabled,
-              ]}
+              style={styles.tokenCard}
               onPress={() => {
-                if (token.disabled) {
-                  Alert.alert('Coming Soon', `${token.name} will be available in a future update.`);
-                }
+                const bal = getTokenBalance(token);
+                router.push({
+                  pathname: '/token-detail',
+                  params: { symbol: token.symbol, balance: bal }
+                } as any);
               }}
-              activeOpacity={token.disabled ? 0.5 : 0.7}
+              activeOpacity={0.7}
             >
               <View style={styles.tokenLeft}>
                 {token.icon ? (
@@ -243,15 +242,17 @@ export default function WalletScreen() {
                   <Text style={styles.tokenName}>{token.name}</Text>
                 </View>
               </View>
-              <Text
-                style={[
-                  styles.tokenBalance,
-                  token.disabled && styles.tokenBalanceDisabled,
-                  (token as any).isPCHML && { color: '#10B981' },
-                ]}
-              >
-                {getTokenBalance(token)}
-              </Text>
+              <View style={styles.tokenRight}>
+                <Text
+                  style={[
+                    styles.tokenBalance,
+                    (token as any).isPCHML && { color: '#6366F1' },
+                  ]}
+                >
+                  {getTokenBalance(token)} {token.symbol}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={THEME.colors.textMuted} />
+              </View>
             </TouchableOpacity>
           ))}
 
