@@ -31,10 +31,10 @@ import { transactionService } from '@/services/transaction';
 import { formatBalance, parseAmount } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 const TOKENS = [
-  { id: 'CHML', symbol: 'pCHML', name: 'Chameleon', color: '#6366F1', icon: 'diamond-outline', assetId: 0, requiresBridge: false },
-  { id: 'BTC', symbol: 'pBTC', name: 'Bitcoin', color: '#F7931A', icon: 'logo-bitcoin', assetId: 2, requiresBridge: true },
-  { id: 'ETH', symbol: 'pETH', name: 'Ethereum', color: '#627EEA', icon: 'logo-electron', assetId: 1, requiresBridge: true },
-  { id: 'USDT', symbol: 'pUSDT', name: 'Tether', color: '#26A17B', icon: 'logo-usd', assetId: 3, requiresBridge: true },
+  { id: 'CHML', symbol: 'pCHML', outputSymbol: 'CHML', name: 'Chameleon', color: '#6366F1', icon: 'diamond-outline', assetId: 0, requiresBridge: false },
+  { id: 'BTC', symbol: 'pBTC', outputSymbol: 'BTC', name: 'Bitcoin', color: '#F7931A', icon: 'logo-bitcoin', assetId: 2, requiresBridge: true },
+  { id: 'ETH', symbol: 'pETH', outputSymbol: 'ETH', name: 'Ethereum', color: '#627EEA', icon: 'logo-electron', assetId: 1, requiresBridge: true },
+  { id: 'USDT', symbol: 'pUSDT', outputSymbol: 'USDT', name: 'Tether', color: '#26A17B', icon: 'logo-usd', assetId: 3, requiresBridge: true },
 ];
 
 export default function UnshieldScreen() {
