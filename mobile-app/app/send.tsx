@@ -614,7 +614,7 @@ export default function SendScreen() {
             
             <View style={styles.modalSection}>
               <Text style={styles.modalLabel}>Sending</Text>
-              <Text style={styles.modalAmountLarge}>{amount} CHML</Text>
+              <Text style={styles.modalAmountLarge}>{amount} {selectedToken.symbol}</Text>
             </View>
             
             <View style={styles.modalSection}>
