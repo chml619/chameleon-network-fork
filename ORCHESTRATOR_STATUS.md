@@ -482,8 +482,8 @@ curl -H "Content-Type: application/json" \
 ### Key Bugs Identified (From Testing Jan 6):
 1. ✅ pToken balances slow to load (8-10 sec delay) - **FIXED: Added 5-second balance caching**
 2. ✅ pCHML balance switching between 0 and 1 - **FIXED: Corrected token decimals (12 not 18)**
-3. "Wallet not unlocked" errors on send/swap
-4. Token selector showing wrong available balance
+3. ✅ "Wallet not unlocked" errors on send/swap - **FIXED: Added getOrDeriveKeyPair() for restored wallets**
+4. ✅ Token selector showing wrong available balance - **FIXED: Now shows selected token balance, not CHML**
 5. Bridge page creates recursive loop
 6. Transaction history not persistent
 
