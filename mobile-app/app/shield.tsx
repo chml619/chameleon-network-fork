@@ -457,6 +457,7 @@ export default function ShieldScreen() {
               )}
             </TouchableOpacity>
           </>
+        )}
       </ScrollView>
 
       {/* Token Selector Modal */}
