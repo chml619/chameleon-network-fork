@@ -71,7 +71,12 @@ export default function BridgeScreen() {
         {/* Available Bridges */}
         <Text style={styles.sectionTitle}>Available Bridges</Text>
         {AVAILABLE_BRIDGES.map((bridge) => (
-          <View key={bridge.id} style={styles.bridgeCard}>
+          <TouchableOpacity 
+            key={bridge.id} 
+            style={styles.bridgeCard}
+            onPress={() => router.push(`/shield?token=${bridge.id}` as any)}
+            activeOpacity={0.7}
+          >
             <View style={[styles.bridgeIcon, { backgroundColor: bridge.color + '20' }]}>
               <Ionicons name={bridge.icon as any} size={24} color={bridge.color} />
             </View>
