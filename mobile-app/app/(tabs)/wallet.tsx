@@ -181,12 +181,14 @@ export default function WalletScreen() {
   // Helper function to get token balance
   const getTokenBalance = (token: typeof TOKENS[0]): string => {
     if (token.isNative) {
-      return balanceLoading ? '...' : `${balanceNumber} ${token.symbol}`;
+      return balanceLoading ? '...' : balanceNumber;
     }
     if ((token as any).isPCHML) {
-      return `${pchmlBalanceNumber} ${token.symbol}`;
+      return pchmlBalanceNumber;
     }
-    return `0 ${token.symbol}`;
+    // pTokens from pdex
+    const pBalance = pTokenBalances[token.symbol];
+    return pBalance || '0';
   };
 
   return (
