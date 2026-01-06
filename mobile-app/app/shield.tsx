@@ -383,8 +383,8 @@ export default function ShieldScreen() {
           </View>
         )}
 
-        {/* Amount Input (CHML only) */}
-        {!selectedToken.requiresBridge && (
+        {/* Amount Input - show for ALL tokens including bridge tokens */}
+        {(
           <>
             <View style={styles.inputSection}>
               <Text style={styles.inputLabel}>Amount to Shield</Text>
