@@ -21,6 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePDEX } from '@/hooks/usePDEX';
 import { useWallet } from '@/context/WalletContext';
+import { transactionHistoryService } from '@/services/transactionHistory';
 import { TokenSelector } from '@/components/TokenSelector';
 import { FeatureBadge } from '@/components/FeatureBadge';
 import { MockViewBanner } from '@/components/MockViewBanner';
