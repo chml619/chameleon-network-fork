@@ -509,7 +509,7 @@ export default function UnshieldScreen() {
               )}
             </TouchableOpacity>
           </>
-        )
+        )}
       </ScrollView>
 
       {/* Token Selector Modal */}
