@@ -233,6 +233,21 @@ export default function UnshieldScreen() {
         }
         txHash = result.txHash || "";
         successMessage = "Bridge withdrawal initiated! Your " + amount + " " + selectedToken.id + " will be sent to " + destinationAddress.slice(0,10) + "...";
+        
+        // Save bridge withdrawal to history
+        try {
+          await transactionHistoryService.saveTransaction(wallet.address, {
+            hash: txHash || `bridge_withdraw_${Date.now()}`,
+            from: wallet.address,
+            to: destinationAddress,
+            amount: amountBN.toString(),
+            formattedAmount: `Withdraw ${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`,
+            status: 'pending',
+            usedMEVProtection: false,
+          });
+        } catch (e) {
+          console.error('[Unshield] Failed to save bridge withdrawal to history:', e);
+        }
       } else {
         // CHML - use privacy unshield
         privacyService.setApi(api);
