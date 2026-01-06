@@ -88,7 +88,7 @@ export default function BridgeScreen() {
               <View style={styles.statusDot} />
               <Text style={styles.statusText}>Active</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
 
         {/* Action Buttons */}
