@@ -219,6 +219,21 @@ export default function ShieldScreen() {
         }
         txHash = result.txHash || "";
         successMessage = "Bridge deposit initiated! Deposit ID: " + result.bridgeId + ". Send " + amount + " " + selectedToken.id + " to complete.";
+        
+        // Save bridge deposit to history
+        try {
+          await transactionHistoryService.saveTransaction(wallet.address, {
+            hash: txHash || `bridge_${result.bridgeId}`,
+            from: wallet.address,
+            to: 'bridge',
+            amount: amountBN.toString(),
+            formattedAmount: `Bridge ${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`,
+            status: 'pending',
+            usedMEVProtection: false,
+          });
+        } catch (e) {
+          console.error('[Shield] Failed to save bridge to history:', e);
+        }
       } else {
         // CHML - use privacy shield
         privacyService.setApi(api);
