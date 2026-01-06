@@ -396,7 +396,7 @@ export default function UnshieldScreen() {
         </View>
 
         {/* Unshield Form - show for ALL tokens including bridge tokens */}
-        {(
+        {true && (
           <>
             {/* Destination Address */}
             <View style={styles.inputSection}>
