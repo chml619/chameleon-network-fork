@@ -160,9 +160,10 @@ export function usePDEX() {
     setError(null);
     
     try {
-      const keyPair = walletService.getKeyPair();
+      // Get or derive keyPair (handles wallet restore from storage)
+      const keyPair = await walletService.getOrDeriveKeyPair();
       if (!keyPair) {
-        throw new Error('Wallet not unlocked');
+        throw new Error('Wallet not unlocked. Please try re-importing your wallet.');
       }
       
       const amountInBN = chainService.parseBalance(amountIn);
