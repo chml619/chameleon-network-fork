@@ -164,6 +164,10 @@ const MOCK_RATES: Record<string, Record<string, number>> = {
 class PDEXService {
   private static instance: PDEXService;
   private mevProtectionEnabled: boolean = true;
+  
+  // Add balance cache
+  private balanceCache: Map<string, { balance: BN; timestamp: number }> = new Map();
+  private CACHE_TTL_MS = 5000; // 5 second cache
 
   private constructor() {}
 
