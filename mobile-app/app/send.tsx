@@ -563,7 +563,7 @@ export default function SendScreen() {
             </TouchableOpacity>
           </View>
           <Text style={styles.availableText}>
-            Available: {formattedFreeBalance}
+            Available: {formatBalance(new BN(tokenBalance))} {selectedToken.symbol}
           </Text>
         </View>
 
