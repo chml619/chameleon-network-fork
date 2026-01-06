@@ -27,6 +27,7 @@ export function useStaking() {
   const [isCompletingUnbond, setIsCompletingUnbond] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nodeStatus, setNodeStatus] = useState<NodeStatus>('None');
 
   // Fetch staking info when API and wallet are available
   useEffect(() => {
