@@ -708,6 +708,20 @@ const styles = StyleSheet.create({
     fontWeight: THEME.fontWeight.semibold,
     marginLeft: THEME.spacing.xs,
   },
+  bridgeNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: THEME.spacing.md,
+    paddingTop: THEME.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: THEME.colors.border,
+  },
+  bridgeNoteText: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.primary,
+    marginLeft: THEME.spacing.xs,
+    flex: 1,
+  },
   addressInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
