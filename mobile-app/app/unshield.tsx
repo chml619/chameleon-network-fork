@@ -395,8 +395,8 @@ export default function UnshieldScreen() {
           )}
         </View>
 
-        {/* Unshield Form (CHML only) */}
-        {!selectedToken.requiresBridge && (
+        {/* Unshield Form - show for ALL tokens including bridge tokens */}
+        {(
           <>
             {/* Destination Address */}
             <View style={styles.inputSection}>
