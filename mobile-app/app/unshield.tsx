@@ -485,7 +485,7 @@ export default function UnshieldScreen() {
                 <Text style={styles.previewTitle}>Preview</Text>
                 <View style={styles.previewRow}>
                   <Text style={styles.previewLabel}>Recipient will receive:</Text>
-                  <Text style={styles.previewAmount}>{amount} CHML (Public)</Text>
+                  <Text style={styles.previewAmount}>{amount} {selectedToken.outputSymbol} (Public)</Text>
                 </View>
                 <View style={styles.warningBadge}>
                   <Ionicons name="eye" size={16} color="#F59E0B" />
