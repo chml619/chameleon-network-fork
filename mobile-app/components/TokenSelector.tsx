@@ -13,6 +13,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TokenInfo } from '@/services/pdex';
 import { THEME } from '@/constants/theme';
 
@@ -34,6 +35,7 @@ export function TokenSelector({
   disabled = false,
 }: TokenSelectorProps) {
   const [modalVisible, setModalVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleSelectToken = (token: TokenInfo) => {
     onSelectToken(token);
@@ -77,7 +79,7 @@ export function TokenSelector({
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, 20) }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Token</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>

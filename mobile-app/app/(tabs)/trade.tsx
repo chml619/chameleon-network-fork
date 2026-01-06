@@ -24,7 +24,6 @@ import { useWallet } from '@/context/WalletContext';
 import { transactionHistoryService } from '@/services/transactionHistory';
 import { TokenSelector } from '@/components/TokenSelector';
 import { FeatureBadge } from '@/components/FeatureBadge';
-import { MockViewBanner } from '@/components/MockViewBanner';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 type TabType = 'swap' | 'liquidity';
@@ -111,9 +110,6 @@ export default function TradeScreen() {
       colors={GRADIENTS.background.colors}
       style={[styles.container, { paddingTop: insets.top }]}
     >
-      {/* Mock View Banner */}
-      <MockViewBanner screenId="trade" featureName="Trading" />
-      
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>

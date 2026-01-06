@@ -10,7 +10,6 @@
  * - TokenId 1 = pETH
  * - TokenId 2 = pBTC
  * - TokenId 3 = pUSDT
- * - TokenId 4 = pUSDC
  */
 
 import { ApiPromise } from '@polkadot/api';
@@ -24,7 +23,6 @@ export const PCHML_TOKEN_ID = 0;
 export const PETH_TOKEN_ID = 1;
 export const PBTC_TOKEN_ID = 2;
 export const PUSDT_TOKEN_ID = 3;
-export const PUSDC_TOKEN_ID = 4;
 
 // Pool IDs for LP
 export const POOL_IDS = {
@@ -48,6 +46,7 @@ export interface TokenInfo {
   balanceRaw: BN;
   icon?: string;
   color: string;
+  tokenId?: number;
 }
 
 export interface SwapQuote {
@@ -109,56 +108,52 @@ export interface SwapResult {
 }
 
 // Supported tokens on pDEX
+// TokenId mapping: 0=pCHML, 1=pETH, 2=pBTC, 3=pUSDT
 export const PDEX_TOKENS: TokenInfo[] = [
   {
-    symbol: 'CHML',
-    name: 'Chameleon',
-    decimals: 12,  // FIXED: was 18
+    symbol: 'pCHML',
+    name: 'Privacy CHML',
+    decimals: 12,
     balance: '0',
     balanceRaw: new BN(0),
-    color: '#22B958',
+    color: '#6366F1',
+    tokenId: 0,
   },
   {
     symbol: 'pETH',
     name: 'Privacy ETH',
-    decimals: 12,  // FIXED: was 18
+    decimals: 12,
     balance: '0',
     balanceRaw: new BN(0),
     color: '#627EEA',
+    tokenId: 1,
   },
   {
     symbol: 'pBTC',
     name: 'Privacy BTC',
-    decimals: 12,  // FIXED: was 8
+    decimals: 12,
     balance: '0',
     balanceRaw: new BN(0),
     color: '#F7931A',
+    tokenId: 2,
   },
   {
     symbol: 'pUSDT',
     name: 'Privacy USDT',
-    decimals: 12,  // FIXED: was 6
+    decimals: 12,
     balance: '0',
     balanceRaw: new BN(0),
     color: '#26A17B',
-  },
-  {
-    symbol: 'pUSDC',
-    name: 'Privacy USDC',
-    decimals: 12,  // FIXED: was 6
-    balance: '0',
-    balanceRaw: new BN(0),
-    color: '#2775CA',
+    tokenId: 3,
   },
 ];
 
 // Mock exchange rates for development
 const MOCK_RATES: Record<string, Record<string, number>> = {
-  'CHML': { 'pETH': 0.0005, 'pBTC': 0.000015, 'pUSDT': 0.85, 'pUSDC': 0.85 },
-  'pETH': { 'CHML': 2000, 'pBTC': 0.03, 'pUSDT': 1700, 'pUSDC': 1700 },
-  'pBTC': { 'CHML': 65000, 'pETH': 33, 'pUSDT': 55000, 'pUSDC': 55000 },
-  'pUSDT': { 'CHML': 1.18, 'pETH': 0.00059, 'pBTC': 0.000018, 'pUSDC': 1 },
-  'pUSDC': { 'CHML': 1.18, 'pETH': 0.00059, 'pBTC': 0.000018, 'pUSDT': 1 },
+  'pCHML': { 'pETH': 0.0005, 'pBTC': 0.000015, 'pUSDT': 0.85 },
+  'pETH': { 'pCHML': 2000, 'pBTC': 0.03, 'pUSDT': 1700 },
+  'pBTC': { 'pCHML': 65000, 'pETH': 33, 'pUSDT': 55000 },
+  'pUSDT': { 'pCHML': 1.18, 'pETH': 0.00059, 'pBTC': 0.000018 },
 };
 
 class PDEXService {
@@ -270,26 +265,38 @@ class PDEXService {
 
   /**
    * Get all supported tokens with balances
+   * Fetches from pDEX pallet's tokenBalances storage
    */
   async getTokensWithBalances(api: ApiPromise, address: string): Promise<TokenInfo[]> {
-    const tokens = [...PDEX_TOKENS];
+    // Create fresh copies to avoid mutation
+    const tokens = PDEX_TOKENS.map(t => ({ ...t, balance: '0', balanceRaw: new BN(0) }));
     
-    // Get CHML balance (native token)
     try {
-      const accountInfo = await api.query.system.account(address);
-      const freeBalance = new BN((accountInfo as any).data.free.toString());
-      tokens[0].balanceRaw = freeBalance;
-      tokens[0].balance = chainService.formatBalance(freeBalance.toString());
-    } catch (e) {
-      // Ignore
+      // Fetch all token balances in parallel from pDEX pallet
+      const balancePromises = tokens.map(async (token) => {
+        try {
+          // Use cached getTokenBalance method
+          const balance = await this.getTokenBalance(token.tokenId ?? 0, address);
+          return { symbol: token.symbol, balance };
+        } catch (e) {
+          console.error(`[pDEX] Error fetching ${token.symbol} balance:`, e);
+          return { symbol: token.symbol, balance: new BN(0) };
+        }
+      });
+      
+      const balances = await Promise.all(balancePromises);
+      
+      // Update tokens with fetched balances
+      tokens.forEach(token => {
+        const found = balances.find(b => b.symbol === token.symbol);
+        if (found) {
+          token.balanceRaw = found.balance;
+          token.balance = chainService.formatBalance(found.balance.toString());
+        }
+      });
+    } catch (error) {
+      console.error('[pDEX] Error fetching token balances:', error);
     }
-    
-    // Other tokens would need asset pallet queries
-    // For now, return mock balances for development
-    tokens.slice(1).forEach(token => {
-      token.balance = '0 ' + token.symbol;
-      token.balanceRaw = new BN(0);
-    });
     
     return tokens;
   }
