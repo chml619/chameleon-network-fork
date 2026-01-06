@@ -394,10 +394,19 @@ export default function SendScreen() {
     } catch (error) {
       console.error('Error sending transaction:', error);
       setIsSending(false);
-      Alert.alert(
-        'Transaction Failed',
-        error instanceof Error ? error.message : 'Unknown error occurred'
-      );
+      
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        // Provide more user-friendly messages
+        if (errorMessage.includes('Insufficient')) {
+          errorMessage = `Insufficient ${selectedToken.symbol} balance for this transfer`;
+        } else if (errorMessage.includes('unlock')) {
+          errorMessage = 'Please unlock your wallet or re-import it';
+        }
+      }
+      
+      Alert.alert('Transaction Failed', errorMessage);
     }
   };
 
