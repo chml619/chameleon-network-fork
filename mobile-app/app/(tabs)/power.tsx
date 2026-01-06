@@ -61,7 +61,7 @@ export default function PowerScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { wallet } = useWallet();
-  const { connectionState } = useApi();
+  const { api, connectionState } = useApi();
   
   // Section state
   const [activeSection, setActiveSection] = useState<SectionType>('validate');
