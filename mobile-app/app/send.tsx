@@ -206,15 +206,19 @@ export default function SendScreen() {
   };
 
   const handleMaxAmount = () => {
-    if (!balance || !feeEstimate) return;
+    if (!tokenBalance || tokenBalance === '0') return;
     
-    const balanceBN = new BN(balance.free);
-    const feeBN = new BN(feeEstimate.partialFee);
-    const maxAmount = balanceBN.sub(feeBN);
+    // Use selected token balance, subtract fee estimate if available
+    let maxBN = new BN(tokenBalance);
     
-    if (maxAmount.gt(new BN(0))) {
-      // Use centralized formatBalance utility, remove commas for input field
-      const formatted = formatBalance(maxAmount);
+    // Only subtract fee for native token (pCHML) since fees are paid in native token
+    if (selectedToken.assetId === 0 && feeEstimate?.partialFee) {
+      const feeBN = new BN(feeEstimate.partialFee);
+      maxBN = maxBN.sub(feeBN);
+    }
+    
+    if (maxBN.gt(new BN(0))) {
+      const formatted = formatBalance(maxBN);
       setAmount(formatted.replace(/,/g, ''));
     }
   };
