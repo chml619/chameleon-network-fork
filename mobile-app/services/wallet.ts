@@ -254,6 +254,54 @@ class WalletService {
   }
 
   /**
+   * Get the keypair, deriving it from stored seed if necessary
+   * This is the preferred method for getting a signing keypair
+   */
+  public async getOrDeriveKeyPair(): Promise<KeyringPair | null> {
+    // If we already have a keypair, return it
+    if (this.currentPair) {
+      return this.currentPair;
+    }
+    
+    // If no wallet state, can't derive
+    if (!this.walletState) {
+      return null;
+    }
+    
+    // Try to import from stored seed
+    try {
+      // Import storageService here to avoid circular dependency issues
+      const { storageService } = await import('./storage');
+      const storedSeed = await storageService.getEncryptedSeed();
+      
+      if (!storedSeed) {
+        console.warn('[Wallet] No stored seed found');
+        return null;
+      }
+      
+      await this.initializeKeyring();
+      
+      if (!this.keyring) {
+        return null;
+      }
+      
+      // Check if it's a dev account URI (contains //)
+      if (storedSeed.includes('//')) {
+        this.currentPair = this.keyring.addFromUri(storedSeed);
+      } else {
+        // Regular mnemonic
+        this.currentPair = this.keyring.addFromMnemonic(storedSeed);
+      }
+      
+      this.walletState.isLocked = false;
+      return this.currentPair;
+    } catch (error) {
+      console.error('[Wallet] Error deriving keypair:', error);
+      return null;
+    }
+  }
+
+  /**
    * Clear wallet data (logout)
    */
   public clearWallet(): void {
