@@ -379,4 +379,91 @@ const styles = StyleSheet.create({
     fontSize: THEME.fontSize.base,
     fontWeight: THEME.fontWeight.semibold,
   },
+  // Token Selector
+  tokenSelectorSection: {
+    marginBottom: THEME.spacing.lg,
+  },
+  sectionLabel: {
+    fontSize: THEME.fontSize.sm,
+    fontWeight: THEME.fontWeight.semibold,
+    color: THEME.colors.textSecondary,
+    marginBottom: THEME.spacing.sm,
+  },
+  tokenSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: THEME.colors.white,
+    borderRadius: THEME.borderRadius.medium,
+    padding: THEME.spacing.md,
+    ...THEME.shadows.small,
+  },
+  tokenSelectorLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tokenIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: THEME.spacing.sm,
+  },
+  tokenSymbol: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.semibold,
+    color: THEME.colors.text,
+  },
+  tokenName: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: THEME.colors.white,
+    borderTopLeftRadius: THEME.borderRadius.large,
+    borderTopRightRadius: THEME.borderRadius.large,
+    padding: THEME.spacing.lg,
+    maxHeight: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: THEME.spacing.lg,
+  },
+  modalTitle: {
+    fontSize: THEME.fontSize.lg,
+    fontWeight: THEME.fontWeight.bold,
+    color: THEME.colors.text,
+  },
+  tokenOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: THEME.spacing.md,
+    borderRadius: THEME.borderRadius.medium,
+    marginBottom: THEME.spacing.sm,
+  },
+  tokenOptionSelected: {
+    backgroundColor: THEME.colors.primaryLight,
+  },
+  tokenOptionInfo: {
+    flex: 1,
+    marginLeft: THEME.spacing.sm,
+  },
+  tokenOptionSymbol: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.semibold,
+    color: THEME.colors.text,
+  },
+  tokenOptionName: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+  },
 });
