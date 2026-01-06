@@ -37,8 +37,19 @@ export default function ReceiveScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { wallet } = useWallet();
+  const { token: tokenParam } = useLocalSearchParams<{ token?: string }>();
   const [selectedToken, setSelectedToken] = useState(TOKENS[0]);
   const [showTokenSelector, setShowTokenSelector] = useState(false);
+
+  // Pre-select token if passed via navigation
+  useEffect(() => {
+    if (tokenParam) {
+      const preselected = TOKENS.find(t => t.symbol === tokenParam);
+      if (preselected) {
+        setSelectedToken(preselected);
+      }
+    }
+  }, [tokenParam]);
 
   // Get the receive address (same for all pTokens on Chameleon)
   const getReceiveAddress = (): string => {
