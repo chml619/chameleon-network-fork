@@ -3,7 +3,7 @@
  * Matches mockup design: chmlwallet-mockup-011.jpg
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
