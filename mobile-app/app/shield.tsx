@@ -48,6 +48,19 @@ export default function ShieldScreen() {
   const [selectedToken, setSelectedToken] = useState(TOKENS[0]);
   const [showTokenSelector, setShowTokenSelector] = useState(false);
 
+  // Read token param from navigation (for deep linking from bridge page)
+  const { token: tokenParam } = useLocalSearchParams<{ token?: string }>();
+
+  // Pre-select token if passed via navigation
+  useEffect(() => {
+    if (tokenParam) {
+      const preselected = TOKENS.find(t => t.id === tokenParam || t.symbol === tokenParam);
+      if (preselected) {
+        setSelectedToken(preselected);
+      }
+    }
+  }, [tokenParam]);
+
   // Form state
   const [amount, setAmount] = useState('');
   const [isShielding, setIsShielding] = useState(false);
