@@ -102,6 +102,12 @@ export default function PowerScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [currentBlock, setCurrentBlock] = useState<number>(0);
   
+  // Add these state variables inside the component
+  const [lpRewards, setLpRewards] = useState('0');
+  const [lpPositions, setLpPositions] = useState<LPPosition[]>([]);
+  const [isLoadingLP, setIsLoadingLP] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
   // Add liquidity modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedPoolId, setSelectedPoolId] = useState<number>(0);
