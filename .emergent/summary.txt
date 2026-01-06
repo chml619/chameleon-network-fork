@@ -1,183 +1,171 @@
-<analysis>**original_problem_statement**: The user, acting as the project lead for the Chameleon Network, wants to build and integrate a suite of DeFi and privacy pallets into a Substrate-based blockchain. The project has undergone several phases:
-1.  Initial setup and integration of core pallets (, , , ).
-2.  A major pivot to privacy, involving the creation of , , and  pallets, including a full MLSAG crypto implementation.
-3.  Integration of a private decentralized exchange () with an internal token registry to resolve dependency issues.
-4.  A complete shift to a privacy-by-default model where all on-chain CHML is a wrapped privacy token (), managed by the pDEX pallet. This involved refactoring the  and  pallets to use .
-5.  Implementation of a multi-validator network and a full staking lifecycle (registration, cooldown, unbonding).
-6.  Development of a React Native mobile app to interact with the chain, which is currently plagued by critical bugs preventing core functionality.
-
-The current user request is to revisit and definitively fix the outstanding critical bugs in the mobile app so that the blockchain features can be properly tested.
+<analysis>**original_problem_statement**: The user, acting as the project lead for the Chameleon Network, wants to build and integrate core DeFi and privacy pallets into a Substrate-based blockchain and a corresponding React Native mobile wallet. The project started with a fresh  and has since integrated pallets for emissions, staking, a bridge, a pDEX, and a complete privacy layer (ring signatures, stealth addresses, confidential transfers). The core on-chain token has been transitioned to a private-by-default asset (pCHML). Most recently, the focus has shifted back to the mobile app, which has numerous critical bugs related to balance display, decimal formatting, and transaction functionality, despite several attempts to fix them. The user's current priority is to resolve these mobile app issues to enable proper testing of the on-chain features.
 
 **PRODUCT REQUIREMENTS**:
--   **Blockchain**: A fully integrated Substrate node with pallets for Emissions, Staking, Bridge, pDEX, and a complete privacy suite (Ring Signatures, Stealth Addresses, Confidential Transfer). All on-chain native assets must be privacy-wrapped ().
--   **Mobile App**: A functional React Native wallet that allows users to manage their wallets, view correct public and private balances, and execute all on-chain transactions, including public transfers (for dev testing), private transfers, shielding (public-to-private), and unshielding (private-to-public).
+
+**1. Core Pallets & Integration**:
+    - **Emissions**: Mints and distributes .
+    - **pDEX**: An AMM with an internal token registry, supporting swaps and liquidity provision for  and bridged assets (, , ).
+    - **Staking**: Validator staking using , with a full node lifecycle (Register, Wait, Active, Unbond).
+    - **Bridge**: Lock/unlock for external assets, which mints/burns corresponding private  on-chain.
+    - **Privacy Layer**: Mandatory privacy using , , and .
+**2. Mobile App Functionality**: The mobile app must correctly display public and private balances, handle the 12-decimal precision consistently, and allow users to perform public transfers, shield public funds into private notes, and execute private confidential transfers.
+**3. pCHML Tokenomics**: All on-chain value (staking, rewards, transfers) is held and transacted as the private  token. Native  is temporarily used for gas fees.
 
 **User's preferred language**: English
 
 **what currently exists?**
--   The project is a Substrate blockchain based on .
--   The blockchain is feature-complete through Week 11, including a multi-validator network, a  with an internal token registry, and a full privacy layer (MLSAG). All on-chain CHML is handled as  via the  pallet, except for gas fees. A full staking lifecycle (register, unbond, etc.) is also implemented.
--   The genesis configuration has been updated to pre-fund developer wallets with significant balances for testing.
--   A React Native mobile app exists with a UI for all core privacy functions (send, receive, shield, unshield).
--   The mobile app code has undergone several patching attempts but remains critically broken. Key issues include incorrect balance display, state being lost on navigation, wrong decimal calculations, and failing transactions. A centralized utility  was created to handle decimal formatting.
--    serves as the detailed project documentation and has been kept up-to-date with all backend progress.
+- A Substrate-based blockchain with a fully integrated set of pallets for emissions, staking (with lifecycle), bridge (with pTokens), pDEX (with internal token registry), and a complete MLSAG-based privacy layer.
+- The entire on-chain economy now runs on private tokens ( and ), with the pallets updated to use the  for minting/burning/transferring these assets.
+- A multi-validator network (Alice & Bob) is configured.
+- The  file is extensively detailed and up-to-date as of Week 11's completion.
+- A React Native mobile app that has UI for all core features (Send, Receive, Shield, Unshield, Trade), but is plagued by critical bugs.
+- The entire project is synced with the  branch of the  GitHub repository, with the latest commit being .
 
 **Last working item**:
--   **Last item agent was working**: Responding to the user's request for a detailed summary of all previously identified mobile app bugs and the attempted fixes.
--   **Status**: NONE (The summary was provided. The next step is to act on that summary and fix the bugs).
--   **Agent Testing Done**: N/A
--   **Which testing method agent to use?**: Frontend testing agent
--   **User Testing Done**: Y (User has confirmed via multiple messages and screenshots that the mobile app is not functional).
+- **Last item agent was working**: The agent synced the local workspace with the remote  branch and reported the status. The sync brought in a series of major mobile app updates, refactoring the application into distinct phases.
+- **Status**: NONE
+- **Agent Testing Done**: N/A
+- **Which testing method agent to use?**: Frontend testing agent
+- **User Testing Done**: N/A
 
 **All Pending/In progress Issue list**:
--   **Issue 1 (P0)**: Mobile app balance displays as 0 after navigating between tabs.
--   **Issue 2 (P0)**: Mobile app shows incorrect decimal formatting (e.g., 95 CHML displayed as 0.000095).
--   **Issue 3 (P0)**: Mobile app public transfers fail with insufficient balance errors.
--   **Issue 4 (P0)**: Mobile app shield transaction shows success but has no on-chain effect.
--   **Issue 5 (P1)**: Mobile app transaction history is empty.
--   **Issue 6 (P1)**: UI layout bug where the shield button overlaps the balance text on the home screen.
+- **Issue 1 (P0)**: Critical Mobile App Bugs Preventing Core Functionality.
+- **Issue 2 (P1)**:  is not functional.
 
 **Issues Detail**:
--   **Issue 1: Mobile app balance state resets on navigation**
-    -   **Attempted fixes**:  and  were added to  to try and persist the balance state during re-renders and navigation. A  state was also introduced. These fixes were ineffective.
-    -   **Next debug checklist**:
-        1.  Review the entire state management flow in .
-        2.  Investigate how and when  and  are called by different components.
-        3.  Consider a more robust state management solution or correctly implement the existing context to prevent state loss on tab changes.
-        4.  Ensure balance is only set to '0' on initial load, not during fetches.
-    -   **Why fix this issue and what will be achieved with the fix?**: A correct balance display is fundamental for any wallet functionality. This bug blocks all other transaction-related testing.
-    -   **Status**: NOT STARTED
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Frontend
-    -   **Blocked on other issue**: None
+- **Issue 1: Critical Mobile App Bugs Preventing Core Functionality**
+    - **Description**: The mobile app has multiple recurring bugs that make it unusable for testing. The user has provided screenshots and detailed reports on these issues. The latest git sync introduced a complete refactor of the mobile app, so the state of these bugs is unknown and requires immediate re-evaluation.
+    - **Key Sub-Bugs Identified:**
+        1.  **Balance State Reset**: Balances display correctly on load but reset to 0 upon navigating between tabs.
+        2.  **Decimal Formatting Mismatch**: An error in decimal conversion (12 vs 18) causes balances to be off by a factor of 1,000,000 (e.g., displaying  instead of ).
+        3.  **Public/Private Transfers Failing**: Transactions fail with Insufficient balance errors, likely due to the other bugs.
+        4.  **Shield/Unshield Not Working**: Transactions appear to succeed but have no on-chain effect.
+        5.  **UI Layout Issues**: Buttons and text overlapping on the home screen.
+    - **Attempted fixes**: The agent previously delegated two major bug-fixing sessions to a Mobile Wallet sub-agent. Fixes included creating a central  utility, adding loading states and  to , and implementing detailed error handling in transaction flows. However, these fixes were applied before the latest major refactor was synced.
+    - **Next debug checklist**:
+        1. Run the mobile app and perform a full regression test based on the user's last testing flow request (from Chat Message 222).
+        2. Verify if the  utility is still in use and correctly handles the 12-decimal precision.
+        3. Check  to see if the state management logic (e.g., , , loading states) has been preserved or improved in the new code.
+        4. Test a public transfer, a shield operation, and a private transfer, checking the console logs for errors.
+        5. Verify all UI screens for layout problems.
+    - **Why fix this issue and what will be achieved with the fix?**: This is the highest priority blocker. Fixing the mobile app is essential to test any of the advanced on-chain features that have been completed.
+    - **Status**: NOT STARTED
+    - **Is recurring issue?**: Y
+    - **Should Test frontend/backend/both after fix?**: Frontend
+    - **Blocked on other issue**: None
 
--   **Issue 2: Mobile app decimal formatting mismatch**
-    -   **Attempted fixes**: A central utility file  was created with  and  functions to handle the chain's 12 decimals. These were supposedly integrated into all screens. The bug persists, indicating the utility is either incorrect or not used everywhere.
-    -   **Next debug checklist**:
-        1.  Verify the logic in  is correct for converting a BN with 12 decimals to a floating-point string and back.
-        2.  Audit every file that displays or inputs a balance (, , , ) to ensure it exclusively uses these utility functions.
-        3.  Add logging before and after formatting/parsing to pinpoint where the calculation goes wrong.
-    -   **Why fix this issue and what will be achieved with the fix?**: Prevents users from seeing incorrect balances and sending incorrect amounts, which could lead to failed transactions or loss of funds.
-    -   **Status**: NOT STARTED
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Frontend
-    -   **Blocked on other issue**: None
+- **Issue 2:  is not functional**
+    - **Description**: The  hook in  does not seem to trigger automatically, requiring manual transaction execution to run the MEV protection logic.
+    - **Attempted fixes**: None. This issue was identified early on and deferred by the user until after the main testnet features were complete.
+    - **Next debug checklist**: Investigate the runtime configuration to ensure  is correctly called for the MEV pallet.
+    - **Why fix this issue and what will be achieved with the fix?**: Automates a core feature of the network.
+    - **Status**: NOT STARTED
+    - **Is recurring issue?**: Y
+    - **Should Test frontend/backend/both after fix?**: Backend
+    - **Blocked on other issue**: None
 
--   **Issue 3: Mobile app public transfers fail**
-    -   **Attempted fixes**: Logic was added to  to use the  utility and perform a  comparison. Debug logging was also added. The fix was unsuccessful, likely because the balance being checked is incorrect (due to Issue 1) or the amount is still being parsed incorrectly (due to Issue 2).
-    -   **Next debug checklist**:
-        1.  Solve Issues 1 and 2 first.
-        2.  In , log the final  and  (as BN strings) just before the  call to confirm they are correct.
-        3.  Ensure the  extrinsic is being called with the amount as a string in its raw chain unit form.
-    -   **Why fix this issue and what will be achieved with the fix?**: Enables basic transaction functionality for testing and development.
-    -   **Status**: BLOCKED
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Frontend
-    -   **Blocked on other issue**: Mobile app balance state resets on navigation, Mobile app decimal formatting mismatch
-
--   **Issue 4: Mobile app shield transaction not working**
-    -   **Attempted fixes**: The  function in  was updated with a full  callback, including  handling and logic to refresh balances on finalization.
-    -   **Next debug checklist**:
-        1.  Confirm the error handling logic is actually catching and displaying errors from the chain.
-        2.  Log the  and  being sent to the  extrinsic to ensure they are correctly formatted.
-        3.  Verify that  and  are being called successfully after the transaction is finalized.
-    -   **Why fix this issue and what will be achieved with the fix?**: Shielding is the entry point to the network's entire privacy ecosystem. It must work.
-    -   **Status**: NOT STARTED
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Frontend
-    -   **Blocked on other issue**: Potentially Mobile app decimal formatting mismatch
-
--   **Issue 5 & 6 (Lower Priority)**: Transaction history is empty, and the Shield button overlaps UI text. These are minor UI/feature gaps compared to the critical transaction-blocking bugs. They should be addressed after the P0 issues are resolved.
+**In progress Task List**:
+- None.
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks (Week 12):**
-    -   (P0) Staking cooldown period (unstaking delay).
-    -   (P1) Node lifecycle enhancements (register→waiting→active→unbonding→delete).
-    -   (P1) Mobile app: vNode management UI.
-    -   (P1) Mobile app: staking/unstaking UI.
-    -   (P0) Mobile app: pCHML balance display.
--   **Future Tasks (Weeks 13-14):**
-    -   (P0) End-to-end privacy testing.
-    -   (P1) Convert gas fees to pCHML.
-    -   (P2) Security audits and documentation finalization.
+- **Upcoming Tasks (Week 12 - P0):**
+    - **Task**: Mobile App + Staking Enhancements.
+    - **Details**:
+        1.  Implement a staking cooldown period (7-day unstaking delay) in .
+        2.  Implement the full node lifecycle ( ->  ->  ->  -> ) in .
+        3.  Create a vNode management UI in the mobile app.
+        4.  Create staking/unstaking UI in the mobile app.
+        5.  Ensure  balance is correctly displayed and used throughout the app.
+
+- **Future Tasks (Weeks 13-14):**
+    - **Task**: Testing + Hardening.
+    - **Details**:
+        1.  Conduct end-to-end privacy testing.
+        2.  Perform multi-validator stress testing.
+        3.  Convert gas fees from native  to .
+        4.  Finalize documentation and conduct security audits.
 
 **Completed work in this session**
--   **Privacy Pallet Scaffolding**: Created and compiled , , and .
--   **Repository Sync & Integration**: Configured git remote and repeatedly synced with , integrating major features developed externally:
-    -   Full MLSAG ring signature cryptography ().
-    -    pallet with an internal token registry, replacing .
-    -   On-chain fee distribution model (90% LP / 10% Treasury).
-    -   Complete  integration, refactoring  and  pallets to use the privacy-wrapped token.
-    -   Bridge pallet enhancements to mint/burn  (pBTC, pETH).
-    -   Multi-validator support with block author reward detection.
-    -   A full staking lifecycle with a 7-day unbonding period.
--   **Genesis Config**: Updated  to pre-fund dev wallets with larger amounts for staking tests.
--   **Mobile App Privacy UI**: Used a sub-agent to implement a comprehensive UI overhaul for a privacy-first user experience, including new screens for  and , and updates to , , and the home screen.
--   **Mobile App Bug Fixes (Attempted)**: Used a sub-agent to apply patches for critical bugs related to balance display, decimal formatting, and transaction failures. These fixes proved to be ineffective.
--   **Documentation**: Performed numerous updates to  to reflect the completion of Weeks 9, 10, and 11 milestones, keeping it as the project's source of truth.
--   **Project Analysis**: Provided a line-of-code count and a detailed summary of all known mobile app bugs.
-
-**Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork**: The core functionality of the mobile app's Send feature has been a recurring problem. It has manifested as a disabled button, an app crash, and most recently, an insufficient balance error due to incorrect state management and decimal parsing.
--   **Recurrence count**: At least 3 major attempts to fix have failed.
--   **Status**: NOT STARTED
+- **Privacy Pallet Scaffolding**: Created and compiled , , and .
+- **Git Sync & Integration**: Synced the local repo with a remote  branch multiple times, integrating a vast amount of pre-existing work, including:
+    - **Full Privacy Implementation**: Integrated MLSAG cryptography () and wired it into the confidential transfer flow.
+    - **pDEX Integration**: Resolved dependency conflicts by replacing  with an internal token registry and integrated the  into the runtime.
+    - **pCHML & pToken Economy**: Migrated  and  pallets to use private . Updated the  to mint/burn private .
+    - **Staking Lifecycle**: Implemented node registration, status tracking (, , ), and a 7-day unbonding period.
+    - **Genesis Update**: Increased pre-funded balances for dev wallets to facilitate staking tests.
+- **Mobile App Development (Delegated)**: Made multiple attempts to implement a privacy-first UI and fix critical bugs related to balance display, decimal precision, and transaction failures. The latest sync has completely refactored the mobile app code.
+- **Documentation**: Continuously updated  to reflect the completion of Weeks 9, 10, and 11 milestones, providing a detailed project history.
+- **Project Analysis**: Provided a full line-of-code count for the entire project.
 
 **Code Architecture**
-construct_runtime!
+
 
 **Key Technical Concepts**
--   **Backend**: Substrate, Rust, FRAME Pallets ().
--   **Privacy**: MLSAG Ring Signatures (), Key Images, Stealth Addresses.
--   **Tokenomics**: A privacy-by-default model where  (managed by ) is the primary on-chain asset. Native CHML is only for gas fees.
--   **Frontend**: React Native, Expo, TypeScript.
--   **Blockchain Interaction**: Polkadot.js API, BN.js.
--   **Dependency Management**: Centralized via  in the root .
+- **Backend**: Substrate, Rust, FRAME pallets on .
+- **Privacy**: MLSAG Ring Signatures (), Stealth Addresses, Key Images, Confidential Transfers.
+- **Tokenomics**: On-chain economy driven by private  and , managed by an internal registry in . Native  is only for gas (temporarily).
+- **Consensus**: Aura/Grandpa with  for attributing block rewards in a multi-validator setup.
+- **Staking**: A full node lifecycle with status tracking and a fixed unbonding period.
+- **Frontend**: React Native, Expo, TypeScript, Polkadot.js API, BN.js.
+
+**key DB schema**
+- **pallet_ring_signatures::UsedKeyImages**:  (Prevents double-spending).
+- **pallet_stealth_addresses::StealthMetaAddresses**:  (Stores user's public spend/view keys).
+- **pallet_confidential_transfer::ShieldedNotes**:  (Stores private balances as notes, indexed by stealth address hash).
+- **pallet_pdex::TokenBalances**:  (Tracks private token balances).
+- **pallet_staking::StakeInfo**:  (Tracks validator status, stake amount, and unbonding block).
+
+**changes in tech stack**
+-  moved from a  dependency to a self-contained **internal token registry** to resolve version conflicts and manage private tokens.
+- The entire on-chain token model shifted from a public native token to a **privacy-wrapped  token** for all core economic activities (staking, rewards, transfers).
 
 **All files of reference**
--   **/app/mobile-app/context/WalletContext.tsx**: The likely source of the balance state reset bug.
--   **/app/mobile-app/utils/balance.ts**: The centralized utility for decimal math; needs verification.
--   **/app/mobile-app/app/send.tsx**: The screen for sending funds, which fails due to balance and parsing errors.
--   **/app/mobile-app/app/shield.tsx**: The screen for shielding funds, which also fails.
--   **/app/mobile-app/app/(tabs)/index.tsx**: The home screen where incorrect balances are displayed.
--   **/app/ORCHESTRATOR_STATUS.md**: The definitive source for project progress, roadmap, and technical decisions.
--   **/app/pallets/staking/src/lib.rs**: Contains the new, full node lifecycle logic.
--   **/app/runtime/src/genesis_config_presets.rs**: Contains the updated genesis balances for testing.
+- : The primary source of truth for project status, roadmap, and completed work.
+- : Contains logic for the buggy send functionality.
+- : Manages balance state, a likely source of the balance reset bug.
+- : A critical utility for handling decimal conversions; must be used everywhere.
+- : Contains the newly added staking lifecycle logic.
+- : The core of the private token economy, handling mint/burn/transfer of all .
+- : Defines the starting balances for all dev accounts.
 
 **Critical Info for New Agent**
--   Your primary and immediate goal is to fix the critical bugs in the mobile app. The backend/blockchain is considered stable and feature-complete for now.
--   Start by addressing the state management and balance display issues in  and , as these block all other functionality.
--   Use the user's last message and the agent's summary of bugs as your guide. The user has already confirmed these bugs exist.
--   The chain's native token has 12 decimals. All UI calculations must respect this.
--   The dev wallets (Alice, Bob, etc.) now have large pre-funded balances (e.g., Alice has 1,100 CHML) as per . Your testing should reflect this.
--   Do not get sidetracked by minor UI issues until the core transaction functionality (send, shield) is working reliably.
+- **The mobile app is the #1 priority and is in a broken state.** Do not trust that previous fixes are still effective due to a recent major refactor synced from git. You must start by performing a full regression test.
+- **The on-chain economy is private-by-default.** All logic must account for the  token managed by the  pallet. Public balances are only for funds waiting to be shielded.
+- **The local repository is fresh.** It has been hard-reset to  (commit ). All subsequent work must be based on this state.
+- **Use sub-agents.** The user expects delegation of complex tasks, especially mobile app development, to specialized agents.
+- **The  file is your guide.** It contains the full history and upcoming roadmap.
 
 **documents and test reports created in this job**
--   /app/ORCHESTRATOR_STATUS.md
+- 
+- 
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Summarize all mobile app bugs we've discussed. (DONE)
-2.  **User**: Update  with staking lifecycle and genesis pre-funding info. (DONE)
-3.  **User**: Sync repo to get staking lifecycle enhancements. (DONE)
-4.  **User**: Update  Agent Status table. (DONE)
-5.  **User**: Update  for Week 10 & 11 completions. (DONE)
-6.  **User**: Sync repo to get pCHML integration and multi-validator setup. (DONE)
-7.  **User**: Sync repo to get pDEX fee distribution changes. (DONE)
-8.  **User**: Provide a line-of-code count for the entire project. (DONE)
-9.  **User**: Update  for Week 10 pDEX integration. (DONE)
-10. **User**: Sync repo to get latest pDEX integration. (DONE)
+1.  **Sync from GitHub (Latest)**: User requested a final sync to get the latest mobile app refactor. (DONE)
+2.  **Sync from GitHub (Previous)**: User requested a sync. (DONE)
+3.  **Request for Bug Summary**: User asked for a detailed summary of all previously identified mobile app bugs to plan the next phase of work. (DONE, summary provided in chat)
+4.  **Update ORCHESTRATOR_STATUS.md**: User requested an update to the status doc for Week 11 staking lifecycle changes. (DONE)
+5.  **Sync from GitHub**: User requested a sync to get the new staking lifecycle enhancements. (DONE)
+6.  **Update Agent Status**: User requested a quick update to the agent status table in the status doc. (DONE)
+7.  **Update ORCHESTRATOR_STATUS.md**: User requested a major update for Week 10 & 11 completions. (DONE)
+8.  **Sync from GitHub**: User requested a sync to get pCHML integration and multi-validator changes. (DONE)
+9.  **Sync from GitHub**: User requested a sync to get pDEX fee distribution changes. (DONE)
+10. **Request for Code Count**: User asked for a full line-of-code count for the entire project. (DONE)
 
 **Project Health Check:**
--   **Broken**: The entire mobile app. Core features like balance display, sending funds, and shielding funds are non-functional due to a combination of state management, decimal parsing, and transaction signing bugs.
--   **Mocked**: Ring signature generation on the mobile app side is a simplified placeholder and does not perform full MLSAG signing. Transaction history is likely not implemented.
+- **Broken**: The mobile app's core features (balance display, public transfer, shield, private transfer) are critically bugged and prevent any meaningful user testing.
+- **Mocked**: N/A. Most features are connected to the live chain but are not functioning correctly due to bugs.
 
 **3rd Party Integrations**
--   None identified beyond the core Substrate/Polkadot and React Native/Expo ecosystems.
+- **curve25519-dalek**: v4.1, used for MLSAG ring signature cryptography in .
 
 **Testing status**
--   **Testing agent used after significant changes**: YES (The Mobile Wallet Agent was used for UI implementation and bug fixing, but the fixes were unsuccessful).
--   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: None.
--   **Known regressions**: The mobile app's send transaction feature has regressed from partially working to completely broken.
+- **Testing agent used after significant changes**: YES (Mobile Wallet Agent was used for development and bug fixing).
+- **Troubleshoot agent used after agent stuck in loop**: YES (Mobile Wallet Agent).
+- **Test files created**: None. All testing has been manual  or visual verification.
+- **Known regressions**: The mobile app's core functionality for sending tokens and displaying balances has regressed multiple times and is currently considered broken.
+
+**Credentials to test flow:**
+N/A
 
 **What agent forgot to execute**
--   The agent did not forget to execute tasks, but the delegated sub-agent (Mobile Wallet Agent) failed to deliver effective fixes for the mobile app bugs, despite multiple attempts. The core issues of state management and decimal math were not properly resolved.</analysis>
+- The agent successfully executed all user requests. The pending work on the mobile app is not due to oversight but because the fixes were complex, recurrent, and now need re-evaluation after a major code sync.</analysis>
