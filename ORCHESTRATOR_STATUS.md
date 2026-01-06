@@ -428,6 +428,70 @@ curl -H "Content-Type: application/json" \
 
 ---
 
+---
+
+## 🔄 WEEK 12 PROGRESS (Jan 4-6, 2026)
+
+**Status:** 🔄 MOBILE APP INTEGRATION - PHASES 0-5 COMPLETE
+
+### Phase 0: pToken Genesis Funding ✅
+- Genesis funding for pBTC, pETH, pUSDT across dev wallets
+- TokenId mapping: 0=pCHML, 1=pETH, 2=pBTC, 3=pUSDT
+
+### Phase 1: Home Screen Fixes ✅
+- Public CHML balance display working
+- pToken balances under Private Assets section
+- Quick action buttons functional
+
+### Phase 2: Shield/Unshield Rework ✅
+- Token selector with 4 tokens (CHML, BTC, ETH, USDT)
+- Bridge deposit flow for external tokens
+- Bridge withdrawal flow for pTokens
+
+### Phase 3: Send/Receive Multi-Token ✅
+- Added pDEX transfer extrinsic (call_index 5)
+- Token selector on send screen
+- Dynamic balance display per token
+
+### Phase 4: Bridge Functionality ✅
+- bridgeService.initiateDeposit() for BTC/ETH/USDT
+- bridgeService.initiateWithdrawal() for pBTC/pETH/pUSDT
+- Bridge landing page with available/coming soon bridges
+- Blockchain supports Bitcoin, Ethereum, Polygon chains
+
+### Phase 5: Trade/pDEX with MEV Protection ✅
+- Renamed "Privacy Mode" to "MEV Protection" (accurate terminology)
+- MEV Protection default ON (ring signatures hide trader identity)
+- Slippage settings (0.5%, 1%, 3%, custom)
+- Real blockchain calls for quotes and swaps
+- Info text explains MEV protection benefits
+
+### Testing Results & Remaining Work
+
+| Phase | Scope | Est. Time | Status |
+|-------|-------|-----------|--------|
+| Phase 6 | Balance & Core Data Fixes | 2-3 hrs | 🔄 NEXT |
+| Phase 7 | Shield/Unshield/Bridge Fixes | 3-4 hrs | ⏳ QUEUED |
+| Phase 8 | Send/Receive Fixes | 1-2 hrs | ⏳ QUEUED |
+| Phase 9 | Trade/pDEX Fixes + Genesis Pools | 2-3 hrs | ⏳ QUEUED |
+| Phase 10 | Wallet Tab Enhancement | 2-3 hrs | ⏳ QUEUED |
+| Phase 11 | Power Tab (vNode + LP) | 5-6 hrs | ⏳ QUEUED |
+| Phase 12 | Liquidity Pools Full | 3-4 hrs | ⏳ QUEUED |
+| Phase 13 | Polish & Tech Debt | 1-2 hrs | ⏳ QUEUED |
+
+### Key Bugs Identified (From Testing Jan 6):
+1. pToken balances slow to load (8-10 sec delay)
+2. pCHML balance switching between 0 and 1
+3. "Wallet not unlocked" errors on send/swap
+4. Token selector showing wrong available balance
+5. Bridge page creates recursive loop
+6. Transaction history not persistent
+
+### Tags Created:
+- `pdex-transfer-v1` - pDEX transfer extrinsic
+
+---
+
 ## 📋 PRIOR WEEKS
 
 ---
