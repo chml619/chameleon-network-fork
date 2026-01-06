@@ -287,7 +287,7 @@ export default function ShieldScreen() {
   const isFormReady = (): boolean => {
     // Bridge tokens don't need fee estimate
     if (selectedToken.requiresBridge) {
-      return validateShield() === null && amount && parseFloat(amount) > 0;
+      return validateShield() === null && !!amount && parseFloat(amount) > 0;
     }
     return validateShield() === null && !!feeEstimate;
   };
