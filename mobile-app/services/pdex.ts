@@ -222,9 +222,16 @@ class PDEXService {
   }
 
   /**
-   * Get any token balance from pDEX pallet
+   * Get any token balance from pDEX pallet (with caching)
    */
   async getTokenBalance(tokenId: number, address: string): Promise<BN> {
+    // Check cache first
+    const cacheKey = `${address}-${tokenId}`;
+    const cached = this.balanceCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < this.CACHE_TTL_MS) {
+      return cached.balance;
+    }
+
     const api = apiService.getApi();
     if (!api) {
       return new BN(0);
@@ -236,7 +243,12 @@ class PDEXService {
       }
 
       const balance = await (api.query.pdex as any).tokenBalances(address, tokenId);
-      return new BN(balance.toString());
+      const result = new BN(balance.toString());
+      
+      // Update cache
+      this.balanceCache.set(cacheKey, { balance: result, timestamp: Date.now() });
+      
+      return result;
     } catch (error) {
       console.error('[pDEX] Error getting token balance:', error);
       return new BN(0);
