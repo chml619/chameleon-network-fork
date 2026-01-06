@@ -113,7 +113,7 @@ export const PDEX_TOKENS: TokenInfo[] = [
   {
     symbol: 'CHML',
     name: 'Chameleon',
-    decimals: 18,
+    decimals: 12,  // FIXED: was 18
     balance: '0',
     balanceRaw: new BN(0),
     color: '#22B958',
@@ -121,7 +121,7 @@ export const PDEX_TOKENS: TokenInfo[] = [
   {
     symbol: 'pETH',
     name: 'Privacy ETH',
-    decimals: 18,
+    decimals: 12,  // FIXED: was 18
     balance: '0',
     balanceRaw: new BN(0),
     color: '#627EEA',
@@ -129,7 +129,7 @@ export const PDEX_TOKENS: TokenInfo[] = [
   {
     symbol: 'pBTC',
     name: 'Privacy BTC',
-    decimals: 8,
+    decimals: 12,  // FIXED: was 8
     balance: '0',
     balanceRaw: new BN(0),
     color: '#F7931A',
@@ -137,7 +137,7 @@ export const PDEX_TOKENS: TokenInfo[] = [
   {
     symbol: 'pUSDT',
     name: 'Privacy USDT',
-    decimals: 6,
+    decimals: 12,  // FIXED: was 6
     balance: '0',
     balanceRaw: new BN(0),
     color: '#26A17B',
@@ -145,7 +145,7 @@ export const PDEX_TOKENS: TokenInfo[] = [
   {
     symbol: 'pUSDC',
     name: 'Privacy USDC',
-    decimals: 6,
+    decimals: 12,  // FIXED: was 6
     balance: '0',
     balanceRaw: new BN(0),
     color: '#2775CA',
