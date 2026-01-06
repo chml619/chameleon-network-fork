@@ -465,6 +465,11 @@ const styles = StyleSheet.create({
     fontWeight: THEME.fontWeight.semibold,
     color: THEME.colors.primary,
   },
+  tokenRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: THEME.spacing.xs,
+  },
   tokenBalanceDisabled: {
     color: THEME.colors.textMuted,
   },
