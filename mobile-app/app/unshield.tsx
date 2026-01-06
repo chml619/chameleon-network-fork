@@ -29,6 +29,7 @@ import { apiService } from '@/services/api';
 import { bridgeService } from '@/services/bridge';
 import { transactionService } from '@/services/transaction';
 import { formatBalance, parseAmount } from '@/utils/balance';
+import { transactionHistoryService } from '@/services/transactionHistory';
 import { THEME, GRADIENTS } from '@/constants/theme';
 const TOKENS = [
   { id: 'CHML', symbol: 'pCHML', outputSymbol: 'CHML', name: 'Chameleon', color: '#6366F1', icon: 'diamond-outline', assetId: 0, requiresBridge: false },
