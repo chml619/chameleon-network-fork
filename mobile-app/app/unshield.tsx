@@ -386,13 +386,12 @@ export default function UnshieldScreen() {
               : 'Unshield your private tokens to make them public again. The destination address will be visible on-chain.'}
           </Text>
           {selectedToken.requiresBridge && (
-            <TouchableOpacity
-              style={styles.bridgeButton}
-              onPress={() => router.push('/bridge')}
-            >
-              <Ionicons name="git-branch-outline" size={18} color={THEME.colors.white} />
-              <Text style={styles.bridgeButtonText}>Go to Bridge</Text>
-            </TouchableOpacity>
+            <View style={styles.bridgeNote}>
+              <Ionicons name="information-circle" size={16} color={THEME.colors.primary} />
+              <Text style={styles.bridgeNoteText}>
+                Enter destination address and amount below to initiate bridge withdrawal
+              </Text>
+            </View>
           )}
         </View>
 
