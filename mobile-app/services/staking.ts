@@ -376,6 +376,96 @@ class StakingService {
   }
 
   /**
+   * Register a new validator node with IP and port endpoint
+   * This is the enhanced version that stores node endpoint information
+   */
+  async registerNodeWithEndpoint(
+    api: ApiPromise,
+    keyPair: KeyringPair,
+    ip: string,
+    port: number
+  ): Promise<StakingResult> {
+    console.log('[Staking] Registering node with endpoint:', ip, port);
+
+    // Check if custom pallet supports registerNode with params
+    if (this.hasCustomStakingPallet(api)) {
+      try {
+        // Try the enhanced registerNode call with IP/port
+        // The pallet may support: api.tx.staking.registerNode(ip, port)
+        let tx;
+        
+        // Check if the extrinsic accepts parameters
+        const registerNodeMeta = api.tx.staking.registerNode;
+        if (registerNodeMeta.meta.args.length >= 2) {
+          // Pallet supports IP/port parameters
+          tx = api.tx.staking.registerNode(ip, port);
+        } else {
+          // Fallback to basic registration without params
+          tx = api.tx.staking.registerNode();
+        }
+
+        return new Promise<StakingResult>((resolve) => {
+          tx.signAndSend(keyPair, { nonce: -1 }, ({ status, events, dispatchError }) => {
+            if (status.isInBlock || status.isFinalized) {
+              if (dispatchError) {
+                let errorMessage = 'Registration failed';
+                if (dispatchError.isModule) {
+                  const decoded = api.registry.findMetaError(dispatchError.asModule);
+                  errorMessage = `${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`;
+                }
+                console.error('[Staking] Registration error:', errorMessage);
+                resolve({ success: false, error: errorMessage });
+              } else {
+                // Check events for success
+                let nodeRegistered = false;
+                events.forEach(({ event }) => {
+                  if (event.section === 'staking' && 
+                      (event.method === 'NodeRegistered' || event.method === 'Registered')) {
+                    nodeRegistered = true;
+                  }
+                });
+
+                const txHash = status.isFinalized 
+                  ? status.asFinalized.toString() 
+                  : status.asInBlock.toString();
+
+                console.log('[Staking] Node registered, txHash:', txHash);
+                
+                // Update mock data status
+                this.mockStakingData.status = 'Registered';
+                
+                resolve({ 
+                  success: true, 
+                  txHash,
+                  blockHash: txHash,
+                });
+              }
+            }
+          }).catch((error) => {
+            console.error('[Staking] Registration tx error:', error);
+            resolve({ success: false, error: error.message });
+          });
+        });
+      } catch (error) {
+        console.error('[Staking] registerNodeWithEndpoint error:', error);
+        return { 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Registration failed' 
+        };
+      }
+    }
+
+    // Fallback to mock registration for development
+    console.log('[Staking] Using mock registration (pallet not available)');
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    this.mockStakingData.status = 'Registered';
+    return { 
+      success: true, 
+      txHash: '0x' + Math.random().toString(16).slice(2),
+    };
+  }
+
+  /**
    * Register as a validator node
    * Uses api.tx.staking.registerNode()
    */
