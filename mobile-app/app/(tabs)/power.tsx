@@ -28,7 +28,7 @@ import { useLiquidity } from '@/hooks/useLiquidity';
 import { useWallet } from '@/context/WalletContext';
 import { useApi } from '@/hooks/useApi';
 import { NetworkBadge } from '@/components/NetworkBadge';
-import { MockViewBanner } from '@/components/MockViewBanner';
+// MockViewBanner removed - functionality is now real
 import { THEME, GRADIENTS } from '@/constants/theme';
 import { NodeStatus } from '@/services/staking';
 import { formatBalance, parseAmount } from '@/utils/balance';
