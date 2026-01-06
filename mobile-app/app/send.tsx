@@ -386,6 +386,10 @@ export default function SendScreen() {
       setIsSending(false);
       setShowResult(true);
       
+      // Refresh balances after successful send
+      refreshBalances();
+      refreshPCHMLBalance();
+      
       console.log(`[Send] ${transferType} successful:`, txHash);
     } catch (error) {
       console.error('Error sending transaction:', error);
