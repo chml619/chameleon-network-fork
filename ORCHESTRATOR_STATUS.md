@@ -470,7 +470,7 @@ curl -H "Content-Type: application/json" \
 
 | Phase | Scope | Est. Time | Status |
 |-------|-------|-----------|--------|
-| Phase 6 | Balance & Core Data Fixes | 2-3 hrs | 🔄 IN PROGRESS (6A done) |
+| Phase 6 | Balance & Core Data Fixes | 2-3 hrs | ✅ COMPLETE |
 | Phase 7 | Shield/Unshield/Bridge Fixes | 3-4 hrs | ⏳ QUEUED |
 | Phase 8 | Send/Receive Fixes | 1-2 hrs | ⏳ QUEUED |
 | Phase 9 | Trade/pDEX Fixes + Genesis Pools | 2-3 hrs | ⏳ QUEUED |
