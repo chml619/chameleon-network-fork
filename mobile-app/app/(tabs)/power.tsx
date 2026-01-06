@@ -347,15 +347,6 @@ export default function PowerScreen() {
     );
   };
 
-  const handleClaimLPRewards = async (poolId: number) => {
-    const result = await claimLPRewards(poolId);
-    if (result.success) {
-      Alert.alert('Success', 'LP rewards claimed successfully!');
-    } else {
-      Alert.alert('Error', result.error || 'Claim failed');
-    }
-  };
-
   const nodeStatus = stakingInfo?.status || 'None';
   const statusColor = STATUS_COLORS[nodeStatus];
   const unbondingInfo = getUnbondingProgress();
