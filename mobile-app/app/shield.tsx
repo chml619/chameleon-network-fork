@@ -180,8 +180,9 @@ export default function ShieldScreen() {
       Alert.alert('Shield Error', error);
       return;
     }
-    if (!wallet?.address || (!selectedToken.requiresBridge && !feeEstimate)) return;
-    if (!wallet?.address || !feeEstimate) return;
+    // For CHML need fee estimate, for bridge tokens we don't
+    if (!wallet?.address) return;
+    if (!selectedToken.requiresBridge && !feeEstimate) return;
 
     setIsShielding(true);
 
