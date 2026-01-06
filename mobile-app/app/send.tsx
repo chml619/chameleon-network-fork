@@ -59,6 +59,7 @@ export default function SendScreen() {
   const insets = useSafeAreaInsets();
   const { wallet, refreshBalances, refreshPCHMLBalance } = useWallet();
   const { formattedFreeBalance, balance } = useBalance(wallet?.address);
+  const { token: tokenParam } = useLocalSearchParams<{ token?: string }>();
   
   // Form state
   const [recipient, setRecipient] = useState('');
@@ -76,6 +77,16 @@ export default function SendScreen() {
   const [isSending, setIsSending] = useState(false);
   const [transactionResult, setTransactionResult] = useState<any>(null);
   const [showResult, setShowResult] = useState(false);
+
+  // Pre-select token if passed via navigation
+  useEffect(() => {
+    if (tokenParam) {
+      const preselected = TOKENS.find(t => t.symbol === tokenParam);
+      if (preselected) {
+        setSelectedToken(preselected);
+      }
+    }
+  }, [tokenParam]);
 
   // Validate address safely (with error handling)
   const checkAddressValid = useCallback((addr: string): boolean => {
