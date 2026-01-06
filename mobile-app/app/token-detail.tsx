@@ -46,9 +46,9 @@ export default function TokenDetailScreen() {
     if (!wallet?.address) return;
     setIsLoading(true);
     try {
-      const allTx = await transactionHistoryService.getTransactions(wallet.address);
+      const allTx = await transactionHistoryService.getHistory(wallet.address);
       // Filter transactions for this token
-      const tokenTx = allTx.filter(tx => {
+      const tokenTx = allTx.filter((tx: StoredTransaction) => {
         const txStr = JSON.stringify(tx).toLowerCase();
         const symbolLower = (symbol || '').toLowerCase();
         return txStr.includes(symbolLower);
