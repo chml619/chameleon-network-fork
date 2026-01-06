@@ -327,9 +327,6 @@ export default function PowerScreen() {
       colors={GRADIENTS.background.colors}
       style={[styles.container, { paddingTop: insets.top }]}
     >
-      {/* Mock View Banner */}
-      <MockViewBanner screenId="power" featureName="Power Features" />
-
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Power</Text>
