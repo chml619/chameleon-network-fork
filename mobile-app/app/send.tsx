@@ -57,7 +57,7 @@ const QUICK_TEST_ACCOUNTS = [
 export default function SendScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { wallet } = useWallet();
+  const { wallet, refreshBalances, refreshPCHMLBalance } = useWallet();
   const { formattedFreeBalance, balance } = useBalance(wallet?.address);
   
   // Form state
