@@ -484,8 +484,8 @@ curl -H "Content-Type: application/json" \
 2. ✅ pCHML balance switching between 0 and 1 - **FIXED: Corrected token decimals (12 not 18)**
 3. ✅ "Wallet not unlocked" errors on send/swap - **FIXED: Added getOrDeriveKeyPair() for restored wallets**
 4. ✅ Token selector showing wrong available balance - **FIXED: Now shows selected token balance, not CHML**
-5. Bridge page creates recursive loop
-6. Transaction history not persistent
+5. ✅ Bridge page creates recursive loop - **FIXED: Removed redirect, shield handles external tokens directly**
+6. ✅ Transaction history not persistent - **FIXED: Added history saving to trade.tsx and shield.tsx**
 
 ### Tags Created:
 - `pdex-transfer-v1` - pDEX transfer extrinsic
