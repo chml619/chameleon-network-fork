@@ -363,13 +363,12 @@ export default function ShieldScreen() {
               : 'Shield your tokens to make them private and untraceable. Shielded tokens can only be seen by you.'}
           </Text>
           {selectedToken.requiresBridge && (
-            <TouchableOpacity
-              style={styles.bridgeButton}
-              onPress={() => router.push('/bridge')}
-            >
-              <Ionicons name="git-branch-outline" size={18} color={THEME.colors.white} />
-              <Text style={styles.bridgeButtonText}>Go to Bridge</Text>
-            </TouchableOpacity>
+            <View style={styles.bridgeNote}>
+              <Ionicons name="information-circle" size={16} color={THEME.colors.primary} />
+              <Text style={styles.bridgeNoteText}>
+                Enter amount below to initiate bridge deposit
+              </Text>
+            </View>
           )}
         </View>
 
