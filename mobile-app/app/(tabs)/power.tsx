@@ -469,7 +469,7 @@ export default function PowerScreen() {
               {nodeStatus === 'None' && (
                 <TouchableOpacity
                   style={[styles.actionButton, styles.primaryButton]}
-                  onPress={handleRegisterNode}
+                  onPress={() => router.push('/register-node')}
                   disabled={isRegistering}
                 >
                   {isRegistering ? (
