@@ -17,7 +17,7 @@ cssInterop(H5, { className: 'style' });
 cssInterop(H6, { className: 'style' });
 
 const MappedHeading = memo(
-  forwardRef<React.ElementRef<typeof H1>, IHeadingProps>(
+  forwardRef<any, IHeadingProps>(
     (
       {
         size,
