@@ -42,16 +42,37 @@ export default function RemoveLiquidityScreen() {
   }, [api, poolId, wallet?.address]);
 
   const loadData = async () => {
-    if (!api || !poolId || !wallet?.address) return;
+    if (!api || !poolId || !wallet?.address) {
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
+    setLoadingTimeout(false);
+    
+    // Set a timeout for loading
+    const timeoutId = setTimeout(() => {
+      setLoadingTimeout(true);
+      setIsLoading(false);
+    }, 10000); // 10 second timeout
+    
     try {
-      const poolInfo = await poolService.getPool(api, parseInt(poolId as string));
+      // Validate poolId is a valid number
+      const poolIdNum = parseInt(poolId as string);
+      if (isNaN(poolIdNum) || poolIdNum < 0) {
+        throw new Error('Invalid pool ID');
+      }
+      
+      const poolInfo = await poolService.getPool(api, poolIdNum);
       setPool(poolInfo);
       
-      const userPosition = await poolService.getUserPosition(api, parseInt(poolId as string), wallet.address);
+      const userPosition = await poolService.getUserPosition(api, poolIdNum, wallet.address);
       setPosition(userPosition);
+      
+      clearTimeout(timeoutId);
     } catch (error) {
       console.error('Error loading data:', error);
+      clearTimeout(timeoutId);
     } finally {
       setIsLoading(false);
     }
