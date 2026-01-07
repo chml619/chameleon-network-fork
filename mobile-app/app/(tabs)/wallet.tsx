@@ -270,7 +270,7 @@ export default function WalletScreen() {
         <View style={styles.issueSection}>
           <TouchableOpacity
             style={styles.issueButton}
-            onPress={() => Alert.alert('Coming Soon', 'Issue your own privacy coin in a future update.')}
+            onPress={() => Alert.alert('Feature Unavailable', 'Token issuance will be available in a future update. Contact support for enterprise token needs.')}
           >
             <Text style={styles.issueButtonText}>Issue your own privacy coin</Text>
           </TouchableOpacity>
