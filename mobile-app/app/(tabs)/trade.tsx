@@ -73,14 +73,14 @@ export default function TradeScreen() {
     
     setLoadingPoolStats(true);
     try {
-      const pools = await poolService.getAllPools(api);
+      const pools = await pdexService.getLPPools(wallet?.address || '');
       const activePoolCount = pools.length;
       
       // Calculate TVL from pool reserves (simplified)
       let totalTVL = 0;
-      pools.forEach(pool => {
-        const reserveA = parseFloat(poolService.formatAmount(pool.reserveA));
-        const reserveB = parseFloat(poolService.formatAmount(pool.reserveB));
+      pools.forEach((pool: any) => {
+        const reserveA = parseFloat(pdexService.formatAmount(pool.reserveA));
+        const reserveB = parseFloat(pdexService.formatAmount(pool.reserveB));
         // Simplified TVL calculation (assuming 1:1 USD for demo)
         totalTVL += reserveA + reserveB;
       });
