@@ -19,6 +19,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { usePDEX } from '@/hooks/usePDEX';
 import { useWallet } from '@/context/WalletContext';
 import { transactionHistoryService } from '@/services/transactionHistory';
