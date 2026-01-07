@@ -313,10 +313,15 @@ export default function AddLiquidityScreen() {
                   value={amountB}
                   onChangeText={setAmountB}
                   keyboardType="decimal-pad"
-                  placeholder="0.00"
+                  placeholder={selectedPool && poolService.formatAmount(selectedPool.reserveA) === '0' ? "0.00 (you set initial price)" : "0.00 (auto-calculated)"}
                   placeholderTextColor={THEME.colors.textMuted}
                 />
               </View>
+              {selectedPool && poolService.formatAmount(selectedPool.reserveA) === '0' && (
+                <Text style={styles.initialPriceNote}>
+                  Pool has no liquidity - you'll set the initial price ratio
+                </Text>
+              )}
             </View>
 
             {/* Expected LP Tokens */}
