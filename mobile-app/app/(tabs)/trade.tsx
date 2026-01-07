@@ -3,7 +3,7 @@
  * Full swap interface with privacy mode
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
