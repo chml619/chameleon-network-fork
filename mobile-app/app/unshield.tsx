@@ -301,12 +301,19 @@ export default function UnshieldScreen() {
       console.error('Unshield error:', error);
       let errorMessage = 'Unable to complete unshielding. Please check your private balance and try again.';
       if (error instanceof Error) {
+        console.error('Unshield error details:', error.message);
+        
         if (error.message.includes('Insufficient')) {
-          errorMessage = 'Insufficient private balance to complete unshielding transaction.';
+          errorMessage = error.message; // Use the detailed insufficient balance message
         } else if (error.message.includes('unlock')) {
-          errorMessage = 'Please unlock your wallet or re-import it.';
-        } else if (error.message.includes('network')) {
-          errorMessage = 'Network connection issue. Please try again.';
+          errorMessage = 'Unable to unlock wallet. Please try re-importing your wallet from the Wallet tab.';
+        } else if (error.message.includes('network') || error.message.includes('connection')) {
+          errorMessage = 'Network connection issue. Please check your connection and try again.';
+        } else if (error.message.includes('dispatch')) {
+          errorMessage = 'Transaction failed on blockchain. This may be due to insufficient balance or network issues.';
+        } else {
+          // Show the actual error message if it's informative
+          errorMessage = error.message.length > 5 ? error.message : errorMessage;
         }
       }
       Alert.alert('Unshield Failed', errorMessage);
