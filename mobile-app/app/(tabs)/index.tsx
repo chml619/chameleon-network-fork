@@ -1069,6 +1069,8 @@ const styles = StyleSheet.create({
     fontSize: THEME.fontSize.lg,
     fontWeight: THEME.fontWeight.semibold,
     color: THEME.colors.text,
+    maxWidth: 150, // Prevent cutoff
+    flexShrink: 1,
   },
   switchWalletHint: {
     fontSize: THEME.fontSize.xs,
