@@ -461,7 +461,9 @@ export default function HomeScreen() {
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push('/manage-wallets' as any)}>
-              <Text style={styles.walletName}>{wallet?.name || 'My Wallet'}</Text>
+              <Text style={styles.walletName} numberOfLines={1} adjustsFontSizeToFit>
+                {wallet?.name || 'My Wallet'}
+              </Text>
               <Text style={styles.switchWalletHint}>Tap to switch wallet</Text>
             </TouchableOpacity>
           </View>
