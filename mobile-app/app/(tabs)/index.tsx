@@ -234,7 +234,11 @@ export default function HomeScreen() {
       loadUnreadCount();
       // Load pToken balances
       loadPTokenBalances();
-    }, [loadTransactionHistory, checkIncomingTransactions, loadUnreadCount, loadPTokenBalances])
+      // Force refresh pCHML balance when returning to home screen
+      if (refreshPCHMLBalance) {
+        refreshPCHMLBalance();
+      }
+    }, [loadTransactionHistory, checkIncomingTransactions, loadUnreadCount, loadPTokenBalances, refreshPCHMLBalance])
   );
 
   // Pull-to-refresh handler
