@@ -145,7 +145,7 @@ export default function UnshieldScreen() {
         setDestinationAddress(clipboardContent.trim());
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to paste from clipboard');
+      Alert.alert('Clipboard Error', 'Unable to access clipboard. Please enter the address manually.');
     }
   };
 
