@@ -378,7 +378,7 @@ export default function TradeScreen() {
             <View style={styles.liquidityActions}>
               <TouchableOpacity 
                 style={styles.liquidityActionButton}
-                onPress={() => router.push('/add-liquidity')}
+                onPress={() => router.push('/add-liquidity' as any)}
               >
                 <View style={styles.liquidityActionIcon}>
                   <Ionicons name="add" size={24} color={THEME.colors.primary} />
@@ -388,7 +388,7 @@ export default function TradeScreen() {
               
               <TouchableOpacity 
                 style={styles.liquidityActionButton}
-                onPress={() => router.push('/remove-liquidity')}
+                onPress={() => router.push('/remove-liquidity' as any)}
               >
                 <View style={styles.liquidityActionIcon}>
                   <Ionicons name="remove" size={24} color={THEME.colors.error} />
