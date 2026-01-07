@@ -107,17 +107,14 @@ export default function RemoveLiquidityScreen() {
               );
 
               if (result.success) {
-                await transactionHistoryService.addTransaction(wallet.address, {
-                  type: 'remove_liquidity',
-                  poolId: pool.id,
-                  tokenA: poolService.getTokenSymbol(pool.assetA),
-                  tokenB: poolService.getTokenSymbol(pool.assetB),
-                  amountA: getExpectedA(),
-                  amountB: getExpectedB(),
-                  lpTokens: getLpToRemove(),
+                await transactionHistoryService.saveTransaction(wallet.address, {
+                  hash: result.txHash || 'unknown',
+                  from: wallet.address,
+                  to: 'pool',
+                  amount: `${getExpectedA()} ${poolService.getTokenSymbol(pool.assetA)} + ${getExpectedB()} ${poolService.getTokenSymbol(pool.assetB)}`,
+                  formattedAmount: `${getExpectedA()} ${poolService.getTokenSymbol(pool.assetA)} + ${getExpectedB()} ${poolService.getTokenSymbol(pool.assetB)}`,
                   status: 'finalized',
-                  timestamp: Date.now(),
-                  txHash: result.txHash,
+                  usedMEVProtection: false,
                 });
 
                 if (refreshBalances) await refreshBalances();
