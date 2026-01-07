@@ -296,12 +296,11 @@ export default function HomeScreen() {
     }
   };
 
-  // Debug: Log connection state changes
+  // Log connection errors only
   useEffect(() => {
-    console.log('[Home] ====== CONNECTION STATE CHANGE ======');
-    console.log('[Home] Status:', connectionState.status);
-    console.log('[Home] Block number:', connectionState.blockNumber);
-    console.log('[Home] Error:', connectionState.error);
+    if (connectionState.error) {
+      console.error('[Home] Connection error:', connectionState.error);
+    }
   }, [connectionState]);
 
   // Auto-connect to network on mount
