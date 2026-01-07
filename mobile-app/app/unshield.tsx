@@ -292,10 +292,17 @@ export default function UnshieldScreen() {
       );
     } catch (error) {
       console.error('Unshield error:', error);
-      Alert.alert(
-        'Unshield Failed',
-        error instanceof Error ? error.message : 'Unknown error occurred'
-      );
+      let errorMessage = 'Unable to complete unshielding. Please check your private balance and try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('Insufficient')) {
+          errorMessage = 'Insufficient private balance to complete unshielding transaction.';
+        } else if (error.message.includes('unlock')) {
+          errorMessage = 'Please unlock your wallet or re-import it.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Network connection issue. Please try again.';
+        }
+      }
+      Alert.alert('Unshield Failed', errorMessage);
     } finally {
       setIsUnshielding(false);
     }
