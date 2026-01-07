@@ -371,4 +371,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   noPositionText: { color: THEME.colors.textMuted },
+  retryButton: {
+    backgroundColor: THEME.colors.primary,
+    paddingHorizontal: THEME.spacing.lg,
+    paddingVertical: THEME.spacing.sm,
+    borderRadius: THEME.borderRadius.medium,
+    marginTop: THEME.spacing.md,
+  },
+  retryButtonText: {
+    color: THEME.colors.white,
+    fontWeight: THEME.fontWeight.semibold,
+  },
+  loadingText: {
+    marginTop: THEME.spacing.md,
+    color: THEME.colors.textSecondary,
+  },
 });
