@@ -76,7 +76,7 @@ export default function StakeNodeScreen() {
 
     const keyPair = await walletService.getOrDeriveKeyPair();
     if (!keyPair) {
-      Alert.alert('Error', 'Wallet not unlocked. Please re-import your wallet.');
+      Alert.alert('Wallet Locked', 'Please unlock your wallet or re-import it to continue staking.');
       return;
     }
 
