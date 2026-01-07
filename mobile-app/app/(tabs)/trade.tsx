@@ -753,35 +753,76 @@ const styles = StyleSheet.create({
     color: THEME.colors.error,
     lineHeight: 20,
   },
-  // Coming Soon
-  comingSoonContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: THEME.spacing.xl,
-    marginTop: THEME.spacing.xl * 2,
+  // Liquidity Tab
+  liquidityContainer: {
+    padding: THEME.spacing.md,
   },
-  comingSoonIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  liquidityTitle: {
+    fontSize: THEME.fontSize.xl,
+    fontWeight: THEME.fontWeight.bold as any,
+    color: THEME.colors.text,
+    marginBottom: THEME.spacing.xs,
+  },
+  liquiditySubtitle: {
+    fontSize: THEME.fontSize.base,
+    color: THEME.colors.textSecondary,
+    marginBottom: THEME.spacing.lg,
+  },
+  liquidityActions: {
+    flexDirection: 'row',
+    gap: THEME.spacing.md,
+    marginBottom: THEME.spacing.lg,
+  },
+  liquidityActionButton: {
+    flex: 1,
+    backgroundColor: THEME.colors.white,
+    padding: THEME.spacing.md,
+    borderRadius: THEME.borderRadius.medium,
+    alignItems: 'center',
+    ...THEME.shadows.small,
+  },
+  liquidityActionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: THEME.colors.lightGrey,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: THEME.spacing.lg,
-  },
-  comingSoonTitle: {
-    fontSize: THEME.fontSize.xl,
-    fontWeight: THEME.fontWeight.bold,
-    color: THEME.colors.text,
     marginBottom: THEME.spacing.sm,
   },
-  comingSoonText: {
+  liquidityActionText: {
+    fontSize: THEME.fontSize.sm,
+    fontWeight: THEME.fontWeight.medium as any,
+    color: THEME.colors.text,
+  },
+  poolStatsCard: {
+    backgroundColor: THEME.colors.white,
+    padding: THEME.spacing.md,
+    borderRadius: THEME.borderRadius.medium,
+    ...THEME.shadows.small,
+  },
+  poolStatsTitle: {
     fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.bold as any,
+    color: THEME.colors.text,
+    marginBottom: THEME.spacing.md,
+  },
+  poolStatRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: THEME.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: THEME.colors.border,
+  },
+  poolStatLabel: {
+    fontSize: THEME.fontSize.sm,
     color: THEME.colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: THEME.spacing.lg,
-    lineHeight: 22,
+  },
+  poolStatValue: {
+    fontSize: THEME.fontSize.sm,
+    fontWeight: THEME.fontWeight.semibold as any,
+    color: THEME.colors.text,
   },
   slippageToggle: {
     flexDirection: "row",
