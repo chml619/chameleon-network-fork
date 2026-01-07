@@ -169,17 +169,14 @@ export default function AddLiquidityScreen() {
 
       if (result.success) {
         // Save to transaction history
-        await transactionHistoryService.addTransaction(wallet.address, {
-          type: 'add_liquidity',
-          poolId: selectedPool.id,
-          tokenA: poolService.getTokenSymbol(selectedPool.assetA),
-          tokenB: poolService.getTokenSymbol(selectedPool.assetB),
-          amountA,
-          amountB,
-          lpTokens: result.lpTokensReceived || expectedLP,
+        await transactionHistoryService.saveTransaction(wallet.address, {
+          hash: result.txHash || 'unknown',
+          from: wallet.address,
+          to: 'pool',
+          amount: `${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`,
+          formattedAmount: `${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`,
           status: 'finalized',
-          timestamp: Date.now(),
-          txHash: result.txHash,
+          usedMEVProtection: false,
         });
 
         // Refresh balances
