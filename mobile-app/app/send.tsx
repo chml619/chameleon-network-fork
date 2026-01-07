@@ -354,7 +354,7 @@ export default function SendScreen() {
       const formattedAmount = `${amount} ${selectedToken.symbol}`;
 
       // Transferring via pDEX
-      console.log(`[Send] Transferring ${selectedToken.symbol} via pDEX`);
+      // Transferring via pDEX
       const result = await pdexService.transfer(
         keyPair,
         selectedToken.assetId,
