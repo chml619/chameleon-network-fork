@@ -298,16 +298,20 @@ curl -H "Content-Type: application/json" \
 | **Transactions** | Auto-dismiss success, explorer links, copy-to-clipboard, history |
 | **Notifications** | Local push (sent/confirmed/received/failed), bell icon, unread badge |
 | **Multi-Wallet** | Persistence, switching, manage wallets screen |
-| **UX** | Pull-to-refresh, mock banners, DEVNET badge, MEV toggle |
+| **UX** | Pull-to-refresh, DEVNET badge, MEV toggle |
+| **Power Tab** | vNode registration, staking (1,750 pCHML), unbonding lifecycle, LP rewards |
+| **Liquidity** | Add liquidity, remove liquidity, pool detail, position tracking |
+| **Token Detail** | Per-token view, filtered history, send/receive actions |
 
 ### Technical Stack
 - **Framework:** React Native + Expo SDK 54
 - **Blockchain:** Polkadot.js API
 - **Storage:** AsyncStorage (wallets, history, notifications)
 - **Notifications:** expo-notifications
+- **TypeScript:** ZERO errors (validated)
 
 ### Latest Build
-**Build:** 1.026 | **Date:** Jan 6, 2026 | **Status:** Testing in progress - Phases 0-5 complete, bugs identified  
+**Build:** 1.027 | **Date:** Jan 7, 2026 | **Status:** ✅ Feature Complete - Testing in progress  
 **Link:** EAS Preview Build (Android)
 
 ---
