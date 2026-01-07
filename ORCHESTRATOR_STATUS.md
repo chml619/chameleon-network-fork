@@ -311,8 +311,8 @@ curl -H "Content-Type: application/json" \
 - **TypeScript:** ZERO errors (validated)
 
 ### Latest Build
-**Build:** 1.027 | **Date:** Jan 7, 2026 | **Status:** ✅ Feature Complete - Testing in progress  
-**Link:** EAS Preview Build (Android)
+**Build:** 1.031 | **Date:** Jan 7, 2026 | **Status:** ✅ Feature Complete - Testing in progress  
+**Link:** [Android EAS build # 691ad486](https://expo.dev/accounts/spronline/projects/chameleon-wallet-spronline/builds/691ad486-4ac8-4efa-8194-e7694a5dd32c)
 
 ---
 
