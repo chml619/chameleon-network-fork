@@ -304,19 +304,9 @@ export default function HomeScreen() {
     console.log('[Home] Error:', connectionState.error);
   }, [connectionState]);
 
-  // Debug: Log wallet and balance info
-  useEffect(() => {
-    console.log('[Home] ====== WALLET/BALANCE INFO ======');
-    console.log('[Home] Wallet address:', wallet?.address);
-    console.log('[Home] Balance loading:', balanceLoading);
-    console.log('[Home] Formatted balance:', formattedFreeBalance);
-  }, [wallet?.address, balanceLoading, formattedFreeBalance]);
-
   // Auto-connect to network on mount
   useEffect(() => {
-    console.log('[Home] Auto-connect check - status:', connectionState.status);
     if (connectionState.status === 'disconnected') {
-      console.log('[Home] Triggering connect()...');
       connect();
     }
   }, [connectionState.status, connect]);
