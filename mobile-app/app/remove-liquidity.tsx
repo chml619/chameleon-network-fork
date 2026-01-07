@@ -34,6 +34,7 @@ export default function RemoveLiquidityScreen() {
   const [position, setPosition] = useState<UserLPPosition | null>(null);
   const [percentage, setPercentage] = useState(50);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
   useEffect(() => {
