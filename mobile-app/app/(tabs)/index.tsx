@@ -313,7 +313,6 @@ export default function HomeScreen() {
   // Handle dev account import
   const handleDevAccountImport = async (accountName: string) => {
     try {
-      console.log('[Home] Importing dev account:', accountName);
       await importDevAccount(accountName.toLowerCase() as any);
       Alert.alert('Success', `${accountName} account imported!`);
     } catch (error) {
