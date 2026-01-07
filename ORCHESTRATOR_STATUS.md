@@ -377,14 +377,14 @@ curl -H "Content-Type: application/json" \
 │   ├── ring-signatures/    # Ring signatures (index 13) ✅
 │   ├── stealth-addresses/  # Stealth addresses (index 14) ✅
 │   ├── confidential-transfer/ # Confidential transfer (index 15) ✅
-│   ├── pdex/               # pDEX pallet (index 16) ✅ NEW
+│   ├── pdex/               # pDEX pallet (index 16) ✅
 │   │   ├── src/lib.rs      # AMM logic + internal token helpers
 │   │   └── src/tokens.rs   # TokenId enum for supported tokens
 │   └── template/           # Template pallet
 ├── runtime/src/
 │   ├── lib.rs              # Runtime config with pallet indices
 │   ├── configs/mod.rs      # Pallet configurations
-│   └── genesis_config_presets.rs  # Dev wallet pre-funding
+│   └── genesis_config_presets.rs  # Dev wallet pre-funding (UPDATED Jan 7)
 ├── node/                   # Node implementation
 ├── Cargo.toml              # Workspace root
 └── Cargo.lock              # ⚠️ DO NOT DELETE - backed up
@@ -392,15 +392,72 @@ curl -H "Content-Type: application/json" \
 
 **Total Runtime Pallets:** 8 custom + system pallets
 
-### Mobile App
+### Mobile App (Complete Structure - Jan 7, 2026)
 ```
-/mobile-app/
-├── services/mev.ts             # MEV service (✅ Updated)
-├── services/privacy.ts         # Privacy service (✅ NEW)
-├── app/send.tsx                # Send screen with MEV toggle (✅ Updated)
-├── config/network.ts           # Network endpoints (✅ Updated)
-└── services/api.ts             # API connection
+/app/mobile-app/
+├── app/
+│   ├── (tabs)/
+│   │   ├── _layout.tsx         # Tab navigation layout
+│   │   ├── index.tsx           # Home screen (balance, quick actions)
+│   │   ├── wallet.tsx          # Token list with navigation to detail
+│   │   ├── trade.tsx           # pDEX swaps + liquidity tab
+│   │   └── power.tsx           # vNode staking + LP rewards (PHASE 11)
+│   ├── _layout.tsx             # Root layout
+│   ├── add-liquidity.tsx       # Add liquidity to pools (PHASE 12) ✅ NEW
+│   ├── bridge.tsx              # Bridge landing page
+│   ├── create-wallet.tsx       # Wallet creation flow
+│   ├── import-wallet.tsx       # Import via mnemonic
+│   ├── node-detail.tsx         # vNode management (PHASE 11) ✅ NEW
+│   ├── pool-detail.tsx         # Pool stats + position (PHASE 12) ✅ NEW
+│   ├── receive.tsx             # Receive tokens with QR
+│   ├── register-node.tsx       # Register new vNode (PHASE 11) ✅ NEW
+│   ├── remove-liquidity.tsx    # Remove liquidity (PHASE 12) ✅ NEW
+│   ├── send.tsx                # Send tokens
+│   ├── settings.tsx            # App settings
+│   ├── shield.tsx              # Shield public → private
+│   ├── stake-node.tsx          # Stake on vNode (PHASE 11) ✅ NEW
+│   ├── token-detail.tsx        # Per-token view (PHASE 10) ✅ NEW
+│   └── unshield.tsx            # Unshield private → public
+├── components/
+│   ├── ui/
+│   │   ├── IconSymbol.tsx      # Icon component (FIXED Phase 13)
+│   │   └── heading/index.tsx   # Heading component (FIXED Phase 13)
+│   └── ... (other components)
+├── context/
+│   └── WalletContext.tsx       # Wallet state management (MODIFIED)
+├── hooks/
+│   ├── useApi.ts               # Polkadot API hook
+│   ├── usePDEX.ts              # pDEX operations hook (MODIFIED)
+│   └── useStaking.ts           # Staking hook (if exists)
+├── services/
+│   ├── wallet.ts               # Wallet service + getOrDeriveKeyPair()
+│   ├── pdex.ts                 # pDEX service (MODIFIED)
+│   ├── pool.ts                 # Pool service (PHASE 12) ✅ NEW
+│   ├── staking.ts              # Staking service (PHASE 11) ✅ NEW
+│   ├── bridge.ts               # Bridge service (MODIFIED)
+│   ├── transactionHistory.ts   # TX history persistence (MODIFIED)
+│   └── mev.ts                  # MEV protection service
+├── constants/
+│   └── theme.ts                # THEME constants
+├── config/
+│   └── network.ts              # Network endpoints
+├── utils/
+│   └── balance.ts              # Balance formatting (MODIFIED)
+└── package.json                # Dependencies
 ```
+
+**New Files Created (Phases 10-12):**
+| File | Phase | Description |
+|------|-------|-------------|
+| `app/token-detail.tsx` | 10 | Per-token view with history |
+| `app/register-node.tsx` | 11 | vNode registration form |
+| `app/stake-node.tsx` | 11 | Fixed 1,750 pCHML staking |
+| `app/node-detail.tsx` | 11 | Node management (claim, unbond) |
+| `app/add-liquidity.tsx` | 12 | Add liquidity to pools |
+| `app/remove-liquidity.tsx` | 12 | Remove liquidity (percentage) |
+| `app/pool-detail.tsx` | 12 | Pool stats + user position |
+| `services/pool.ts` | 12 | Pool service (pDEX integration) |
+| `services/staking.ts` | 11 | Staking service |
 
 ### Documentation
 ```
