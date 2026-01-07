@@ -92,7 +92,7 @@ export default function UnshieldScreen() {
     try {
       const api = apiService.getApi();
       if (!api) {
-        console.log('API not connected');
+        console.error('API not connected');
         setPrivateBalance(new BN(0));
         return;
       }
