@@ -162,14 +162,46 @@ export default function RemoveLiquidityScreen() {
   if (isLoading) {
     return (
       <LinearGradient colors={GRADIENTS.background.colors} style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color={THEME.colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Remove Liquidity</Text>
+          <View style={{ width: 24 }} />
+        </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={THEME.colors.primary} />
+          <Text style={styles.loadingText}>Loading pool data...</Text>
         </View>
       </LinearGradient>
     );
   }
 
-  if (!pool || !position) {
+  if (loadingTimeout) {
+    return (
+      <LinearGradient colors={GRADIENTS.background.colors} style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color={THEME.colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Remove Liquidity</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.noPositionCard}>
+          <Ionicons name="time-outline" size={48} color={THEME.colors.textMuted} />
+          <Text style={styles.noPositionText}>Loading timed out</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={loadData}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    );
+  }
+
+  if (!pool || !position || !position.lpTokens || position.lpTokens === '0') {
     return (
       <LinearGradient colors={GRADIENTS.background.colors} style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
