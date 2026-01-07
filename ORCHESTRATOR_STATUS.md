@@ -628,6 +628,26 @@ curl -H "Content-Type: application/json" \
 - `pdex-transfer-v1` - pDEX transfer extrinsic
 - `mobile-app-complete-v1` - All 13 phases complete
 
+### Liquidity Pools Setup (Jan 7, 2026)
+
+**Genesis Token Balances Updated:**
+- Public CHML: 1,210,000 total (was 26,500)
+- pCHML: 1,472,500 total (was 0)
+- pETH: 233 total (was ~71)
+- pBTC: 12.1 total (was ~5)
+- pUSDT: 1,210,000 total (was ~190,000)
+
+**Liquidity Pools Created:**
+| Pool ID | Pair | pCHML | Other Token | ~USD Value |
+|---------|------|-------|-------------|------------|
+| 0 | pCHML/pBTC | 225,000 | 1.1 pBTC | ~$203k |
+| 1 | pCHML/pETH | 225,000 | 31 pETH | ~$201k |
+| 2 | pCHML/pUSDT | 225,000 | 100,000 pUSDT | ~$200k |
+
+**Scripts Added:**
+- `scripts/create-pools.js` - Creates the 3 genesis liquidity pools
+- `scripts/add-liquidity.js` - Seeds pools with initial liquidity
+
 ---
 
 ## 📋 PRIOR WEEKS
