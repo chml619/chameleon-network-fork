@@ -658,7 +658,7 @@ export default function PowerScreen() {
                 <View style={styles.lpRewardsHeader}>
                   <Text style={styles.lpRewardsLabel}>Pending LP Rewards</Text>
                   <View style={styles.apyBadge}>
-                    <Text style={styles.apyText}>~12% APY</Text>
+                    <Text style={styles.apyText}>Variable APY</Text>
                   </View>
                 </View>
                 <Text style={styles.lpRewardsAmount}>{lpRewards} pCHML</Text>
