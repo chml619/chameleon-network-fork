@@ -259,7 +259,7 @@ export default function WalletScreen() {
           {/* Add Token Button */}
           <TouchableOpacity
             style={styles.addTokenButton}
-            onPress={() => Alert.alert('Coming Soon', 'Add custom tokens in a future update.')}
+            onPress={() => Alert.alert('Feature Unavailable', 'Custom token support will be added in a future update. Currently supported: pCHML, pBTC, pETH, pUSDT.')}
           >
             <Ionicons name="add" size={20} color={THEME.colors.secondary} />
             <Text style={styles.addTokenText}>Add a coin to your list</Text>
