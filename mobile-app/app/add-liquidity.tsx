@@ -153,7 +153,7 @@ export default function AddLiquidityScreen() {
 
     const keyPair = await walletService.getOrDeriveKeyPair();
     if (!keyPair) {
-      Alert.alert('Error', 'Wallet not unlocked');
+      Alert.alert('Wallet Locked', 'Please unlock your wallet or re-import it to continue');
       return;
     }
 
