@@ -518,9 +518,9 @@ curl -H "Content-Type: application/json" \
 
 ---
 
-## 🔄 WEEK 12 PROGRESS (Jan 4-6, 2026)
+## 🔄 WEEK 12 PROGRESS (Jan 4-7, 2026)
 
-**Status:** 🔄 MOBILE APP INTEGRATION - PHASES 0-5 COMPLETE
+**Status:** ✅ COMPLETE - ALL 13 PHASES DONE
 
 ### Phase 0: pToken Genesis Funding ✅
 - Genesis funding for pBTC, pETH, pUSDT across dev wallets
@@ -554,29 +554,75 @@ curl -H "Content-Type: application/json" \
 - Real blockchain calls for quotes and swaps
 - Info text explains MEV protection benefits
 
-### Testing Results & Remaining Work
+### Phase 6: Balance & Core Data Fixes ✅
+- Added 5-second balance caching for performance
+- Fixed pCHML decimal display (12 decimals, not 18)
+- Fixed token balance loading issues
 
-| Phase | Scope | Est. Time | Status |
-|-------|-------|-----------|--------|
-| Phase 6 | Balance & Core Data Fixes | 2-3 hrs | ✅ COMPLETE |
-| Phase 7 | Shield/Unshield/Bridge Fixes | 3-4 hrs | ✅ COMPLETE |
-| Phase 8 | Send/Receive Fixes | 1-2 hrs | ✅ COMPLETE |
-| Phase 9 | Trade/pDEX Fixes + Genesis Pools | 2-3 hrs | ✅ COMPLETE |
-| Phase 10 | Wallet Tab Enhancement | 2-3 hrs | ✅ COMPLETE |
-| Phase 11 | Power Tab (vNode + LP) | 5-6 hrs | ✅ COMPLETE |
-| Phase 12 | Liquidity Pools Full | 3-4 hrs | ⏳ QUEUED |
-| Phase 13 | Polish & Tech Debt | 1-2 hrs | ⏳ QUEUED |
+### Phase 7: Shield/Unshield & Bridge Fixes ✅
+- Fixed bridge page redirect loop
+- Added persistent transaction history (AsyncStorage per wallet)
+- Balance refresh after shield/unshield operations
 
-### Key Bugs Identified (From Testing Jan 6):
-1. ✅ pToken balances slow to load (8-10 sec delay) - **FIXED: Added 5-second balance caching**
-2. ✅ pCHML balance switching between 0 and 1 - **FIXED: Corrected token decimals (12 not 18)**
-3. ✅ "Wallet not unlocked" errors on send/swap - **FIXED: Added getOrDeriveKeyPair() for restored wallets**
-4. ✅ Token selector showing wrong available balance - **FIXED: Now shows selected token balance, not CHML**
-5. ✅ Bridge page creates recursive loop - **FIXED: Removed redirect, shield handles external tokens directly**
-6. ✅ Transaction history not persistent - **FIXED: Added history saving to trade.tsx and shield.tsx**
+### Phase 8: Send/Receive Fixes ✅
+- Implemented getOrDeriveKeyPair() for restored wallets
+- Fixed "Wallet not unlocked" errors
+- Added token selector to receive screen
+- Balance refresh after send
+
+### Phase 9: Trade/pDEX Fixes ✅
+- Fixed token lists and balance fetching
+- Added transaction history for swaps
+- Resolved wallet unlock errors during swaps
+
+### Phase 10: Wallet Tab Enhancement ✅
+- Created token-detail.tsx screen
+- Per-token view with balance and actions
+- Filtered transaction history per token
+- Navigation from wallet list to detail
+
+### Phase 11: Power Tab (vNode + LP) ✅
+- **register-node.tsx**: vNode registration form
+- **stake-node.tsx**: Fixed 1,750 pCHML stake amount
+- **node-detail.tsx**: Node management (claim rewards, unbonding lifecycle)
+- **power.tsx**: vNode list + LP rewards section
+- Full unbonding lifecycle: Start → 7-day cooldown → Complete
+
+### Phase 12: Liquidity Pools ✅
+- **services/pool.ts**: Pool service with pDEX integration
+- **add-liquidity.tsx**: Pool selector, dual token input, LP preview
+- **remove-liquidity.tsx**: Percentage-based removal (25/50/75/100%)
+- **pool-detail.tsx**: Pool stats, user position, add/remove actions
+- Transaction history for all liquidity operations
+
+### Phase 13: Polish & Tech Debt ✅
+- Fixed IconSymbol.tsx TypeScript error (ViewStyle → TextStyle)
+- Fixed heading/index.tsx forwardRef type constraints
+- Removed 15+ console.log debug statements
+- Updated error messages to be user-friendly
+- **Result: ZERO TypeScript errors**
+
+### Genesis Config Update (Jan 7, 2026) ✅
+- Public CHML: 26,500 → **1,210,000 CHML**
+- pCHML: 0 → **1,472,500 pCHML** (NEW!)
+- pETH: ~71 → **233 pETH**
+- pBTC: ~5 → **12.1 pBTC**
+- pUSDT: ~190,000 → **1,210,000 pUSDT**
+
+### All Bugs Fixed:
+| Bug | Fix | Phase |
+|-----|-----|-------|
+| pToken balances slow (8-10 sec) | 5-second balance caching | 6 |
+| pCHML switching between 0 and 1 | Correct 12 decimals | 6 |
+| "Wallet not unlocked" errors | getOrDeriveKeyPair() | 8 |
+| Token selector wrong balance | Show selected token balance | 6 |
+| Bridge page redirect loop | Direct shield handling | 7 |
+| Transaction history not persistent | AsyncStorage per wallet | 7 |
+| TypeScript errors | Fixed IconSymbol + heading | 13 |
 
 ### Tags Created:
 - `pdex-transfer-v1` - pDEX transfer extrinsic
+- `mobile-app-complete-v1` - All 13 phases complete
 
 ---
 
