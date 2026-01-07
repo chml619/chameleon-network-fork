@@ -217,7 +217,17 @@ export default function WalletScreen() {
       colors={GRADIENTS.background.colors}
       style={[styles.container, { paddingTop: insets.top }]}
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={THEME.colors.primary}
+            colors={[THEME.colors.primary]}
+          />
+        }
+      >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
