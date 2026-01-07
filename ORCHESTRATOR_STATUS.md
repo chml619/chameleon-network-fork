@@ -329,12 +329,12 @@ curl -H "Content-Type: application/json" \
 | 10 | pDEX + Bridge Fees + Fee Distribution | ✅ **COMPLETE** |
 | 11 | pCHML Integration + Multi-validator | ✅ **COMPLETE** |
 
-### Phase 3: Infrastructure (Weeks 12-14) ⏳ PLANNED
+### Phase 3: Infrastructure (Weeks 12-14) 🔄 IN PROGRESS
 
 | Week | Milestone | Status |
 |------|-----------|--------|
-| 12 | Mobile App + Staking Enhancements | ⏳ QUEUED |
-| 13-14 | Testing + Gas Fee Conversion | ⏳ QUEUED |
+| 12 | Mobile App Complete (13 Phases) | ✅ **COMPLETE** |
+| 13-14 | Testing + Gas Fee Conversion | 🧪 STARTING |
 
 ### Phase 4: Public Testnet (Week 15+) 🎯 Target
 
