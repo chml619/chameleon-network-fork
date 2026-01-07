@@ -56,6 +56,12 @@ export default function TradeScreen() {
   } = usePDEX();
 
   const [activeTab, setActiveTab] = useState<TabType>('swap');
+  const [poolStats, setPoolStats] = useState({
+    totalValueLocked: '—',
+    volume24h: '—',
+    activePools: '—',
+  });
+  const [loadingPoolStats, setLoadingPoolStats] = useState(false);
 
   const [slippage, setSlippage] = useState('0.5');
   const [showSlippageModal, setShowSlippageModal] = useState(false);
