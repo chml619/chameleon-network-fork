@@ -166,7 +166,7 @@ export default function PoolDetailScreen() {
                 
                 <TouchableOpacity
                   style={styles.removeButtonSmall}
-                  onPress={() => router.push(`/remove-liquidity?poolId=${pool.id}`)}
+                  onPress={() => router.push(`/remove-liquidity?poolId=${pool.id}` as any)}
                 >
                   <Ionicons name="remove" size={18} color="#D32F2F" />
                   <Text style={styles.removeText}>Remove</Text>
