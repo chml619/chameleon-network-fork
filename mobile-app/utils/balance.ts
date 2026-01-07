@@ -137,3 +137,70 @@ export function debugBalance(rawBalance: string | BN | null | undefined, label: 
   console.log(`  With Unit: ${formatBalanceWithUnit(rawBalance)}`);
   console.log(`  Decimals: ${DECIMALS}`);
 }
+
+/**
+ * Format a balance for display with proper decimal places and thousand separators
+ * @param rawValue - Raw blockchain value (string, number, or BN)
+ * @param decimals - Number of decimal places to show (default: 2)
+ * @param tokenDecimals - Token decimals for conversion (default: 12 for CHML)
+ * @returns Formatted string like "499,999.99"
+ */
+export function formatDisplayBalance(
+  rawValue: string | number | BN, 
+  decimals: number = 2,
+  tokenDecimals: number = 12
+): string {
+  try {
+    let value: number;
+    
+    if (typeof rawValue === 'string') {
+      // If it's already a formatted string (like "499999.992035"), parse it
+      if (rawValue.includes('.') && !rawValue.includes('e')) {
+        value = parseFloat(rawValue);
+      } else {
+        // Raw blockchain value - divide by 10^tokenDecimals
+        const bn = new BN(rawValue);
+        const divisor = new BN(10).pow(new BN(tokenDecimals));
+        value = parseFloat(bn.toString()) / parseFloat(divisor.toString());
+      }
+    } else if (typeof rawValue === 'number') {
+      value = rawValue;
+    } else {
+      // BN instance
+      const divisor = new BN(10).pow(new BN(tokenDecimals));
+      value = parseFloat(rawValue.toString()) / parseFloat(divisor.toString());
+    }
+    
+    // Round to specified decimal places
+    const rounded = Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
+    
+    // Format with thousand separators
+    return rounded.toLocaleString('en-US', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+  } catch (error) {
+    console.error('Error formatting balance:', error);
+    return '0.00';
+  }
+}
+
+/**
+ * Format a balance for display without thousand separators (for inputs)
+ * @param rawValue - Raw value
+ * @param decimals - Number of decimal places
+ * @returns Formatted string like "499999.99"
+ */
+export function formatInputBalance(
+  rawValue: string | number | BN, 
+  decimals: number = 6
+): string {
+  try {
+    const formatted = formatDisplayBalance(rawValue, decimals);
+    // Remove thousand separators for input fields
+    return formatted.replace(/,/g, '');
+  } catch (error) {
+    console.error('Error formatting input balance:', error);
+    return '0';
+  }
+}
