@@ -430,7 +430,7 @@ export default function HomeScreen() {
 
   const handleActionPress = (action: typeof ACTIONS[0]) => {
     if (action.disabled) {
-      Alert.alert('Coming Soon', `${action.label} feature will be available in a future update.`);
+      Alert.alert('Feature Unavailable', `${action.label} is not yet available. Check back in a future update.`);
       return;
     }
     if (action.route) {
