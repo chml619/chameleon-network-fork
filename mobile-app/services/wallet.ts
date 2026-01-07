@@ -265,6 +265,7 @@ class WalletService {
     
     // If no wallet state, can't derive
     if (!this.walletState) {
+      console.warn('[Wallet] No wallet state available');
       return null;
     }
     
@@ -275,25 +276,41 @@ class WalletService {
       const storedSeed = await storageService.getEncryptedSeed();
       
       if (!storedSeed) {
-        console.warn('[Wallet] No stored seed found');
+        console.warn('[Wallet] No stored seed found - wallet may need to be re-imported');
         return null;
       }
       
       await this.initializeKeyring();
       
       if (!this.keyring) {
+        console.error('[Wallet] Failed to initialize keyring');
         return null;
       }
       
       // Check if it's a dev account URI (contains //)
       if (storedSeed.includes('//')) {
+        console.log('[Wallet] Restoring dev account from URI');
         this.currentPair = this.keyring.addFromUri(storedSeed);
       } else {
-        // Regular mnemonic
+        // Regular mnemonic - validate first
+        if (!this.validateMnemonic(storedSeed)) {
+          console.error('[Wallet] Invalid stored mnemonic');
+          return null;
+        }
+        console.log('[Wallet] Restoring wallet from mnemonic');
         this.currentPair = this.keyring.addFromMnemonic(storedSeed);
       }
       
+      // Verify the restored keypair matches the wallet address
+      if (this.currentPair.address !== this.walletState.address) {
+        console.error('[Wallet] Address mismatch - stored seed does not match wallet address');
+        console.error(`Expected: ${this.walletState.address}, Got: ${this.currentPair.address}`);
+        this.currentPair = null;
+        return null;
+      }
+      
       this.walletState.isLocked = false;
+      console.log('[Wallet] Successfully restored keypair');
       return this.currentPair;
     } catch (error) {
       console.error('[Wallet] Error deriving keypair:', error);
