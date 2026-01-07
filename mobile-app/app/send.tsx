@@ -401,7 +401,7 @@ export default function SendScreen() {
       refreshBalances();
       refreshPCHMLBalance();
       
-      console.log(`[Send] ${transferType} successful:`, txHash);
+      // Transaction successful
     } catch (error) {
       console.error('Error sending transaction:', error);
       setIsSending(false);
