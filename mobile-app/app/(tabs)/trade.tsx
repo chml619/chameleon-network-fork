@@ -365,17 +365,52 @@ export default function TradeScreen() {
             </View>
           </>
         ) : (
-          /* Liquidity Tab - Coming Soon */
-          <View style={styles.comingSoonContainer}>
-            <View style={styles.comingSoonIconContainer}>
-              <Ionicons name="layers" size={48} color={THEME.colors.textMuted} />
-            </View>
-            <Text style={styles.comingSoonTitle}>Liquidity Pools</Text>
-            <Text style={styles.comingSoonText}>
-              Add liquidity to earn trading fees and LP rewards.
-              This feature is coming soon!
+          /* Liquidity Tab */
+          <View style={styles.liquidityContainer}>
+            <Text style={styles.liquidityTitle}>Liquidity Pools</Text>
+            <Text style={styles.liquiditySubtitle}>
+              Add liquidity to earn trading fees and LP rewards
             </Text>
-            <FeatureBadge type="coming-soon" size="medium" />
+            
+            {/* Quick Actions */}
+            <View style={styles.liquidityActions}>
+              <TouchableOpacity 
+                style={styles.liquidityActionButton}
+                onPress={() => router.push('/add-liquidity')}
+              >
+                <View style={styles.liquidityActionIcon}>
+                  <Ionicons name="add" size={24} color={THEME.colors.primary} />
+                </View>
+                <Text style={styles.liquidityActionText}>Add Liquidity</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.liquidityActionButton}
+                onPress={() => router.push('/remove-liquidity')}
+              >
+                <View style={styles.liquidityActionIcon}>
+                  <Ionicons name="remove" size={24} color={THEME.colors.error} />
+                </View>
+                <Text style={styles.liquidityActionText}>Remove Liquidity</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Pool Stats */}
+            <View style={styles.poolStatsCard}>
+              <Text style={styles.poolStatsTitle}>Pool Overview</Text>
+              <View style={styles.poolStatRow}>
+                <Text style={styles.poolStatLabel}>Total Value Locked</Text>
+                <Text style={styles.poolStatValue}>$2.4M</Text>
+              </View>
+              <View style={styles.poolStatRow}>
+                <Text style={styles.poolStatLabel}>24h Volume</Text>
+                <Text style={styles.poolStatValue}>$156K</Text>
+              </View>
+              <View style={styles.poolStatRow}>
+                <Text style={styles.poolStatLabel}>Active Pools</Text>
+                <Text style={styles.poolStatValue}>6</Text>
+              </View>
+            </View>
           </View>
         )}
 
