@@ -342,12 +342,11 @@ curl -H "Content-Type: application/json" \
 
 ## 🎯 NEXT STEPS
 
-### Week 12 (Mobile App + Staking)
-- [ ] Staking cooldown period (7-day unstaking delay)
-- [ ] Node lifecycle states (register→waiting→active→unbonding)
-- [ ] Mobile app vNode management UI
-- [ ] Mobile app staking/unstaking screens
-- [ ] pCHML balance display in wallet
+### Current: Mobile App Testing 🧪
+- [ ] End-to-end testing of all features
+- [ ] TestFlight build for iOS
+- [ ] Play Store internal testing build
+- [ ] User acceptance testing
 
 ### Week 13-14 (Testing + Hardening)
 - [ ] Convert gas fees to pCHML (Option B - ~7-12 days)
@@ -355,6 +354,11 @@ curl -H "Content-Type: application/json" \
 - [ ] Multi-validator stress testing
 - [ ] Security audits
 - [ ] Documentation finalization
+
+### Week 15 (Public Testnet Launch) 🚀
+- [ ] Public testnet deployment
+- [ ] Community onboarding
+- [ ] Bug bounty program
 
 ### Future (pNode Hardware)
 - [ ] pNode device specification
