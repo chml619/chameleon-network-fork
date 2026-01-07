@@ -502,7 +502,7 @@ export default function HomeScreen() {
                   </View>
                   <View style={styles.balanceValueRow}>
                     <Text style={styles.balanceAmount}>
-                      {formatBalance(publicBalance)} CHML
+                      {formatDisplayBalance(publicBalance)} CHML
                     </Text>
                     {balanceLoading && (
                       <ActivityIndicator size="small" color={THEME.colors.primary} style={{ marginLeft: 8 }} />
