@@ -23,7 +23,7 @@ import { useRouter } from 'expo-router';
 import { usePDEX } from '@/hooks/usePDEX';
 import { useWallet } from '@/context/WalletContext';
 import { useApi } from '@/hooks/useApi';
-import { poolService } from '@/services/pdex';
+import { pdexService } from '@/services/pdex';
 import { transactionHistoryService } from '@/services/transactionHistory';
 import { TokenSelector } from '@/components/TokenSelector';
 import { FeatureBadge } from '@/components/FeatureBadge';
