@@ -160,7 +160,7 @@ export default function ImportWalletScreen() {
             />
             <TouchableOpacity
               style={styles.scanButton}
-              onPress={() => Alert.alert('Coming Soon', 'QR scanning will be available soon.')}
+              onPress={() => Alert.alert('QR Scanner Unavailable', 'QR code scanning for seed phrases will be added in a future update. Please enter your seed phrase manually.')}
             >
               <Ionicons name="scan-outline" size={24} color={THEME.colors.textSecondary} />
             </TouchableOpacity>
