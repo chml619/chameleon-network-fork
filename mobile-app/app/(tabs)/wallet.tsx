@@ -41,8 +41,9 @@ export default function WalletScreen() {
   const insets = useSafeAreaInsets();
   const { wallet, isLoading: walletLoading, importDevAccount, logout, publicBalance, pchmlBalance } = useWallet();
   const { connectionState, connect } = useApi();
-  const { formattedFreeBalance, isLoading: balanceLoading } = useBalance(wallet?.address);
+  const { formattedFreeBalance, isLoading: balanceLoading, refetch: refetchBalance } = useBalance(wallet?.address);
   const [pTokenBalances, setPTokenBalances] = useState<Record<string, string>>({});
+  const [refreshing, setRefreshing] = useState(false);
 
   // Auto-connect to network on mount
   useEffect(() => {
