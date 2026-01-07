@@ -49,27 +49,36 @@ fn testnet_genesis(
         // Pre-funded pToken balances for dev wallets
         // Format: (account, token_id, balance)
         // Using 12 decimals for all pTokens
+        // Token IDs: 0=pCHML, 1=pETH, 2=pBTC, 3=pUSDT
+        // Updated: Significantly increased for comprehensive testing
         let pdex_token_balances: Vec<(AccountId, u32, u128)> = vec![
-                // Alice: 1.1452 pBTC, 15.67234 pETH, 75,350 pUSDT
-                (Sr25519Keyring::Alice.to_account_id(), PBTC_ID, 1_145_200_000_000),
-                (Sr25519Keyring::Alice.to_account_id(), PETH_ID, 15_672_340_000_000),
-                (Sr25519Keyring::Alice.to_account_id(), PUSDT_ID, 75_350_000_000_000_000),
-                // Bob: 0.75 pBTC, 9.5 pETH, 25,000 pUSDT
-                (Sr25519Keyring::Bob.to_account_id(), PBTC_ID, 750_000_000_000),
-                (Sr25519Keyring::Bob.to_account_id(), PETH_ID, 9_500_000_000_000),
-                (Sr25519Keyring::Bob.to_account_id(), PUSDT_ID, 25_000_000_000_000_000),
-                // Charlie: 0.85 pBTC, 12.1 pETH, 7,200 pUSDT
-                (Sr25519Keyring::Charlie.to_account_id(), PBTC_ID, 850_000_000_000),
-                (Sr25519Keyring::Charlie.to_account_id(), PETH_ID, 12_100_000_000_000),
-                (Sr25519Keyring::Charlie.to_account_id(), PUSDT_ID, 7_200_000_000_000_000),
-                // Dave: 0.95 pBTC, 14.5 pETH, 38,000 pUSDT
-                (Sr25519Keyring::Dave.to_account_id(), PBTC_ID, 950_000_000_000),
-                (Sr25519Keyring::Dave.to_account_id(), PETH_ID, 14_500_000_000_000),
-                (Sr25519Keyring::Dave.to_account_id(), PUSDT_ID, 38_000_000_000_000_000),
-                // Eve: 1.25 pBTC, 19.7 pETH, 45,212 pUSDT
-                (Sr25519Keyring::Eve.to_account_id(), PBTC_ID, 1_250_000_000_000),
-                (Sr25519Keyring::Eve.to_account_id(), PETH_ID, 19_700_000_000_000),
-                (Sr25519Keyring::Eve.to_account_id(), PUSDT_ID, 45_212_000_000_000_000),
+                // ===== pCHML (TokenId 0) - Privacy CHML =====
+                (Sr25519Keyring::Alice.to_account_id(), PCHML_ID, 1_000_000_000_000_000_000),   // 1,000,000 pCHML
+                (Sr25519Keyring::Bob.to_account_id(), PCHML_ID, 175_000_000_000_000_000),       // 175,000 pCHML
+                (Sr25519Keyring::Charlie.to_account_id(), PCHML_ID, 125_000_000_000_000_000),   // 125,000 pCHML
+                (Sr25519Keyring::Dave.to_account_id(), PCHML_ID, 95_000_000_000_000_000),       // 95,000 pCHML
+                (Sr25519Keyring::Eve.to_account_id(), PCHML_ID, 77_500_000_000_000_000),        // 77,500 pCHML
+                
+                // ===== pETH (TokenId 1) - Privacy Ethereum =====
+                (Sr25519Keyring::Alice.to_account_id(), PETH_ID, 100_000_000_000_000),          // 100 pETH
+                (Sr25519Keyring::Bob.to_account_id(), PETH_ID, 45_000_000_000_000),             // 45 pETH
+                (Sr25519Keyring::Charlie.to_account_id(), PETH_ID, 37_500_000_000_000),         // 37.5 pETH
+                (Sr25519Keyring::Dave.to_account_id(), PETH_ID, 28_500_000_000_000),            // 28.5 pETH
+                (Sr25519Keyring::Eve.to_account_id(), PETH_ID, 22_000_000_000_000),             // 22 pETH
+                
+                // ===== pBTC (TokenId 2) - Privacy Bitcoin =====
+                (Sr25519Keyring::Alice.to_account_id(), PBTC_ID, 5_000_000_000_000),            // 5 pBTC
+                (Sr25519Keyring::Bob.to_account_id(), PBTC_ID, 2_500_000_000_000),              // 2.5 pBTC
+                (Sr25519Keyring::Charlie.to_account_id(), PBTC_ID, 1_850_000_000_000),          // 1.85 pBTC
+                (Sr25519Keyring::Dave.to_account_id(), PBTC_ID, 1_500_000_000_000),             // 1.5 pBTC
+                (Sr25519Keyring::Eve.to_account_id(), PBTC_ID, 1_250_000_000_000),              // 1.25 pBTC
+                
+                // ===== pUSDT (TokenId 3) - Privacy USDT =====
+                (Sr25519Keyring::Alice.to_account_id(), PUSDT_ID, 500_000_000_000_000_000),     // 500,000 pUSDT
+                (Sr25519Keyring::Bob.to_account_id(), PUSDT_ID, 250_000_000_000_000_000),       // 250,000 pUSDT
+                (Sr25519Keyring::Charlie.to_account_id(), PUSDT_ID, 185_000_000_000_000_000),   // 185,000 pUSDT
+                (Sr25519Keyring::Dave.to_account_id(), PUSDT_ID, 150_000_000_000_000_000),      // 150,000 pUSDT
+                (Sr25519Keyring::Eve.to_account_id(), PUSDT_ID, 125_000_000_000_000_000),       // 125,000 pUSDT
         ];
 
         build_struct_json_patch!(RuntimeGenesisConfig {
