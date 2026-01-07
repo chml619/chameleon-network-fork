@@ -467,4 +467,10 @@ const styles = StyleSheet.create({
   },
   noPoolsTitle: { fontSize: THEME.fontSize.lg, fontWeight: THEME.fontWeight.bold, color: THEME.colors.text, marginTop: THEME.spacing.md },
   noPoolsText: { fontSize: THEME.fontSize.sm, color: THEME.colors.textMuted, textAlign: 'center', marginTop: THEME.spacing.xs },
+  initialPriceNote: {
+    fontSize: THEME.fontSize.xs,
+    color: THEME.colors.primary,
+    marginTop: THEME.spacing.xs,
+    fontStyle: 'italic',
+  },
 });
