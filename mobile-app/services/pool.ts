@@ -71,7 +71,7 @@ class PoolService {
       const entries = await api.query.pdex.pools.entries();
       
       for (const [key, value] of entries) {
-        const poolId = key.args[0].toNumber();
+        const poolId = (key.args[0] as any).toNumber();
         const data = value.toJSON() as any;
         
         if (data) {
