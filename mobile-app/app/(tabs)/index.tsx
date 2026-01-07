@@ -169,8 +169,6 @@ export default function HomeScreen() {
                     const amountBN = new BN(amount);
                     const formattedAmount = formatBalance(amountBN) + ' CHML';
                     
-                    console.log('[Home] Found incoming transfer:', txHash, 'from:', sender, 'amount:', formattedAmount);
-                    
                     // Save to history as received transaction
                     transactionHistoryService.saveTransaction(wallet.address, {
                       hash: txHash,
