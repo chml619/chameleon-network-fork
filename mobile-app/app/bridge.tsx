@@ -122,8 +122,8 @@ export default function BridgeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Coming Soon */}
-        <Text style={styles.sectionTitle}>Coming Soon</Text>
+        {/* Additional Bridges */}
+        <Text style={styles.sectionTitle}>Additional Bridges</Text>
         {COMING_SOON_BRIDGES.map((bridge) => (
           <View key={bridge.id} style={[styles.bridgeCard, styles.bridgeCardDisabled]}>
             <View style={[styles.bridgeIcon, { backgroundColor: bridge.color + '10' }]}>
