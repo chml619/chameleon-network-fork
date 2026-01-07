@@ -80,8 +80,8 @@ export default function TradeScreen() {
       // Calculate TVL from pool reserves (simplified)
       let totalTVL = 0;
       pools.forEach((pool: any) => {
-        const reserveA = parseFloat(pdexService.formatAmount(pool.reserveA));
-        const reserveB = parseFloat(pdexService.formatAmount(pool.reserveB));
+        const reserveA = parseFloat(formatBalance(pool.reserveA));
+        const reserveB = parseFloat(formatBalance(pool.reserveB));
         // Simplified TVL calculation (assuming 1:1 USD for demo)
         totalTVL += reserveA + reserveB;
       });
