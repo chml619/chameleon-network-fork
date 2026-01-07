@@ -71,6 +71,13 @@ function getBadgeConfig(type: BadgeType) {
         bgColor: '#E3F2FD',
         textColor: '#1976D2',
       };
+    case 'devnet':
+      return {
+        label: 'Devnet',
+        icon: 'construct',
+        bgColor: '#E3F2FD',
+        textColor: '#1976D2',
+      };
   }
 }
 
