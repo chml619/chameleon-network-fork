@@ -8,7 +8,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { THEME } from '@/constants/theme';
 
-type BadgeType = 'live' | 'beta' | 'coming-soon' | 'testnet';
+type BadgeType = 'live' | 'beta' | 'coming-soon' | 'testnet' | 'devnet';
 
 interface FeatureBadgeProps {
   type: BadgeType;
