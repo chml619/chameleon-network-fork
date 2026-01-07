@@ -518,7 +518,7 @@ export default function HomeScreen() {
                   </View>
                   <View style={styles.balanceValueRow}>
                     <Text style={[styles.balanceAmount, { color: '#10B981' }]}>
-                      {formatBalance(pchmlBalance)} pCHML
+                      {formatDisplayBalance(pchmlBalance)} pCHML
                     </Text>
                   </View>
                 </View>
