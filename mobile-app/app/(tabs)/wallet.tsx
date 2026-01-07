@@ -98,7 +98,7 @@ export default function WalletScreen() {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchBalance]);
+  }, [refreshBalance]);
 
   const handleLogout = () => {
     Alert.alert(
