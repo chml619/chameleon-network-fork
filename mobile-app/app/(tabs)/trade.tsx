@@ -28,6 +28,7 @@ import { transactionHistoryService } from '@/services/transactionHistory';
 import { TokenSelector } from '@/components/TokenSelector';
 import { FeatureBadge } from '@/components/FeatureBadge';
 import { formatBalance, formatDisplayBalance } from '@/utils/balance';
+import { THEME, GRADIENTS } from '@/constants/theme';
 
 type TabType = 'swap' | 'liquidity';
 
