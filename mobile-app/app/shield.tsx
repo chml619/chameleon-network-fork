@@ -279,13 +279,17 @@ export default function ShieldScreen() {
             onPress: async () => {
               setAmount('');
               setFeeEstimate(null);
+              
               // Refresh all balances including pTokens
               await refreshBalances();
               await refreshPCHMLBalance();
-              // Small delay to ensure state updates propagate
-              setTimeout(() => {
+              
+              // Small delay to ensure state updates propagate and balance is refreshed
+              setTimeout(async () => {
+                // Force another balance refresh to ensure UI updates
+                await refreshPCHMLBalance();
                 router.back();
-              }, 100);
+              }, 1500);
             }
           }
         ]
