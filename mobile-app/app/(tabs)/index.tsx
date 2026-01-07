@@ -240,7 +240,6 @@ export default function HomeScreen() {
   // Pull-to-refresh handler
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    console.log('[Home] Pull-to-refresh triggered');
     
     try {
       // Refresh balance
