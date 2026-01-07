@@ -217,7 +217,6 @@ export default function HomeScreen() {
     try {
       const history = await transactionHistoryService.getRecentTransactions(wallet.address, 5);
       setRecentTransactions(history);
-      console.log('[Home] Loaded', history.length, 'recent transactions');
     } catch (error) {
       console.error('[Home] Failed to load transaction history:', error);
     } finally {
