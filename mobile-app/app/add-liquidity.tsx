@@ -109,13 +109,24 @@ export default function AddLiquidityScreen() {
     setAmountA(value);
     
     // Auto-calculate amount B to maintain ratio
-    if (selectedPool && value && parseFloat(selectedPool.reserveA) > 0) {
-      const optimalB = poolService.calculateOptimalAmountB(
-        value,
-        poolService.formatAmount(selectedPool.reserveA),
-        poolService.formatAmount(selectedPool.reserveB)
-      );
-      setAmountB(parseFloat(optimalB).toFixed(6));
+    if (selectedPool && value && parseFloat(value) > 0) {
+      const reserveAFormatted = poolService.formatAmount(selectedPool.reserveA);
+      const reserveBFormatted = poolService.formatAmount(selectedPool.reserveB);
+      
+      // Check if pool has liquidity
+      if (parseFloat(reserveAFormatted) > 0 && parseFloat(reserveBFormatted) > 0) {
+        const optimalB = poolService.calculateOptimalAmountB(
+          value,
+          reserveAFormatted,
+          reserveBFormatted
+        );
+        setAmountB(parseFloat(optimalB).toFixed(6));
+      } else {
+        // Pool has no liquidity - user sets the initial price
+        setAmountB('');
+      }
+    } else {
+      setAmountB('');
     }
   };
 
