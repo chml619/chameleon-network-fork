@@ -122,8 +122,6 @@ export default function HomeScreen() {
     if (!api) return;
     
     try {
-      console.log('[Home] Checking for incoming transactions...');
-      
       // Get recent blocks to check for incoming transfers
       const latestHeader = await api.rpc.chain.getHeader();
       const latestBlockNumber = latestHeader.number.toNumber();
