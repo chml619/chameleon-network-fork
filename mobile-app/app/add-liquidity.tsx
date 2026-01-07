@@ -192,7 +192,15 @@ export default function AddLiquidityScreen() {
         Alert.alert('Failed', result.error || 'Failed to add liquidity');
       }
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to add liquidity');
+      let errorMessage = 'Unable to add liquidity. Please check your balances and try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('Insufficient')) {
+          errorMessage = 'Insufficient token balance to add liquidity.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Network connection issue. Please try again.';
+        }
+      }
+      Alert.alert('Add Liquidity Failed', errorMessage);
     } finally {
       setIsAdding(false);
     }
