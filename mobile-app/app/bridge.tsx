@@ -133,8 +133,8 @@ export default function BridgeScreen() {
               <Text style={[styles.bridgeName, styles.textDisabled]}>{bridge.name}</Text>
               <Text style={[styles.bridgeSymbol, styles.textDisabled]}>{bridge.symbol} → p{bridge.symbol}</Text>
             </View>
-            <View style={styles.comingSoonBadge}>
-              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            <View style={styles.plannedBadge}>
+              <Text style={styles.plannedText}>Planned</Text>
             </View>
           </View>
         ))}
