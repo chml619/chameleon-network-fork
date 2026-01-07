@@ -204,14 +204,21 @@ export default function UnshieldScreen() {
     try {
       const keyPair = await walletService.getOrDeriveKeyPair();
       if (!keyPair) {
-        throw new Error('Wallet not unlocked. Please try re-importing your wallet.');
+        throw new Error('Unable to unlock wallet. Please try re-importing your wallet from the Wallet tab.');
       }
 
       const api = apiService.getApi();
       if (!api) {
-        throw new Error('Not connected to network');
+        throw new Error('Not connected to network. Please check your connection and try again.');
       }
+      
       const amountBN = parseAmount(amount);
+      
+      // Check if we have sufficient private balance before proceeding
+      if (amountBN.gt(privateBalance)) {
+        throw new Error(`Insufficient ${selectedToken.symbol} balance. You have ${formatBalance(privateBalance)} but trying to unshield ${amount}.`);
+      }
+      
       let txHash: string;
       let successMessage: string;
 
