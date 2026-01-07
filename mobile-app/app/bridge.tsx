@@ -284,13 +284,13 @@ const styles = StyleSheet.create({
     color: '#059669',
     fontWeight: THEME.fontWeight.medium,
   },
-  comingSoonBadge: {
+  plannedBadge: {
     backgroundColor: '#F3F4F6',
     paddingHorizontal: THEME.spacing.sm,
     paddingVertical: THEME.spacing.xs,
     borderRadius: THEME.borderRadius.small,
   },
-  comingSoonText: {
+  plannedText: {
     fontSize: THEME.fontSize.xs,
     color: THEME.colors.textMuted,
     fontWeight: THEME.fontWeight.medium,
