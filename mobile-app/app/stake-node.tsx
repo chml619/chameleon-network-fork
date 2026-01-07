@@ -70,7 +70,7 @@ export default function StakeNodeScreen() {
     }
 
     if (!api || !wallet) {
-      Alert.alert('Error', 'Not connected to network');
+      Alert.alert('Connection Error', 'Unable to connect to the network. Please check your internet connection.');
       return;
     }
 
