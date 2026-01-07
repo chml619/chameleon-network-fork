@@ -413,7 +413,7 @@ export default function SendScreen() {
         if (errorMessage.includes('Insufficient')) {
           errorMessage = `Insufficient ${selectedToken.symbol} balance for this transfer`;
         } else if (errorMessage.includes('unlock')) {
-          errorMessage = 'Please unlock your wallet or re-import it';
+          errorMessage = 'Unable to unlock wallet. Please try re-importing your wallet from the Wallet tab.';
         }
       }
       
