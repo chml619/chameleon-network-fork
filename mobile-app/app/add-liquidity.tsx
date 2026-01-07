@@ -139,7 +139,7 @@ export default function AddLiquidityScreen() {
       return;
     }
     if (!amountB || parseFloat(amountB) <= 0) {
-      Alert.alert('Error', 'Enter amount for second token');
+      Alert.alert('Invalid Amount', 'Please enter an amount for the second token');
       return;
     }
     if (parseFloat(amountA) > parseFloat(balanceA)) {
