@@ -98,15 +98,27 @@
 | complete_unbonding | ✅ Complete | Release funds after cooldown (call_index 7) |
 | delete_node | ✅ Complete | Remove node from chain (call_index 8) |
 
-### Genesis Prefunding (Updated Jan 3, 2026)
+### Genesis Prefunding (Updated Jan 7, 2026)
 
+**Public CHML Balances:**
 | Account | Balance | Purpose |
 |---------|---------|---------|
-| Alice | 1,100 CHML | Validator + staking tests |
-| Bob | 2,150 CHML | Validator + staking tests |
-| Charlie | 5,200 CHML | Additional validator tests |
-| Dave | 7,750 CHML | Full staking lifecycle tests |
-| Eve | 10,300 CHML | Multi-validator tests |
+| Alice | 500,000 CHML | Validator + comprehensive testing |
+| Bob | 250,000 CHML | Validator + staking tests |
+| Charlie | 185,000 CHML | Additional validator tests |
+| Dave | 150,000 CHML | Full staking lifecycle tests |
+| Eve | 125,000 CHML | Multi-validator tests |
+| **TOTAL** | **1,210,000 CHML** | |
+
+**pToken Balances (NEW):**
+| Account | pCHML | pETH | pBTC | pUSDT |
+|---------|-------|------|------|-------|
+| Alice | 1,000,000 | 100 | 5 | 500,000 |
+| Bob | 175,000 | 45 | 2.5 | 250,000 |
+| Charlie | 125,000 | 37.5 | 1.85 | 185,000 |
+| Dave | 95,000 | 28.5 | 1.5 | 150,000 |
+| Eve | 77,500 | 22 | 1.25 | 125,000 |
+| **TOTAL** | **1,472,500** | **233** | **12.1** | **1,210,000** |
 
 ### Bridge Fee Structure
 - Shield: 0.02% OR 0.1 CHML minimum (whichever higher)
