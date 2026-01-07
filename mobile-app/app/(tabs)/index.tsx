@@ -30,7 +30,7 @@ import { NetworkBadge } from '@/components/NetworkBadge';
 import { transactionHistoryService, StoredTransaction } from '@/services/transactionHistory';
 import { notificationService } from '@/services/notifications';
 import { apiService } from '@/services/api';
-import { formatBalance } from '@/utils/balance';
+import { formatBalance, formatDisplayBalance } from '@/utils/balance';
 import { truncateAddress } from '@/utils/address';
 import BN from 'bn.js';
 import { THEME, GRADIENTS } from '@/constants/theme';
