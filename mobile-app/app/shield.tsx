@@ -81,7 +81,7 @@ export default function ShieldScreen() {
     try {
       const api = apiService.getApi();
       if (!api) {
-        console.log('API not connected');
+        console.error('API not connected');
         setPublicBalance(null);
         return;
       }
