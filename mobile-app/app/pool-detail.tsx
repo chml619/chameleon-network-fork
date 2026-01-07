@@ -158,7 +158,7 @@ export default function PoolDetailScreen() {
               <View style={styles.positionActions}>
                 <TouchableOpacity
                   style={styles.addMoreButton}
-                  onPress={() => router.push(`/add-liquidity?poolId=${pool.id}`)}
+                  onPress={() => router.push(`/add-liquidity?poolId=${pool.id}` as any)}
                 >
                   <Ionicons name="add" size={18} color={THEME.colors.primary} />
                   <Text style={styles.addMoreText}>Add More</Text>
