@@ -207,7 +207,9 @@ export default function WalletScreen() {
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.walletName}>{wallet?.name || 'My Wallet'}</Text>
+            <TouchableOpacity onPress={() => router.push('/manage-wallets' as any)}>
+              <Text style={styles.walletName}>{wallet?.name || 'My Wallet'}</Text>
+            </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={24} color={THEME.colors.textSecondary} />
