@@ -81,6 +81,25 @@ export default function WalletScreen() {
     }
   };
 
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    
+    try {
+      // Refresh balance
+      if (refetchBalance) {
+        await refetchBalance();
+      }
+      
+      // Refresh pToken balances
+      await loadPTokenBalances();
+    } catch (error) {
+      console.error('Error refreshing wallet data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetchBalance]);
+
   const handleLogout = () => {
     Alert.alert(
       'Logout',
