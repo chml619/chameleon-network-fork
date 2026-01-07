@@ -342,7 +342,7 @@ export default function SendScreen() {
       // Get or derive keyPair (handles wallet restore from storage)
       const keyPair = await walletService.getOrDeriveKeyPair();
       if (!keyPair) {
-        throw new Error('Wallet not unlocked. Please try re-importing your wallet.');
+        throw new Error('Unable to unlock wallet. Please try re-importing your wallet from the Wallet tab.');
       }
       
       const api = apiService.getApi();
