@@ -662,7 +662,7 @@ export default function PowerScreen() {
                   </View>
                 </View>
                 <Text style={styles.lpRewardsAmount}>{lpRewards} pCHML</Text>
-                <Text style={styles.lpRewardsSubtext}>30% of block emissions distributed to LPs</Text>
+                <Text style={styles.lpRewardsSubtext}>Based on network activity • 30% of block emissions distributed to LPs</Text>
                 
                 <TouchableOpacity
                   style={[styles.claimLPButton, (actionLoading === 'claimLP' || parseFloat(lpRewards) <= 0) && styles.buttonDisabled]}
