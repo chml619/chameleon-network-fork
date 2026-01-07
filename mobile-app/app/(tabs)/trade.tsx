@@ -454,15 +454,21 @@ export default function TradeScreen() {
               <Text style={styles.poolStatsTitle}>Pool Overview</Text>
               <View style={styles.poolStatRow}>
                 <Text style={styles.poolStatLabel}>Total Value Locked</Text>
-                <Text style={styles.poolStatValue}>$2.4M</Text>
+                <Text style={styles.poolStatValue}>
+                  {loadingPoolStats ? '...' : poolStats.totalValueLocked}
+                </Text>
               </View>
               <View style={styles.poolStatRow}>
                 <Text style={styles.poolStatLabel}>24h Volume</Text>
-                <Text style={styles.poolStatValue}>$156K</Text>
+                <Text style={styles.poolStatValue}>
+                  {loadingPoolStats ? '...' : poolStats.volume24h}
+                </Text>
               </View>
               <View style={styles.poolStatRow}>
                 <Text style={styles.poolStatLabel}>Active Pools</Text>
-                <Text style={styles.poolStatValue}>6</Text>
+                <Text style={styles.poolStatValue}>
+                  {loadingPoolStats ? '...' : poolStats.activePools}
+                </Text>
               </View>
             </View>
           </View>
