@@ -66,6 +66,49 @@ export default function TradeScreen() {
 
   const [slippage, setSlippage] = useState('0.5');
   const [showSlippageModal, setShowSlippageModal] = useState(false);
+
+  // Load pool statistics
+  const loadPoolStats = async () => {
+    if (!api) return;
+    
+    setLoadingPoolStats(true);
+    try {
+      const pools = await poolService.getAllPools(api);
+      const activePoolCount = pools.length;
+      
+      // Calculate TVL from pool reserves (simplified)
+      let totalTVL = 0;
+      pools.forEach(pool => {
+        const reserveA = parseFloat(poolService.formatAmount(pool.reserveA));
+        const reserveB = parseFloat(poolService.formatAmount(pool.reserveB));
+        // Simplified TVL calculation (assuming 1:1 USD for demo)
+        totalTVL += reserveA + reserveB;
+      });
+      
+      setPoolStats({
+        totalValueLocked: totalTVL > 0 ? `$${(totalTVL / 1000000).toFixed(1)}M` : '—',
+        volume24h: '—', // Not tracked
+        activePools: activePoolCount.toString(),
+      });
+    } catch (error) {
+      console.error('Error loading pool stats:', error);
+      setPoolStats({
+        totalValueLocked: '—',
+        volume24h: '—',
+        activePools: '—',
+      });
+    } finally {
+      setLoadingPoolStats(false);
+    }
+  };
+
+  // Load pool stats when API is available
+  useEffect(() => {
+    if (api && activeTab === 'liquidity') {
+      loadPoolStats();
+    }
+  }, [api, activeTab]);
+
   const handleSwap = async () => {
     const validationError = validateSwap();
     if (validationError) {
