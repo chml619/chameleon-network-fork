@@ -52,25 +52,27 @@ export default function WalletScreen() {
     }
   }, [connectionState.status, connect]);
 
-  // Load pToken balances
-  useEffect(() => {
-    const loadPTokenBalances = async () => {
-      if (!wallet?.address || connectionState.status !== 'connected') return;
-      try {
-        const balances: Record<string, string> = {};
-        // Load pETH, pBTC, pUSDT balances (tokenIds 1, 2, 3)
-        for (const tokenId of [1, 2, 3]) {
-          const balance = await pdexService.getTokenBalance(tokenId, wallet.address);
-          const symbol = tokenId === 1 ? 'pETH' : tokenId === 2 ? 'pBTC' : 'pUSDT';
-          balances[symbol] = balance.isZero() ? '0' : (balance.toNumber() / Math.pow(10, 12)).toFixed(4);
-        }
-        setPTokenBalances(balances);
-      } catch (error) {
-        console.error('Error loading pToken balances:', error);
+  // Load pToken balances function
+  const loadPTokenBalances = useCallback(async () => {
+    if (!wallet?.address || connectionState.status !== 'connected') return;
+    try {
+      const balances: Record<string, string> = {};
+      // Load pETH, pBTC, pUSDT balances (tokenIds 1, 2, 3)
+      for (const tokenId of [1, 2, 3]) {
+        const balance = await pdexService.getTokenBalance(tokenId, wallet.address);
+        const symbol = tokenId === 1 ? 'pETH' : tokenId === 2 ? 'pBTC' : 'pUSDT';
+        balances[symbol] = balance.isZero() ? '0' : (balance.toNumber() / Math.pow(10, 12)).toFixed(4);
       }
-    };
-    loadPTokenBalances();
+      setPTokenBalances(balances);
+    } catch (error) {
+      console.error('Error loading pToken balances:', error);
+    }
   }, [wallet?.address, connectionState.status]);
+
+  // Load pToken balances on mount and when dependencies change
+  useEffect(() => {
+    loadPTokenBalances();
+  }, [loadPTokenBalances]);
 
   const handleDevAccountImport = async (accountName: string) => {
     try {
