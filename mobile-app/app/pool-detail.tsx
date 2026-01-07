@@ -179,7 +179,7 @@ export default function PoolDetailScreen() {
               <Text style={styles.noPositionText}>No liquidity in this pool</Text>
               <TouchableOpacity
                 style={styles.addLiquidityButton}
-                onPress={() => router.push(`/add-liquidity?poolId=${pool.id}`)}
+                onPress={() => router.push(`/add-liquidity?poolId=${pool.id}` as any)}
               >
                 <Text style={styles.addLiquidityText}>Add Liquidity</Text>
               </TouchableOpacity>
