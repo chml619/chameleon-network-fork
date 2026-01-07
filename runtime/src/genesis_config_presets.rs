@@ -37,12 +37,13 @@ fn testnet_genesis(
 ) -> Value {
         // Pre-funded dev wallets with specific CHML amounts
         // Using 12 decimals: 1 CHML = 1_000_000_000_000
+        // Updated: Significantly increased for comprehensive testing
         let endowed_accounts: Vec<(AccountId, u128)> = vec![
-                (Sr25519Keyring::Alice.to_account_id(), 1_100_000_000_000_000),   // 1,100 CHML
-                (Sr25519Keyring::Bob.to_account_id(), 2_150_000_000_000_000),     // 2,150 CHML
-                (Sr25519Keyring::Charlie.to_account_id(), 5_200_000_000_000_000), // 5,200 CHML
-                (Sr25519Keyring::Dave.to_account_id(), 7_750_000_000_000_000),    // 7,750 CHML
-                (Sr25519Keyring::Eve.to_account_id(), 10_300_000_000_000_000),    // 10,300 CHML
+                (Sr25519Keyring::Alice.to_account_id(), 500_000_000_000_000_000),   // 500,000 CHML
+                (Sr25519Keyring::Bob.to_account_id(), 250_000_000_000_000_000),     // 250,000 CHML
+                (Sr25519Keyring::Charlie.to_account_id(), 185_000_000_000_000_000), // 185,000 CHML
+                (Sr25519Keyring::Dave.to_account_id(), 150_000_000_000_000_000),    // 150,000 CHML
+                (Sr25519Keyring::Eve.to_account_id(), 125_000_000_000_000_000),     // 125,000 CHML
         ];
 
         // Pre-funded pToken balances for dev wallets
