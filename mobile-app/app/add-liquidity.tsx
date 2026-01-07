@@ -135,7 +135,7 @@ export default function AddLiquidityScreen() {
     if (!api || !wallet || !selectedPool) return;
     
     if (!amountA || parseFloat(amountA) <= 0) {
-      Alert.alert('Error', 'Enter amount for first token');
+      Alert.alert('Invalid Amount', 'Please enter an amount for the first token');
       return;
     }
     if (!amountB || parseFloat(amountB) <= 0) {
