@@ -100,7 +100,7 @@ export default function WalletScreen() {
     } finally {
       setRefreshing(false);
     }
-  }, [refreshBalance]);
+  }, [refreshBalance, loadPTokenBalances]);
 
   const handleLogout = () => {
     Alert.alert(
