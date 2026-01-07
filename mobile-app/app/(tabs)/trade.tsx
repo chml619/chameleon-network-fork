@@ -125,7 +125,7 @@ export default function TradeScreen() {
           <Text style={styles.headerTitle}>Trade</Text>
         </View>
         <View style={styles.headerRight}>
-          <FeatureBadge type="testnet" />
+          <FeatureBadge type="devnet" />
         </View>
       </View>
 
