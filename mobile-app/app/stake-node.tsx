@@ -98,7 +98,15 @@ export default function StakeNodeScreen() {
         Alert.alert('Staking Failed', result.error || 'Unknown error occurred');
       }
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Staking failed');
+      let errorMessage = 'Unable to stake tokens. Please check your balance and try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('Insufficient')) {
+          errorMessage = 'Insufficient pCHML balance to stake. You need 1,750 pCHML.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Network connection issue. Please try again.';
+        }
+      }
+      Alert.alert('Staking Failed', errorMessage);
     } finally {
       setIsStaking(false);
     }
