@@ -87,8 +87,8 @@ export default function WalletScreen() {
     
     try {
       // Refresh balance
-      if (refetchBalance) {
-        await refetchBalance();
+      if (refreshBalance) {
+        await refreshBalance();
       }
       
       // Refresh pToken balances
