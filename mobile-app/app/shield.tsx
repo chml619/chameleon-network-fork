@@ -292,10 +292,17 @@ export default function ShieldScreen() {
       );
     } catch (error) {
       console.error('Shield error:', error);
-      Alert.alert(
-        'Shield Failed',
-        error instanceof Error ? error.message : 'Unknown error occurred'
-      );
+      let errorMessage = 'Unable to complete shielding. Please check your balance and try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('Insufficient')) {
+          errorMessage = 'Insufficient balance to complete shielding transaction.';
+        } else if (error.message.includes('unlock')) {
+          errorMessage = 'Please unlock your wallet or re-import it.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Network connection issue. Please try again.';
+        }
+      }
+      Alert.alert('Shield Failed', errorMessage);
     } finally {
       setIsShielding(false);
     }
