@@ -31,6 +31,7 @@ type TabType = 'swap' | 'liquidity';
 
 export default function TradeScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { wallet } = useWallet();
   const {
     tokens,
