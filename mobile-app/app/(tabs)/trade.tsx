@@ -27,7 +27,7 @@ import { pdexService } from '@/services/pdex';
 import { transactionHistoryService } from '@/services/transactionHistory';
 import { TokenSelector } from '@/components/TokenSelector';
 import { FeatureBadge } from '@/components/FeatureBadge';
-import { THEME, GRADIENTS } from '@/constants/theme';
+import { formatBalance, formatDisplayBalance } from '@/utils/balance';
 
 type TabType = 'swap' | 'liquidity';
 
