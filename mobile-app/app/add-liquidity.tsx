@@ -147,7 +147,7 @@ export default function AddLiquidityScreen() {
       return;
     }
     if (parseFloat(amountB) > parseFloat(balanceB)) {
-      Alert.alert('Error', `Insufficient ${poolService.getTokenSymbol(selectedPool.assetB)} balance`);
+      Alert.alert('Insufficient Balance', `You don't have enough ${poolService.getTokenSymbol(selectedPool.assetB)} tokens`);
       return;
     }
 
