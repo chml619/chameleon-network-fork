@@ -19,59 +19,103 @@
  */
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 
-const RPC_ENDPOINT = process.env.RPC_ENDPOINT || 'ws://127.0.0.1:9944';
+async function sendAndWait(api, tx, signer, description) {
+  return new Promise((resolve, reject) => {
+    console.log(`\n${description}...`);
+    tx.signAndSend(signer, ({ status, events, dispatchError }) => {
+      if (status.isInBlock) {
+        console.log(`  In block: ${status.asInBlock.toHex()}`);
+      }
+      if (status.isFinalized) {
+        console.log(`  Finalized: ${status.asFinalized.toHex()}`);
+        
+        if (dispatchError) {
+          if (dispatchError.isModule) {
+            const decoded = api.registry.findMetaError(dispatchError.asModule);
+            console.log(`  ERROR: ${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`);
+            reject(new Error(`${decoded.section}.${decoded.name}`));
+          } else {
+            console.log(`  ERROR: ${dispatchError.toString()}`);
+            reject(new Error(dispatchError.toString()));
+          }
+        } else {
+          events.forEach(({ event }) => {
+            if (event.section === 'pdex' && event.method === 'LiquidityAdded') {
+              console.log(`  SUCCESS: LiquidityAdded`);
+            }
+          });
+          resolve(true);
+        }
+      }
+    }).catch(reject);
+  });
+}
 
 async function main() {
-  console.log(`Connecting to ${RPC_ENDPOINT}...`);
-  const provider = new WsProvider(RPC_ENDPOINT);
+  console.log('Connecting to ws://127.0.0.1:9944...');
+  const provider = new WsProvider('ws://127.0.0.1:9944');
   const api = await ApiPromise.create({ provider });
   
   const keyring = new Keyring({ type: 'sr25519' });
   const alice = keyring.addFromUri('//Alice');
   
-  console.log('Connected to chain:', (await api.rpc.system.chain()).toString());
-  console.log('Alice address:', alice.address);
+  console.log('Connected to:', (await api.rpc.system.chain()).toString());
+  console.log('Alice:', alice.address);
+
+  // 12 decimal places
+  const DECIMALS = 1000000000000n; // 10^12
   
-  // Pool 0: pCHML/pBTC - 225,000 pCHML + 1.1 pBTC
-  // 225,000 * 10^12 = 225000000000000000000
-  // 1.1 * 10^12 = 1100000000000
-  console.log('\nAdding liquidity to Pool 0 (pCHML/pBTC)...');
-  console.log('  225,000 pCHML + 1.1 pBTC');
-  const tx1 = api.tx.pdex.addLiquidity(0, '225000000000000000000', '1100000000000', '0');
-  await tx1.signAndSend(alice, { nonce: -1 });
-  await new Promise(r => setTimeout(r, 6000));
+  // Correct amounts
+  const pCHML_225k = (225000n * DECIMALS).toString();  // 225,000 pCHML
+  const pBTC_1_1 = (11n * DECIMALS / 10n).toString();  // 1.1 pBTC
+  const pETH_31 = (31n * DECIMALS).toString();          // 31 pETH
+  const pUSDT_100k = (100000n * DECIMALS).toString();   // 100,000 pUSDT
+
+  console.log('\nCalculated amounts:');
+  console.log('  225,000 pCHML =', pCHML_225k);
+  console.log('  1.1 pBTC =', pBTC_1_1);
+  console.log('  31 pETH =', pETH_31);
+  console.log('  100,000 pUSDT =', pUSDT_100k);
+
+  try {
+    // Pool 0: pCHML/pBTC
+    await sendAndWait(
+      api,
+      api.tx.pdex.addLiquidity(0, pCHML_225k, pBTC_1_1, '0'),
+      alice,
+      'Adding liquidity to Pool 0 (225,000 pCHML + 1.1 pBTC)'
+    );
+
+    // Pool 1: pCHML/pETH
+    await sendAndWait(
+      api,
+      api.tx.pdex.addLiquidity(1, pCHML_225k, pETH_31, '0'),
+      alice,
+      'Adding liquidity to Pool 1 (225,000 pCHML + 31 pETH)'
+    );
+
+    // Pool 2: pCHML/pUSDT
+    await sendAndWait(
+      api,
+      api.tx.pdex.addLiquidity(2, pCHML_225k, pUSDT_100k, '0'),
+      alice,
+      'Adding liquidity to Pool 2 (225,000 pCHML + 100,000 pUSDT)'
+    );
+
+    console.log('\n✅ All liquidity added successfully!');
+    
+    // Verify pools
+    console.log('\nVerifying pool reserves...');
+    for (let i = 0; i < 3; i++) {
+      const pool = await api.query.pdex.pools(i);
+      console.log(`Pool ${i}:`, pool.toHuman());
+    }
+    
+  } catch (error) {
+    console.error('\n❌ Error:', error.message);
+  }
   
-  // Pool 1: pCHML/pETH - 225,000 pCHML + 31 pETH
-  // 31 * 10^12 = 31000000000000
-  console.log('Adding liquidity to Pool 1 (pCHML/pETH)...');
-  console.log('  225,000 pCHML + 31 pETH');
-  const tx2 = api.tx.pdex.addLiquidity(1, '225000000000000000000', '31000000000000', '0');
-  await tx2.signAndSend(alice, { nonce: -1 });
-  await new Promise(r => setTimeout(r, 6000));
-  
-  // Pool 2: pCHML/pUSDT - 225,000 pCHML + 100,000 pUSDT
-  // 100,000 * 10^12 = 100000000000000000000
-  console.log('Adding liquidity to Pool 2 (pCHML/pUSDT)...');
-  console.log('  225,000 pCHML + 100,000 pUSDT');
-  const tx3 = api.tx.pdex.addLiquidity(2, '225000000000000000000', '100000000000000000000', '0');
-  await tx3.signAndSend(alice, { nonce: -1 });
-  await new Promise(r => setTimeout(r, 6000));
-  
-  console.log('\n✅ Liquidity added to all 3 pools!');
-  console.log('\nTotal liquidity seeded:');
-  console.log('  - 675,000 pCHML (~$303,750)');
-  console.log('  - 1.1 pBTC (~$102,960)');
-  console.log('  - 31 pETH (~$100,936)');
-  console.log('  - 100,000 pUSDT (~$100,000)');
-  console.log('\nAlice remaining balances:');
-  console.log('  - 325,000 pCHML');
-  console.log('  - 3.9 pBTC');
-  console.log('  - 69 pETH');
-  console.log('  - 400,000 pUSDT');
   process.exit(0);
 }
 
-main().catch((error) => {
-  console.error('Error:', error);
-  process.exit(1);
-});
+main();
