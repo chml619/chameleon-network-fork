@@ -65,6 +65,7 @@ export default function TradeScreen() {
     activePools: '—',
   });
   const [loadingPoolStats, setLoadingPoolStats] = useState(false);
+  const [poolList, setPoolList] = useState<PoolInfo[]>([]);
 
   const [slippage, setSlippage] = useState('0.5');
   const [showSlippageModal, setShowSlippageModal] = useState(false);
