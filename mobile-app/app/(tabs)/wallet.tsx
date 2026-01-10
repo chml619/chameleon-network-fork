@@ -281,12 +281,15 @@ export default function WalletScreen() {
               </View>
               <View style={styles.tokenRight}>
                 <Text
+                  numberOfLines={1} 
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}
                   style={[
                     styles.tokenBalance,
                     (token as any).isPCHML && { color: '#6366F1' },
                   ]}
                 >
-                  {getTokenBalance(token)} {token.symbol}
+                  {formatDisplayBalance(getTokenBalance(token), 2)} {token.symbol}
                 </Text>
                 <Ionicons name="chevron-forward" size={16} color={THEME.colors.textMuted} />
               </View>
