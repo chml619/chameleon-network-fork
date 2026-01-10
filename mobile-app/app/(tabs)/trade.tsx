@@ -146,6 +146,7 @@ export default function TradeScreen() {
                   formattedAmount: `${amountIn} ${selectedTokenIn.symbol} → ${result.amountOut || quote.amountOut} ${selectedTokenOut.symbol}`,
                   status: result.success ? 'finalized' : 'failed',
                   usedMEVProtection: mevProtection,
+                  type: 'swap',
                 });
               } catch (e) {
                 console.error('[Trade] Failed to save to history:', e);
