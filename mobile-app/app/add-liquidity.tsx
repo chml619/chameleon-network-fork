@@ -82,8 +82,13 @@ export default function AddLiquidityScreen() {
     try {
       const balA = await pdexService.getTokenBalance(selectedPool.assetA, wallet.address);
       const balB = await pdexService.getTokenBalance(selectedPool.assetB, wallet.address);
-      setBalanceA(poolService.formatAmount(balA.toString()));
-      setBalanceB(poolService.formatAmount(balB.toString()));
+      
+      // Convert raw balances to human-readable format for display and validation
+      const displayBalanceA = (parseFloat(balA.toString()) / Math.pow(10, 12)).toFixed(4);
+      const displayBalanceB = (parseFloat(balB.toString()) / Math.pow(10, 12)).toFixed(4);
+      
+      setBalanceA(displayBalanceA);
+      setBalanceB(displayBalanceB);
     } catch (error) {
       console.error('Error loading balances:', error);
     }
