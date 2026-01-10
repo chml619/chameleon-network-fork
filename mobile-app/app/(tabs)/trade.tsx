@@ -76,7 +76,8 @@ export default function TradeScreen() {
     
     setLoadingPoolStats(true);
     try {
-      const pools = await pdexService.getLPPools(wallet?.address || '');
+      const pools = await poolService.getAllPools(api);
+      setPoolList(pools); // Store pool list for display
       const activePoolCount = pools.length;
       
       // Calculate TVL from pool reserves (simplified)
