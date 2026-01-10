@@ -26,6 +26,7 @@ export interface StoredTransaction {
   usedMEVProtection: boolean;
   mevDelayBlocks?: number;
   error?: string;
+  type?: 'send' | 'receive' | 'swap' | 'shield' | 'unshield' | 'add_liquidity' | 'remove_liquidity';
 }
 
 class TransactionHistoryService {
