@@ -61,7 +61,9 @@ export default function WalletScreen() {
       for (const tokenId of [1, 2, 3]) {
         const balance = await pdexService.getTokenBalance(tokenId, wallet.address);
         const symbol = tokenId === 1 ? 'pETH' : tokenId === 2 ? 'pBTC' : 'pUSDT';
-        balances[symbol] = balance.isZero() ? '0' : (balance.toNumber() / Math.pow(10, 12)).toFixed(4);
+        // Convert from raw balance (12 decimals) to human readable
+        const humanReadable = parseFloat(balance.toString()) / Math.pow(10, 12);
+        balances[symbol] = humanReadable.toFixed(4);
       }
       setPTokenBalances(balances);
     } catch (error) {
