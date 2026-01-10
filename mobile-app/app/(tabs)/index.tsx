@@ -736,6 +736,8 @@ function TransactionItem({ transaction, walletAddress, onPress }: TransactionIte
       ? 'Failed' 
       : 'Pending';
 
+  const transactionLabel = getTransactionLabel(transaction, walletAddress);
+
   return (
     <TouchableOpacity 
       style={styles.transactionItem}
@@ -756,7 +758,7 @@ function TransactionItem({ transaction, walletAddress, onPress }: TransactionIte
       <View style={styles.transactionDetails}>
         <View style={styles.transactionRow}>
           <Text style={styles.transactionTitle}>
-            {isSent ? 'Sent' : 'Received'} {transaction.formattedAmount || 'CHML'}
+            {transactionLabel} {transaction.formattedAmount || 'CHML'}
           </Text>
           <Text style={[styles.transactionStatus, { color: statusColor }]}>
             {statusText}
