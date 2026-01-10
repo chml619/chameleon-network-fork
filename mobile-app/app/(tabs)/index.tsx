@@ -666,7 +666,33 @@ export default function HomeScreen() {
   );
 }
 
-// Helper function to format relative time
+// Helper function to get transaction label based on type
+function getTransactionLabel(transaction: StoredTransaction, walletAddress: string): string {
+  if (transaction.type) {
+    switch (transaction.type) {
+      case 'swap':
+        return 'Swapped';
+      case 'shield':
+        return 'Shielded';
+      case 'unshield':
+        return 'Unshielded';
+      case 'add_liquidity':
+        return 'Added Liquidity';
+      case 'remove_liquidity':
+        return 'Removed Liquidity';
+      case 'send':
+        return 'Sent';
+      case 'receive':
+        return 'Received';
+      default:
+        break;
+    }
+  }
+  
+  // Fallback to old logic for transactions without type
+  const isSent = transaction.from.toLowerCase() === walletAddress.toLowerCase();
+  return isSent ? 'Sent' : 'Received';
+}
 function getRelativeTime(timestamp: number): string {
   const now = Date.now();
   const diff = now - timestamp;
