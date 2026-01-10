@@ -475,6 +475,41 @@ export default function TradeScreen() {
                 </Text>
               </View>
             </View>
+
+            {/* Pool List */}
+            <View style={styles.poolListContainer}>
+              <Text style={styles.poolListTitle}>Available Pools</Text>
+              {loadingPoolStats ? (
+                <View style={styles.poolLoadingContainer}>
+                  <ActivityIndicator size="small" color={THEME.colors.primary} />
+                  <Text style={styles.poolLoadingText}>Loading pools...</Text>
+                </View>
+              ) : poolList.length > 0 ? (
+                poolList.map((pool) => (
+                  <TouchableOpacity
+                    key={pool.id}
+                    style={styles.poolCard}
+                    onPress={() => router.push(`/pool-detail?poolId=${pool.id}` as any)}
+                  >
+                    <View style={styles.poolCardHeader}>
+                      <Text style={styles.poolPairText}>
+                        {poolService.getTokenSymbol(pool.assetA)} / {poolService.getTokenSymbol(pool.assetB)}
+                      </Text>
+                      <Text style={styles.poolFeeText}>{pool.swapFee}</Text>
+                    </View>
+                    <View style={styles.poolCardBody}>
+                      <Text style={styles.poolReservesText}>
+                        Reserves: {poolService.formatAmount(pool.reserveA)} / {poolService.formatAmount(pool.reserveB)}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <View style={styles.emptyPoolsContainer}>
+                  <Text style={styles.emptyPoolsText}>No pools available</Text>
+                </View>
+              )}
+            </View>
           </View>
         )}
 
