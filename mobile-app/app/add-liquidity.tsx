@@ -166,12 +166,13 @@ export default function AddLiquidityScreen() {
       Alert.alert('Invalid Amount', 'Please enter an amount for the second token');
       return;
     }
+    // Validate balances using human-readable amounts
     if (parseFloat(amountA) > parseFloat(balanceA)) {
-      Alert.alert('Insufficient Balance', `You don't have enough ${poolService.getTokenSymbol(selectedPool.assetA)} tokens`);
+      Alert.alert('Insufficient Balance', `You don't have enough ${poolService.getTokenSymbol(selectedPool.assetA)} tokens. Available: ${balanceA}`);
       return;
     }
     if (parseFloat(amountB) > parseFloat(balanceB)) {
-      Alert.alert('Insufficient Balance', `You don't have enough ${poolService.getTokenSymbol(selectedPool.assetB)} tokens`);
+      Alert.alert('Insufficient Balance', `You don't have enough ${poolService.getTokenSymbol(selectedPool.assetB)} tokens. Available: ${balanceB}`);
       return;
     }
 
