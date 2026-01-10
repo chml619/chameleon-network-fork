@@ -38,8 +38,27 @@ export function generateStealthHash(metaAddress: StealthMetaAddress): Uint8Array
   const view = metaAddress.viewPubkey instanceof Uint8Array 
     ? metaAddress.viewPubkey 
     : new Uint8Array(Object.values(metaAddress.viewPubkey));
-  const combined = new Uint8Array([...spend, ...view]);
-  return blake2AsU8a(combined, 256);
+  
+  // Ensure both keys are exactly 32 bytes
+  const spendPadded = padTo32Bytes(spend);
+  const viewPadded = padTo32Bytes(view);
+  
+  const combined = new Uint8Array([...spendPadded, ...viewPadded]);
+  const hash = blake2AsU8a(combined, 256);
+  
+  // Ensure result is exactly 32 bytes
+  return padTo32Bytes(hash);
+}
+
+// Pad to 32 bytes if needed
+function padTo32Bytes(input: Uint8Array): Uint8Array {
+  const result = new Uint8Array(32);
+  if (input.length >= 32) {
+    result.set(input.slice(0, 32));
+  } else {
+    result.set(input);
+  }
+  return result;
 }
 
 // Format for display
