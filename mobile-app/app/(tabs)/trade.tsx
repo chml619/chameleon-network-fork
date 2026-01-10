@@ -307,7 +307,7 @@ export default function TradeScreen() {
                 <View style={styles.swapSectionHeader}>
                   <Text style={styles.swapLabel}>To</Text>
                   <Text style={styles.balanceText}>
-                    Balance: {selectedTokenOut.balance}
+                    Balance: {selectedTokenOut.balance} {selectedTokenOut.symbol}
                   </Text>
                 </View>
                 <View style={styles.swapRow}>
