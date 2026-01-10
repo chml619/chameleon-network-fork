@@ -501,8 +501,13 @@ export default function HomeScreen() {
                     <Text style={styles.balanceLabel}>Public Balance</Text>
                   </View>
                   <View style={styles.balanceValueRow}>
-                    <Text style={styles.balanceAmount}>
-                      {formatDisplayBalance(publicBalance)} CHML
+                    <Text 
+                      numberOfLines={1} 
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.7}
+                      style={styles.balanceAmount}
+                    >
+                      {formatDisplayBalance(publicBalance, 2)} CHML
                     </Text>
                     {balanceLoading && (
                       <ActivityIndicator size="small" color={THEME.colors.primary} style={{ marginLeft: 8 }} />
