@@ -819,6 +819,8 @@ function TransactionDetailModal({
       ? 'Failed' 
       : 'Pending';
 
+  const transactionLabel = getTransactionLabel(transaction, walletAddress);
+
   return (
     <View style={styles.txDetailContainer}>
       {/* Header */}
@@ -833,7 +835,7 @@ function TransactionDetailModal({
             color={isSent ? THEME.colors.error : THEME.colors.success} 
           />
         </View>
-        <Text style={styles.txDetailType}>{isSent ? 'Sent' : 'Received'}</Text>
+        <Text style={styles.txDetailType}>{transactionLabel}</Text>
         <Text style={[
           styles.txDetailAmount,
           { color: isSent ? THEME.colors.error : THEME.colors.success }
