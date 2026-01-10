@@ -215,37 +215,50 @@ class PoolService {
     minLpTokens: string = '0'
   ): Promise<LiquidityResult> {
     try {
-      const amountABN = BigInt(Math.floor(parseFloat(amountA) * Math.pow(10, 12)));
-      const amountBBN = BigInt(Math.floor(parseFloat(amountB) * Math.pow(10, 12)));
-      const minLpBN = BigInt(Math.floor(parseFloat(minLpTokens) * Math.pow(10, 12)));
+      // Convert human-readable amounts to raw values (12 decimals)
+      const rawAmountA = BigInt(Math.floor(parseFloat(amountA) * Math.pow(10, 12))).toString();
+      const rawAmountB = BigInt(Math.floor(parseFloat(amountB) * Math.pow(10, 12))).toString();
+      const rawMinLp = BigInt(Math.floor(parseFloat(minLpTokens) * Math.pow(10, 12))).toString();
       
-      const tx = api.tx.pdex.addLiquidity(poolId, amountABN.toString(), amountBBN.toString(), minLpBN.toString());
+      console.log('[Pool] Adding liquidity:', { poolId, rawAmountA, rawAmountB, rawMinLp });
+      
+      const tx = api.tx.pdex.addLiquidity(poolId, rawAmountA, rawAmountB, rawMinLp);
       
       return new Promise((resolve) => {
         tx.signAndSend(keyPair, ({ status, events, dispatchError }) => {
-          if (status.isInBlock || status.isFinalized) {
+          if (status.isFinalized) {
             if (dispatchError) {
-              resolve({ success: false, error: dispatchError.toString() });
+              if (dispatchError.isModule) {
+                const decoded = api.registry.findMetaError(dispatchError.asModule);
+                console.error('[Pool] Error:', decoded.name, decoded.docs);
+                resolve({ success: false, error: `${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}` });
+              } else {
+                console.error('[Pool] Dispatch error:', dispatchError.toString());
+                resolve({ success: false, error: dispatchError.toString() });
+              }
             } else {
               // Extract LP tokens received from events
               let lpReceived: string | undefined;
               events.forEach(({ event }) => {
                 if (event.section === 'pdex' && event.method === 'LiquidityAdded') {
                   lpReceived = event.data[3]?.toString(); // LP tokens minted
+                  console.log('[Pool] LiquidityAdded event:', event.data.toHuman());
                 }
               });
               resolve({
                 success: true,
-                txHash: status.asInBlock?.toString() || status.asFinalized?.toString(),
+                txHash: status.asFinalized.toString(),
                 lpTokensReceived: lpReceived,
               });
             }
           }
         }).catch((error) => {
+          console.error('[Pool] Transaction error:', error);
           resolve({ success: false, error: error.message });
         });
       });
     } catch (error) {
+      console.error('[Pool] Add liquidity error:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Add liquidity failed' };
     }
   }
