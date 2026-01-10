@@ -537,8 +537,8 @@ export default function UnshieldScreen() {
                     <ActivityIndicator size="small" color={THEME.colors.primary} />
                     <Text style={styles.feeEstimatingText}>Estimating fee...</Text>
                   </View>
-                ) : feeEstimate ? (
-                  <Text style={styles.feeAmount}>~{feeEstimate.formatted}</Text>
+                ) : estimatedFee ? (
+                  <Text style={styles.feeAmount}>{estimatedFee}</Text>
                 ) : (
                   <Text style={styles.feePlaceholder}>Enter amount and address to estimate</Text>
                 )}
