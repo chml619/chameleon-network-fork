@@ -23,7 +23,7 @@ import { useWallet } from '@/context/WalletContext';
 import { useBalance } from '@/hooks/useBalance';
 import { useApi } from '@/hooks/useApi';
 import { NetworkBadge } from '@/components/NetworkBadge';
-import { formatBalance } from '@/utils/balance';
+import { formatBalance, formatDisplayBalance } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 import { pdexService } from '@/services/pdex';
 
