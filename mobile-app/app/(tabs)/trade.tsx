@@ -921,6 +921,70 @@ const styles = StyleSheet.create({
     fontWeight: THEME.fontWeight.semibold as any,
     color: THEME.colors.text,
   },
+  // Pool List Styles
+  poolListContainer: {
+    backgroundColor: THEME.colors.white,
+    padding: THEME.spacing.md,
+    borderRadius: THEME.borderRadius.medium,
+    marginTop: THEME.spacing.md,
+    ...THEME.shadows.small,
+  },
+  poolListTitle: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.bold as any,
+    color: THEME.colors.text,
+    marginBottom: THEME.spacing.md,
+  },
+  poolLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: THEME.spacing.lg,
+  },
+  poolLoadingText: {
+    marginLeft: THEME.spacing.sm,
+    color: THEME.colors.textSecondary,
+    fontSize: THEME.fontSize.sm,
+  },
+  poolCard: {
+    backgroundColor: THEME.colors.lightGrey,
+    borderRadius: THEME.borderRadius.medium,
+    padding: THEME.spacing.md,
+    marginBottom: THEME.spacing.sm,
+    borderWidth: 1,
+    borderColor: THEME.colors.border,
+  },
+  poolCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: THEME.spacing.xs,
+  },
+  poolPairText: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.semibold as any,
+    color: THEME.colors.text,
+  },
+  poolFeeText: {
+    fontSize: THEME.fontSize.xs,
+    color: THEME.colors.primary,
+    fontWeight: THEME.fontWeight.medium as any,
+  },
+  poolCardBody: {
+    marginTop: THEME.spacing.xs,
+  },
+  poolReservesText: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+  },
+  emptyPoolsContainer: {
+    alignItems: 'center',
+    paddingVertical: THEME.spacing.lg,
+  },
+  emptyPoolsText: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textMuted,
+  },
   slippageToggle: {
     flexDirection: "row",
     justifyContent: "space-between",
