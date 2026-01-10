@@ -80,10 +80,29 @@ export default function UnshieldScreen() {
 
   // Estimate fee when amount and destination change (CHML only)
   useEffect(() => {
+    const estimateFee = async () => {
+      if (!amount || parseFloat(amount) <= 0 || !destinationAddress || destinationAddress.length < 10) {
+        setEstimatedFee(null);
+        return;
+      }
+      
+      setIsEstimatingFee(true);
+      try {
+        // Estimate fee (typically small fixed amount for Substrate)
+        // For now, use a reasonable estimate
+        setEstimatedFee('~0.001 CHML');
+      } catch (error) {
+        console.error('Fee estimation error:', error);
+        setEstimatedFee('Unable to estimate');
+      } finally {
+        setIsEstimatingFee(false);
+      }
+    };
+    
     if (!selectedToken.requiresBridge && isValidAddress && amount && wallet?.address && parseFloat(amount) > 0) {
       estimateFee();
     } else {
-      setFeeEstimate(null);
+      setEstimatedFee(null);
     }
   }, [destinationAddress, amount, isValidAddress, wallet?.address, selectedToken]);
 
