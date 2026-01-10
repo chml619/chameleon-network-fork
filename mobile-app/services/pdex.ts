@@ -468,15 +468,23 @@ class PDEXService {
       const tokenOutId = this.getTokenId(tokenOut);
 
       // Get pool ID
-      const poolIdResult = await api.query.pdex.poolIdByAssets(tokenInId, tokenOutId) as any;
-      if (!poolIdResult || poolIdResult.isNone) {
-        // Try reverse order
-        const reverseResult = await api.query.pdex.poolIdByAssets(tokenOutId, tokenInId) as any;
-        if (!reverseResult || reverseResult.isNone) {
-          return { success: false, error: "Pool not found for this pair" };
+      let poolId: number;
+      try {
+        const poolIdResult = await api.query.pdex.poolIdByAssets(tokenInId, tokenOutId) as any;
+        if (!poolIdResult || poolIdResult.isNone) {
+          // Try reverse order
+          const reverseResult = await api.query.pdex.poolIdByAssets(tokenOutId, tokenInId) as any;
+          if (!reverseResult || reverseResult.isNone) {
+            return { success: false, error: "Pool not found for this pair" };
+          }
+          poolId = reverseResult.unwrap().toNumber();
+        } else {
+          poolId = poolIdResult.unwrap().toNumber();
         }
+      } catch (error) {
+        console.error("[pDEX] Error getting pool ID:", error);
+        return { success: false, error: "Failed to find trading pool" };
       }
-      const poolId = poolIdResult.unwrap().toNumber();
 
       let tx;
       if (this.mevProtectionEnabled) {
@@ -496,6 +504,20 @@ class PDEXService {
         error: error instanceof Error ? error.message : "Swap failed",
       };
     }
+  }
+
+  /**
+   * Alias for executeSwap to maintain compatibility
+   */
+  async swap(
+    api: ApiPromise,
+    keyPair: KeyringPair,
+    tokenIn: string,
+    tokenOut: string,
+    amountIn: BN,
+    minAmountOut: BN
+  ): Promise<SwapResult> {
+    return this.executeSwap(api, keyPair, tokenIn, tokenOut, amountIn, minAmountOut);
   }
 
   /**
