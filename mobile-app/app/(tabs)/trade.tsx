@@ -24,6 +24,7 @@ import { usePDEX } from '@/hooks/usePDEX';
 import { useWallet } from '@/context/WalletContext';
 import { useApi } from '@/hooks/useApi';
 import { pdexService } from '@/services/pdex';
+import { poolService, PoolInfo } from '@/services/pool';
 import { transactionHistoryService } from '@/services/transactionHistory';
 import { TokenSelector } from '@/components/TokenSelector';
 import { FeatureBadge } from '@/components/FeatureBadge';
