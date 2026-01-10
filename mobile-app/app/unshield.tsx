@@ -368,7 +368,7 @@ export default function UnshieldScreen() {
   };
 
   const isFormReady = (): boolean => {
-    return validateUnshield() === null && (selectedToken.requiresBridge || !!feeEstimate);
+    return validateUnshield() === null && (selectedToken.requiresBridge || !!estimatedFee);
   };
 
   const getDisplayBalance = (): string => {
