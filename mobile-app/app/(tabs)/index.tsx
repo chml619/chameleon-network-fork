@@ -522,8 +522,13 @@ export default function HomeScreen() {
                     <Text style={[styles.balanceLabel, { color: '#10B981' }]}>Shielded Balance</Text>
                   </View>
                   <View style={styles.balanceValueRow}>
-                    <Text style={[styles.balanceAmount, { color: '#10B981' }]}>
-                      {formatDisplayBalance(pchmlBalance)} pCHML
+                    <Text 
+                      numberOfLines={1} 
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.7}
+                      style={[styles.balanceAmount, { color: '#10B981' }]}
+                    >
+                      {formatDisplayBalance(pchmlBalance, 2)} pCHML
                     </Text>
                   </View>
                 </View>
