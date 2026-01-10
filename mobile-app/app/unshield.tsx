@@ -57,6 +57,7 @@ export default function UnshieldScreen() {
   const [loadingBalance, setLoadingBalance] = useState(false);
   const [feeEstimate, setFeeEstimate] = useState<any>(null);
   const [isEstimatingFee, setIsEstimatingFee] = useState(false);
+  const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
 
   // Load balance when token or wallet changes
   useEffect(() => {
