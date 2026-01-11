@@ -305,9 +305,12 @@ class PoolService {
   /**
    * Format amount for display (12 decimals)
    */
-  formatAmount(amount: string, decimals: number = 4): string {
-    const num = parseFloat(amount) / Math.pow(10, 12);
-    return num.toLocaleString(undefined, { maximumFractionDigits: decimals });
+  formatAmount(amount: string, displayDecimals: number = 4): string {
+    const DECIMALS = 1_000_000_000_000; // 10^12
+    const num = parseFloat(amount) / DECIMALS;
+    if (num === 0) return '0';
+    if (num < 0.0001) return num.toExponential(2);
+    return num.toLocaleString(undefined, { maximumFractionDigits: displayDecimals });
   }
 }
 
