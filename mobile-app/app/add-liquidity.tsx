@@ -179,6 +179,9 @@ export default function AddLiquidityScreen() {
     }
 
     setIsAdding(true);
+    let txHash = '';
+    let success = false;
+    
     try {
       const result = await poolService.addLiquidity(
         api,
@@ -188,18 +191,10 @@ export default function AddLiquidityScreen() {
         amountB
       );
 
-      if (result.success) {
-        // Save to transaction history
-        await transactionHistoryService.saveTransaction(wallet.address, {
-          hash: result.txHash || 'unknown',
-          from: wallet.address,
-          to: 'pool',
-          amount: `${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`,
-          formattedAmount: `${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`,
-          status: 'finalized',
-          usedMEVProtection: false,
-        });
+      success = result.success;
+      txHash = result.txHash || '';
 
+      if (result.success) {
         // Refresh balances
         if (refreshBalances) await refreshBalances();
         if (refreshPCHMLBalance) await refreshPCHMLBalance();
@@ -223,6 +218,24 @@ export default function AddLiquidityScreen() {
       }
       Alert.alert('Add Liquidity Failed', errorMessage);
     } finally {
+      // Save to transaction history (both success and failure)
+      try {
+        await transactionHistoryService.saveTransaction(wallet.address, {
+          hash: txHash || `add_liquidity_${Date.now()}`,
+          from: wallet.address,
+          to: 'pool',
+          amount: `${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`,
+          formattedAmount: success 
+            ? `Added: ${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`
+            : `Failed: ${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`,
+          status: success ? 'finalized' : 'failed',
+          usedMEVProtection: false,
+          type: 'add_liquidity',
+        });
+      } catch (e) {
+        console.error('[AddLiquidity] Failed to save to history:', e);
+      }
+      
       setIsAdding(false);
     }
   };
