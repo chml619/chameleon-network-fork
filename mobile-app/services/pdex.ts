@@ -245,7 +245,8 @@ class PDEXService {
 
     (async () => {
       try {
-        const unsub = await (api.query.pdex as any).tokenBalances(address, PCHML_TOKEN_ID, (balance: any) => {
+        // Note: tokenBalances subscription is (tokenId, address, callback) - fixed parameter order
+        const unsub = await (api.query.pdex as any).tokenBalances(PCHML_TOKEN_ID, address, (balance: any) => {
           callback(new BN(balance.toString()));
         });
         unsubscribe = unsub as any;
