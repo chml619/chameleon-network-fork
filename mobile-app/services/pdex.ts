@@ -393,6 +393,28 @@ class PDEXService {
   }
 
   /**
+   * Get pool ID for token pair using direct mapping
+   */
+  getPoolIdForPair(tokenInId: number, tokenOutId: number): number | null {
+    // All pools have pCHML (0) as one side
+    const hasZero = tokenInId === 0 || tokenOutId === 0;
+    if (!hasZero) return null; // No direct pool for non-pCHML pairs
+    
+    const otherToken = tokenInId === 0 ? tokenOutId : tokenInId;
+    
+    // Fixed pool mapping:
+    // Pool 0: pCHML(0) / pBTC(2)
+    // Pool 1: pCHML(0) / pETH(1)
+    // Pool 2: pCHML(0) / pUSDT(3)
+    switch (otherToken) {
+      case 2: return 0; // pCHML/pBTC
+      case 1: return 1; // pCHML/pETH
+      case 3: return 2; // pCHML/pUSDT
+      default: return null;
+    }
+  }
+
+  /**
    * Get mock quote for development
    */
   private getMockQuote(
