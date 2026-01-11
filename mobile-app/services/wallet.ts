@@ -259,8 +259,22 @@ class WalletService {
    * This is the preferred method for getting a signing keypair
    */
   public async getOrDeriveKeyPair(): Promise<KeyringPair | null> {
-    // If we already have a keypair, return it
+    // Check cached keypair first
+    if (this.cachedKeyPair) {
+      try {
+        // Verify it's still valid by checking address
+        if (this.cachedKeyPair.address && this.walletState?.address === this.cachedKeyPair.address) {
+          return this.cachedKeyPair;
+        }
+      } catch (e) {
+        console.warn('[Wallet] Cached keypair invalid, clearing cache');
+        this.cachedKeyPair = null;
+      }
+    }
+    
+    // If we already have a current keypair, cache and return it
     if (this.currentPair) {
+      this.cachedKeyPair = this.currentPair;
       return this.currentPair;
     }
     
@@ -311,12 +325,20 @@ class WalletService {
       }
       
       this.walletState.isLocked = false;
-      console.log('[Wallet] Successfully restored keypair');
+      this.cachedKeyPair = this.currentPair;
+      console.log('[Wallet] Successfully restored and cached keypair');
       return this.currentPair;
     } catch (error) {
       console.error('[Wallet] Error deriving keypair:', error);
       return null;
     }
+  }
+
+  /**
+   * Clear cached keypair when switching wallets
+   */
+  public clearCachedKeyPair(): void {
+    this.cachedKeyPair = null;
   }
 
   /**
