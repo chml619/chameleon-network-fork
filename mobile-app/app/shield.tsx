@@ -92,7 +92,8 @@ export default function ShieldScreen() {
         setPublicBalance({ free: free.toString() });
       } else {
         // pToken balance from pDEX
-        const pTokenBalance = await api.query.pdex.tokenBalances(wallet.address, selectedToken.assetId) as any;
+        // Note: tokenBalances query is (tokenId, address) - fixed parameter order
+        const pTokenBalance = await api.query.pdex.tokenBalances(selectedToken.assetId, wallet.address) as any;
         setPublicBalance({ free: pTokenBalance.toString() });
       }
     } catch (error) {
