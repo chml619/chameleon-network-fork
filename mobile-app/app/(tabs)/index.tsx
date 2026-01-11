@@ -97,10 +97,11 @@ export default function HomeScreen() {
     
     try {
       // Fetch all balances in parallel
+      // Note: tokenBalances query is (tokenId, address) - fixed parameter order
       const [pBTC, pETH, pUSDT] = await Promise.all([
-        api.query.pdex.tokenBalances(wallet.address, 2).catch(() => '0'),
-        api.query.pdex.tokenBalances(wallet.address, 1).catch(() => '0'),
-        api.query.pdex.tokenBalances(wallet.address, 3).catch(() => '0'),
+        api.query.pdex.tokenBalances(2, wallet.address).catch(() => '0'),
+        api.query.pdex.tokenBalances(1, wallet.address).catch(() => '0'),
+        api.query.pdex.tokenBalances(3, wallet.address).catch(() => '0'),
       ]);
       
       // Only update state if we got valid responses
