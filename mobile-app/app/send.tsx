@@ -119,7 +119,8 @@ export default function SendScreen() {
       try {
         const api = apiService.getApi();
         if (!api) return;
-        const balance = await api.query.pdex.tokenBalances(wallet.address, selectedToken.assetId) as any;
+        // Note: tokenBalances query is (tokenId, address) - fixed parameter order
+        const balance = await api.query.pdex.tokenBalances(selectedToken.assetId, wallet.address) as any;
         const balStr = balance.toString();
         setTokenBalance(balStr);
       } catch (error) {
