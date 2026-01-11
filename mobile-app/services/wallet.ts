@@ -36,6 +36,7 @@ class WalletService {
   private static instance: WalletService;
   private keyring: Keyring | null = null;
   private currentPair: KeyringPair | null = null;
+  private cachedKeyPair: KeyringPair | null = null;
   private walletState: WalletState | null = null;
   private listeners: ((state: WalletState | null) => void)[] = [];
 
