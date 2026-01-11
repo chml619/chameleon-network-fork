@@ -222,6 +222,9 @@ export default function UnshieldScreen() {
 
     setIsUnshielding(true);
 
+    let txHash: string = '';
+    let success = false;
+
     try {
       const keyPair = await walletService.getOrDeriveKeyPair();
       if (!keyPair) {
@@ -240,7 +243,6 @@ export default function UnshieldScreen() {
         throw new Error(`Insufficient ${selectedToken.symbol} balance. You have ${formatBalance(privateBalance)} but trying to unshield ${amount}.`);
       }
       
-      let txHash: string;
       let successMessage: string;
 
       if (selectedToken.requiresBridge) {
@@ -260,22 +262,8 @@ export default function UnshieldScreen() {
           throw new Error(result.error || "Bridge withdrawal failed");
         }
         txHash = result.txHash || "";
+        success = result.success;
         successMessage = "Bridge withdrawal initiated! Your " + amount + " " + selectedToken.id + " will be sent to " + destinationAddress.slice(0,10) + "...";
-        
-        // Save bridge withdrawal to history
-        try {
-          await transactionHistoryService.saveTransaction(wallet.address, {
-            hash: txHash || `bridge_withdraw_${Date.now()}`,
-            from: wallet.address,
-            to: destinationAddress,
-            amount: amountBN.toString(),
-            formattedAmount: `Withdraw ${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`,
-            status: 'pending',
-            usedMEVProtection: false,
-          });
-        } catch (e) {
-          console.error('[Unshield] Failed to save bridge withdrawal to history:', e);
-        }
       } else {
         // CHML - check if we should use pDEX transfer or privacy unshield
         if (selectedToken.assetId === 0) {
@@ -297,6 +285,7 @@ export default function UnshieldScreen() {
           }
           
           txHash = result.txHash || "";
+          success = result.success;
           successMessage = "pCHML transferred successfully! Transaction: " + txHash.slice(0, 10) + "...";
         } else {
           // Other privacy tokens - use privacy unshield
@@ -307,24 +296,24 @@ export default function UnshieldScreen() {
           console.log('[Unshield] Stealth hash length:', inputStealthHash.length, 'bytes');
           
           txHash = await privacyService.unshield(keyPair, inputStealthHash, amountBN, destinationAddress);
+          success = true;
           successMessage = "Tokens unshielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
         }
-        
-        // Save unshield to transaction history
-        try {
-          await transactionHistoryService.saveTransaction(wallet.address, {
-            hash: txHash,
-            from: wallet.address,
-            to: destinationAddress,
-            amount: amountBN.toString(),
-            formattedAmount: `${amount} ${selectedToken.symbol} → ${amount} ${selectedToken.outputSymbol}`,
-            status: 'finalized',
-            usedMEVProtection: false,
-          });
-        } catch (e) {
-          console.error('[Unshield] Failed to save to history:', e);
-        }
       }
+
+      // Save successful transaction to history
+      await transactionHistoryService.saveTransaction(wallet.address, {
+        hash: txHash || `${selectedToken.requiresBridge ? 'bridge' : 'unshield'}_${Date.now()}`,
+        from: wallet.address,
+        to: destinationAddress,
+        amount: amountBN.toString(),
+        formattedAmount: selectedToken.requiresBridge 
+          ? `Withdraw ${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`
+          : `${amount} ${selectedToken.symbol} → ${amount} ${selectedToken.outputSymbol}`,
+        status: success ? 'finalized' : 'pending',
+        usedMEVProtection: false,
+        type: selectedToken.requiresBridge ? 'send' : 'unshield',
+      });
 
       Alert.alert(
         "Unshield Successful",
@@ -346,6 +335,24 @@ export default function UnshieldScreen() {
       );
     } catch (error) {
       console.error('Unshield error:', error);
+      
+      // Save failed transaction to history
+      try {
+        await transactionHistoryService.saveTransaction(wallet.address, {
+          hash: txHash || `failed_unshield_${Date.now()}`,
+          from: wallet.address,
+          to: destinationAddress,
+          amount: parseAmount(amount).toString(),
+          formattedAmount: `Failed: ${amount} ${selectedToken.symbol}`,
+          status: 'failed',
+          usedMEVProtection: false,
+          type: 'unshield',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      } catch (historyError) {
+        console.error('[Unshield] Failed to save failed transaction to history:', historyError);
+      }
+      
       let errorMessage = 'Unable to complete unshielding. Please check your private balance and try again.';
       if (error instanceof Error) {
         console.error('Unshield error details:', error.message);
