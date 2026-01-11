@@ -267,39 +267,25 @@ export default function UnshieldScreen() {
         success = result.success;
         successMessage = "Bridge withdrawal initiated! Your " + amount + " " + selectedToken.id + " will be sent to " + destinationAddress.slice(0,10) + "...";
       } else {
-        // CHML - check if we should use pDEX transfer or privacy unshield
-        if (selectedToken.assetId === 0) {
-          // pCHML (tokenId 0) - use pDEX transfer instead of confidential transfer
-          console.log('[Unshield] Using pDEX transfer for pCHML');
-          
-          // Convert amount to raw
-          const rawAmount = BigInt(Math.floor(parseFloat(amount) * 1e12));
-          
-          const result = await pdexService.transfer(
-            keyPair,
-            0, // pCHML asset ID
-            destinationAddress,
-            new BN(rawAmount.toString())
-          );
-          
-          if (!result.success) {
-            throw new Error(result.error || "pCHML transfer failed");
-          }
-          
-          txHash = result.txHash || "";
-          success = result.success;
-          successMessage = "pCHML transferred successfully! Transaction: " + txHash.slice(0, 10) + "...";
-        } else {
-          // Other privacy tokens - use privacy unshield
-          privacyService.setApi(api);
-          const stealthMetaAddress = { spendPubkey: keyPair.publicKey, viewPubkey: keyPair.publicKey };
-          const inputStealthHash = generateStealthHash(stealthMetaAddress);
-          
-          console.log('[Unshield] Stealth hash length:', inputStealthHash.length, 'bytes');
-          
+        // All privacy tokens (including pCHML) use privacy unshield
+        // This converts private tokens back to public balance
+        privacyService.setApi(api);
+        const stealthMetaAddress = { spendPubkey: keyPair.publicKey, viewPubkey: keyPair.publicKey };
+        const inputStealthHash = generateStealthHash(stealthMetaAddress);
+        
+        console.log('[Unshield] Token:', selectedToken.symbol, 'AssetId:', selectedToken.assetId);
+        console.log('[Unshield] Stealth hash length:', inputStealthHash.length, 'bytes');
+        console.log('[Unshield] Amount:', amountBN.toString(), 'Destination:', destinationAddress);
+        
+        try {
           txHash = await privacyService.unshield(keyPair, inputStealthHash, amountBN, destinationAddress);
           success = true;
-          successMessage = "Tokens unshielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
+          successMessage = selectedToken.assetId === 0 
+            ? "pCHML unshielded to public CHML! Transaction: " + txHash.slice(0, 10) + "..."
+            : "Tokens unshielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
+        } catch (unshieldError: any) {
+          console.error('[Unshield] Privacy unshield failed:', unshieldError);
+          throw new Error(unshieldError.message || 'Unshield transaction failed');
         }
       }
 
