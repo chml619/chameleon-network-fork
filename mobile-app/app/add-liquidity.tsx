@@ -137,16 +137,13 @@ export default function AddLiquidityScreen() {
   const handleMaxA = () => {
     setAmountA(balanceA);
     if (selectedPool) {
-      const reserveAFormatted = poolService.formatAmount(selectedPool.reserveA);
-      const reserveBFormatted = poolService.formatAmount(selectedPool.reserveB);
+      const DECIMALS = 1_000_000_000_000; // 10^12
+      const reserveA = parseFloat(selectedPool.reserveA) / DECIMALS;
+      const reserveB = parseFloat(selectedPool.reserveB) / DECIMALS;
       
-      if (parseFloat(reserveAFormatted) > 0 && parseFloat(reserveBFormatted) > 0) {
-        const optimalB = poolService.calculateOptimalAmountB(
-          balanceA,
-          reserveAFormatted,
-          reserveBFormatted
-        );
-        setAmountB(parseFloat(optimalB).toFixed(6));
+      if (reserveA > 0 && reserveB > 0) {
+        const optimalB = (parseFloat(balanceA) * reserveB) / reserveA;
+        setAmountB(optimalB.toFixed(6));
       } else {
         // Pool has no liquidity
         setAmountB('');
