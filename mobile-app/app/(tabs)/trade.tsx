@@ -133,30 +133,44 @@ export default function TradeScreen() {
         {
           text: 'Swap',
           onPress: async () => {
-            const result = await executeSwap();
+            let result: any = null;
+            let txHash = '';
+            let success = false;
             
-            // Save swap to transaction history
-            if (wallet?.address && result) {
+            try {
+              result = await executeSwap();
+              success = result?.success || false;
+              txHash = result?.txHash || '';
+              
+              if (success) {
+                Alert.alert('Success', 'Swap completed successfully!');
+              } else {
+                Alert.alert('Error', result?.error || 'Swap failed');
+              }
+            } catch (error) {
+              console.error('[Trade] Swap execution error:', error);
+              Alert.alert('Error', 'Swap failed due to network or validation error');
+            }
+            
+            // Save swap to transaction history (both success and failure)
+            if (wallet?.address) {
               try {
                 await transactionHistoryService.saveTransaction(wallet.address, {
-                  hash: result.txHash || `swap_${Date.now()}`,
+                  hash: txHash || `swap_${Date.now()}`,
                   from: wallet.address,
                   to: wallet.address,
                   amount: amountIn,
-                  formattedAmount: `${amountIn} ${selectedTokenIn.symbol} → ${result.amountOut || quote.amountOut} ${selectedTokenOut.symbol}`,
-                  status: result.success ? 'finalized' : 'failed',
+                  formattedAmount: success 
+                    ? `${amountIn} ${selectedTokenIn.symbol} → ${result?.amountOut || quote.amountOut} ${selectedTokenOut.symbol}`
+                    : `Failed: ${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
+                  status: success ? 'finalized' : 'failed',
                   usedMEVProtection: mevProtection,
                   type: 'swap',
+                  error: success ? undefined : (result?.error || 'Swap failed'),
                 });
               } catch (e) {
-                console.error('[Trade] Failed to save to history:', e);
+                console.error('[Trade] Failed to save swap to history:', e);
               }
-            }
-            
-            if (result.success) {
-              Alert.alert('Success', 'Swap completed successfully!');
-            } else {
-              Alert.alert('Error', result.error || 'Swap failed');
             }
           },
         },
