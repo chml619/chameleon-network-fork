@@ -217,7 +217,7 @@ class PDEXService {
         return new BN(0);
       }
 
-      const balance = await (api.query.pdex as any).tokenBalances(address, tokenId);
+      const balance = await (api.query.pdex as any).tokenBalances(tokenId, address);
       const result = new BN(balance.toString());
       
       // Update cache
