@@ -346,6 +346,7 @@ class WalletService {
    */
   public clearWallet(): void {
     this.currentPair = null;
+    this.cachedKeyPair = null;
     this.walletState = null;
     this.notifyListeners();
   }
