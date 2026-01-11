@@ -56,13 +56,14 @@ export default function WalletScreen() {
   const loadPTokenBalances = useCallback(async () => {
     if (!wallet?.address || connectionState.status !== 'connected') return;
     try {
+      const DECIMALS = 1_000_000_000_000; // 10^12
       const balances: Record<string, string> = {};
       // Load pETH, pBTC, pUSDT balances (tokenIds 1, 2, 3)
       for (const tokenId of [1, 2, 3]) {
         const balance = await pdexService.getTokenBalance(tokenId, wallet.address);
         const symbol = tokenId === 1 ? 'pETH' : tokenId === 2 ? 'pBTC' : 'pUSDT';
         // Convert from raw balance (12 decimals) to human readable
-        const humanReadable = parseFloat(balance.toString()) / Math.pow(10, 12);
+        const humanReadable = parseFloat(balance.toString()) / DECIMALS;
         balances[symbol] = humanReadable.toFixed(4);
       }
       setPTokenBalances(balances);
