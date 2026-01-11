@@ -28,7 +28,6 @@ import { walletService } from '@/services/wallet';
 import { apiService } from '@/services/api';
 import { bridgeService } from '@/services/bridge';
 import { transactionService } from '@/services/transaction';
-import { pdexService } from '@/services/pdex';
 import { formatBalance, parseAmount } from '@/utils/balance';
 import { transactionHistoryService } from '@/services/transactionHistory';
 import { THEME, GRADIENTS } from '@/constants/theme';
