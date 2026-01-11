@@ -252,7 +252,7 @@ export class PrivacyService {
     });
   }
 
-  // Unshield tokens (bridge exit)
+  // Unshield tokens (convert private pCHML to public CHML)
   async unshield(
     signerKeypair: any,
     inputStealthHash: Uint8Array,
@@ -261,14 +261,19 @@ export class PrivacyService {
   ): Promise<string> {
     if (!this.api) throw new Error('API not connected');
 
+    // Ensure stealth hash is exactly 32 bytes
+    const stealthHash32 = padTo32Bytes(inputStealthHash);
+    console.log('[Privacy] Unshield stealth_hash length:', stealthHash32.length, 'bytes');
+
     // Build ring for unshield
     const ringMembers = await this.buildTestRing(signerKeypair.publicKey);
     const keyImage = this.generateKeyImage(signerKeypair.secretKey || signerKeypair.publicKey);
     
-    // Build message for unshield
+    // Build message for signing: (stealth_hash, amount, to).encode()
+    const amountBytes = new BN(amount).toArray('le', 16);
     const message = new Uint8Array([
-      ...inputStealthHash,
-      ...new BN(amount).toArray('le', 16)
+      ...stealthHash32,
+      ...amountBytes
     ]);
     
     const signature = this.buildTestSignature(
@@ -279,13 +284,24 @@ export class PrivacyService {
       signerKeypair.secretKey || signerKeypair.publicKey
     );
 
+    console.log('[Privacy] Unshield params:', {
+      stealthHashLength: stealthHash32.length,
+      amount: amount.toString(),
+      ringMembersCount: ringMembers.length,
+      keyImageLength: keyImage.length,
+      signatureLength: signature.length,
+      destination: destinationAddress
+    });
+
+    // Parameters must be in exact order as pallet expects:
+    // stealth_hash, amount, ring_members, key_image, signature, to
     const tx = this.api.tx.confidentialTransfer.unshield(
-      ringMembers.map(m => Array.from(m)),
-      Array.from(keyImage),
-      Array.from(signature),
-      Array.from(inputStealthHash),
-      amount.toString(),
-      destinationAddress
+      Array.from(stealthHash32),           // stealth_hash: [u8; 32]
+      amount.toString(),                    // amount: BalanceOf<T>
+      ringMembers.map(m => Array.from(m)), // ring_members: Vec<[u8; 32]>
+      Array.from(keyImage),                 // key_image: [u8; 32]
+      Array.from(signature),                // signature: Vec<u8>
+      destinationAddress                    // to: AccountId
     );
 
     return new Promise((resolve, reject) => {
@@ -293,7 +309,17 @@ export class PrivacyService {
         const { status, dispatchError } = result;
         if (status.isInBlock || status.isFinalized) {
           if (dispatchError) {
-            reject(new Error(dispatchError.toString()));
+            if (dispatchError.isModule) {
+              try {
+                const decoded = this.api!.registry.findMetaError(dispatchError.asModule);
+                console.error('[Privacy] Unshield error:', decoded.section, decoded.name, decoded.docs.join(' '));
+                reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
+              } catch (e) {
+                reject(new Error(dispatchError.toString()));
+              }
+            } else {
+              reject(new Error(dispatchError.toString()));
+            }
           } else {
             resolve(status.asFinalized?.toString() || status.asInBlock.toString());
           }
