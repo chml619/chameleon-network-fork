@@ -357,8 +357,8 @@ class PDEXService {
       }
 
       const poolData = pool.unwrap();
-      const reserveA = parseFloat(poolData.reserveA.toString()) / 1e18;
-      const reserveB = parseFloat(poolData.reserveB.toString()) / 1e18;
+      const reserveA = parseFloat(poolData.reserveA.toString()) / 1e12;
+      const reserveB = parseFloat(poolData.reserveB.toString()) / 1e12;
 
       // Determine reserves based on swap direction
       const isAtoB = poolData.assetA.toNumber() === tokenInId;
