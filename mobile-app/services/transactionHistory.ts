@@ -202,6 +202,14 @@ class TransactionHistoryService {
   }
 
   /**
+   * Export history as JSON string
+   */
+  public async exportHistory(walletAddress: string): Promise<string> {
+    const history = await this.getHistory(walletAddress);
+    return JSON.stringify(history, null, 2);
+  }
+
+  /**
    * Add a transaction to history (alias for saveTransaction for compatibility)
    */
   public async addTransaction(
