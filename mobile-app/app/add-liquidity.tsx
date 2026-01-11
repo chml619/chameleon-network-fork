@@ -80,12 +80,14 @@ export default function AddLiquidityScreen() {
   const loadBalances = async () => {
     if (!api || !wallet?.address || !selectedPool) return;
     try {
+      // Note: getTokenBalance takes (tokenId, address) - fixed parameter order
       const balA = await pdexService.getTokenBalance(selectedPool.assetA, wallet.address);
       const balB = await pdexService.getTokenBalance(selectedPool.assetB, wallet.address);
       
       // Convert raw balances to human-readable format for display and validation
-      const displayBalanceA = (parseFloat(balA.toString()) / Math.pow(10, 12)).toFixed(4);
-      const displayBalanceB = (parseFloat(balB.toString()) / Math.pow(10, 12)).toFixed(4);
+      const DECIMALS = 1_000_000_000_000; // 10^12
+      const displayBalanceA = (parseFloat(balA.toString()) / DECIMALS).toFixed(4);
+      const displayBalanceB = (parseFloat(balB.toString()) / DECIMALS).toFixed(4);
       
       setBalanceA(displayBalanceA);
       setBalanceB(displayBalanceB);
