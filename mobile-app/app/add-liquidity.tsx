@@ -113,24 +113,23 @@ export default function AddLiquidityScreen() {
   const handleAmountAChange = (value: string) => {
     setAmountA(value);
     
-    // Auto-calculate amount B to maintain ratio
-    if (selectedPool && value && parseFloat(value) > 0) {
-      const reserveAFormatted = poolService.formatAmount(selectedPool.reserveA);
-      const reserveBFormatted = poolService.formatAmount(selectedPool.reserveB);
-      
-      // Check if pool has liquidity
-      if (parseFloat(reserveAFormatted) > 0 && parseFloat(reserveBFormatted) > 0) {
-        const optimalB = poolService.calculateOptimalAmountB(
-          value,
-          reserveAFormatted,
-          reserveBFormatted
-        );
-        setAmountB(parseFloat(optimalB).toFixed(6));
-      } else {
-        // Pool has no liquidity - user sets the initial price
-        setAmountB('');
-      }
+    if (!selectedPool || !value || parseFloat(value) <= 0) {
+      setAmountB('');
+      return;
+    }
+    
+    // Get reserves in human-readable form (after BUG-A fix)
+    const DECIMALS = 1_000_000_000_000; // 10^12
+    const reserveA = parseFloat(selectedPool.reserveA) / DECIMALS;
+    const reserveB = parseFloat(selectedPool.reserveB) / DECIMALS;
+    
+    if (reserveA > 0 && reserveB > 0) {
+      // Calculate optimal Token B amount to maintain pool ratio
+      const amountANum = parseFloat(value);
+      const optimalB = (amountANum * reserveB) / reserveA;
+      setAmountB(optimalB.toFixed(6));
     } else {
+      // Pool has no liquidity - user sets initial ratio
       setAmountB('');
     }
   };
