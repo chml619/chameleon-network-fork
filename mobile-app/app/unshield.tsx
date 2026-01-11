@@ -282,12 +282,14 @@ export default function UnshieldScreen() {
           // pCHML (tokenId 0) - use pDEX transfer instead of confidential transfer
           console.log('[Unshield] Using pDEX transfer for pCHML');
           
-          // Use pDEX transfer for pCHML
+          // Convert amount to raw
+          const rawAmount = BigInt(Math.floor(parseFloat(amount) * 1e12));
+          
           const result = await pdexService.transfer(
             keyPair,
             0, // pCHML asset ID
             destinationAddress,
-            amountBN
+            new BN(rawAmount.toString())
           );
           
           if (!result.success) {
