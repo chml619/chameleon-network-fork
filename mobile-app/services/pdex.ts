@@ -489,23 +489,10 @@ class PDEXService {
       const tokenInId = this.getTokenId(tokenIn);
       const tokenOutId = this.getTokenId(tokenOut);
 
-      // Get pool ID
-      let poolId: number;
-      try {
-        const poolIdResult = await api.query.pdex.poolIdByAssets(tokenInId, tokenOutId) as any;
-        if (!poolIdResult || poolIdResult.isNone) {
-          // Try reverse order
-          const reverseResult = await api.query.pdex.poolIdByAssets(tokenOutId, tokenInId) as any;
-          if (!reverseResult || reverseResult.isNone) {
-            return { success: false, error: "Pool not found for this pair" };
-          }
-          poolId = reverseResult.unwrap().toNumber();
-        } else {
-          poolId = poolIdResult.unwrap().toNumber();
-        }
-      } catch (error) {
-        console.error("[pDEX] Error getting pool ID:", error);
-        return { success: false, error: "Failed to find trading pool" };
+      // Use direct pool ID mapping instead of chain query
+      const poolId = this.getPoolIdForPair(tokenInId, tokenOutId);
+      if (poolId === null) {
+        return { success: false, error: "No pool exists for this token pair" };
       }
 
       let tx;
