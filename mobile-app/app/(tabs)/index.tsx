@@ -315,6 +315,17 @@ export default function HomeScreen() {
     }
   }, [connectionState.status, connect]);
 
+  // Refresh balances when API connects
+  useEffect(() => {
+    if (connectionState.status === 'connected' && wallet?.address) {
+      console.log('[Home] API connected, loading balances');
+      loadPTokenBalances();
+      if (refreshPCHMLBalance) {
+        refreshPCHMLBalance();
+      }
+    }
+  }, [connectionState.status, wallet?.address, loadPTokenBalances, refreshPCHMLBalance]);
+
   // Handle dev account import
   const handleDevAccountImport = async (accountName: string) => {
     try {

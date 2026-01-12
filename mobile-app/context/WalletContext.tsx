@@ -87,6 +87,26 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [wallet?.address]);
 
+  // Refresh balances when API connects
+  useEffect(() => {
+    if (!wallet?.address) return;
+    
+    const unsubscribe = apiService.onConnectionStateChange((state) => {
+      if (state.status === 'connected') {
+        console.log('[WalletContext] API connected, refreshing balances');
+        refreshBalances();
+      }
+    });
+    
+    // Also check if already connected
+    const currentState = apiService.getConnectionState();
+    if (currentState.status === 'connected') {
+      refreshBalances();
+    }
+    
+    return unsubscribe;
+  }, [wallet?.address, refreshBalances]);
+
   const generateStealthAddressForWallet = async (walletState: WalletState) => {
     try {
       const keyPair = walletService.getKeyPair();
