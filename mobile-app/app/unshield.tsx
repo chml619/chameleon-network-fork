@@ -265,29 +265,49 @@ export default function UnshieldScreen() {
         txHash = result.txHash || "";
         success = result.success;
         successMessage = "Bridge withdrawal initiated! Your " + amount + " " + selectedToken.id + " will be sent to " + destinationAddress.slice(0,10) + "...";
+
       } else {
-        // All privacy tokens (including pCHML) use privacy unshield
-        // This converts private tokens back to public balance
-        privacyService.setApi(api);
-        const stealthMetaAddress = { spendPubkey: keyPair.publicKey, viewPubkey: keyPair.publicKey };
-        const inputStealthHash = generateStealthHash(stealthMetaAddress);
-        
+        // pCHML uses pdex.burnToPublic, other tokens use privacy unshield
         console.log('[Unshield] Token:', selectedToken.symbol, 'AssetId:', selectedToken.assetId);
-        console.log('[Unshield] Stealth hash length:', inputStealthHash.length, 'bytes');
         console.log('[Unshield] Amount:', amountBN.toString(), 'Destination:', destinationAddress);
-        
+
         try {
-          txHash = await privacyService.unshield(keyPair, inputStealthHash, amountBN, destinationAddress);
-          success = true;
-          successMessage = selectedToken.assetId === 0 
-            ? "pCHML unshielded to public CHML! Transaction: " + txHash.slice(0, 10) + "..."
-            : "Tokens unshielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
+          if (selectedToken.assetId === 0) {
+            // pCHML: Use pdex.burnToPublic to convert pCHML to public CHML
+            const tx = api.tx.pdex.burnToPublic(amountBN.toString(), destinationAddress);
+            txHash = await new Promise<string>((resolve, reject) => {
+              tx.signAndSend(keyPair, ({ status, dispatchError, txHash: hash }: any) => {
+                if (status.isInBlock || status.isFinalized) {
+                  if (dispatchError) {
+                    if (dispatchError.isModule) {
+                      const decoded = api.registry.findMetaError(dispatchError.asModule);
+                      reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
+                    } else {
+                      reject(new Error(dispatchError.toString()));
+                    }
+                  } else {
+                    resolve(hash?.toHex() || status.asInBlock.toString());
+                  }
+                }
+              }).catch(reject);
+            });
+            success = true;
+            successMessage = "pCHML unshielded to public CHML! Transaction: " + txHash.slice(0, 10) + "...";
+          } else {
+            // Other pTokens: Use privacy unshield
+            privacyService.setApi(api);
+            const stealthMetaAddress = { spendPubkey: keyPair.publicKey, viewPubkey: keyPair.publicKey };
+            const inputStealthHash = generateStealthHash(stealthMetaAddress);
+            txHash = await privacyService.unshield(keyPair, inputStealthHash, amountBN, destinationAddress);
+            success = true;
+            successMessage = "Tokens unshielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
+          }
         } catch (unshieldError: any) {
-          console.error('[Unshield] Privacy unshield failed:', unshieldError);
+          console.error('[Unshield] Unshield failed:', unshieldError);
           throw new Error(unshieldError.message || 'Unshield transaction failed');
         }
       }
-
+     
       // Save successful transaction to history
       await transactionHistoryService.saveTransaction(wallet.address, {
         hash: txHash || `${selectedToken.requiresBridge ? 'bridge' : 'unshield'}_${Date.now()}`,
