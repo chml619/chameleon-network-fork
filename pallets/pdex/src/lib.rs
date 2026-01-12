@@ -54,7 +54,7 @@ pub mod pallet {
     use super::*;
     use frame_support::{
         pallet_prelude::*,
-        traits::Hooks,
+        traits::{Currency, Hooks},
         PalletId,
     };
     use frame_system::pallet_prelude::*;
@@ -111,6 +111,9 @@ pub mod pallet {
         /// Treasury share of swap fees in Permill (10% = 100/1000).
         #[pallet::constant]
         type TreasuryFeeShare: Get<Permill>;
+
+        /// Native currency for public balance operations.
+        type NativeCurrency: Currency<Self::AccountId>;
     }
 
     /// Hooks for automatic operations.
@@ -294,6 +297,15 @@ pub mod pallet {
             /// Recipient account.
             to: T::AccountId,
             /// Amount transferred.
+            amount: T::Balance,
+        },
+        /// pCHML was burned and public CHML credited.
+        BurnedToPublic {
+            /// Account that burned pCHML.
+            from: T::AccountId,
+            /// Account that received public CHML.
+            to: T::AccountId,
+            /// Amount converted.
             amount: T::Balance,
         },
     }
@@ -827,6 +839,44 @@ pub mod pallet {
                 to,
                 amount,
             });
+            Ok(())
+        }
+
+        /// Burn pCHML and credit public CHML to destination.
+        /// This is the "unshield" operation for pCHML specifically.
+        /// 
+        /// Parameters:
+        /// - `amount`: Amount of pCHML to burn
+        /// - `to`: Destination account to receive public CHML
+        #[pallet::call_index(6)]
+        #[pallet::weight(Weight::from_parts(50_000_000, 0))]
+        pub fn burn_to_public(
+            origin: OriginFor<T>,
+            amount: T::Balance,
+            to: T::AccountId,
+        ) -> DispatchResult {
+            let from = ensure_signed(origin)?;
+            ensure!(!amount.is_zero(), Error::<T>::InvalidAmounts);
+            
+            // Asset ID 0 is pCHML
+            let pchml_id: T::AssetId = 0u32.into();
+            
+            // Burn pCHML from sender
+            Self::do_burn(pchml_id, &from, amount)?;
+            
+            // Convert Balance to Currency balance type
+            let amount_u128: u128 = amount.into();
+            let currency_amount = amount_u128.saturated_into();
+            
+            // Credit public CHML to destination
+            let _ = T::NativeCurrency::deposit_creating(&to, currency_amount);
+            
+            Self::deposit_event(Event::BurnedToPublic {
+                from,
+                to,
+                amount,
+            });
+            
             Ok(())
         }
     }

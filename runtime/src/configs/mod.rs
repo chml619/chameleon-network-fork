@@ -337,4 +337,5 @@ impl pallet_pdex::Config for Runtime {
     type SwapFee = SwapFee;
     type TreasuryAccount = TreasuryAccount;
     type TreasuryFeeShare = TreasuryFeeShare;
+    type NativeCurrency = Balances;
 }
