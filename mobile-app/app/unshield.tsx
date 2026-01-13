@@ -122,14 +122,14 @@ export default function UnshieldScreen() {
         if (pchmlBalance) {
           setPrivateBalance(pchmlBalance);
         } else {
-          // Note: tokenBalances query is (tokenId, address) - fixed parameter order
-          const pchmlBal = await api.query.pdex.tokenBalances(0, wallet.address) as any;
+          // Note: tokenBalances query is (address, tokenId) - fixed parameter order
+          const pchmlBal = await api.query.pdex.tokenBalances(wallet.address, 0) as any;
           setPrivateBalance(new BN(pchmlBal.toString()));
         }
       } else {
         // pToken balance from pDEX
-        // Note: tokenBalances query is (tokenId, address) - fixed parameter order
-        const pTokenBalance = await api.query.pdex.tokenBalances(selectedToken.assetId, wallet.address) as any;
+        // Note: tokenBalances query is (address, tokenId) - fixed parameter order
+        const pTokenBalance = await api.query.pdex.tokenBalances(wallet.address, selectedToken.assetId) as any;
         setPrivateBalance(new BN(pTokenBalance.toString()));
       }
     } catch (error) {

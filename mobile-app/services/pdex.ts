@@ -217,7 +217,7 @@ class PDEXService {
         return new BN(0);
       }
 
-      const balance = await (api.query.pdex as any).tokenBalances(tokenId, address);
+      const balance = await (api.query.pdex as any).tokenBalances(address, tokenId);
       const result = new BN(balance.toString());
       
       // Update cache
@@ -246,7 +246,7 @@ class PDEXService {
     (async () => {
       try {
         // Note: tokenBalances subscription is (tokenId, address, callback) - fixed parameter order
-        const unsub = await (api.query.pdex as any).tokenBalances(PCHML_TOKEN_ID, address, (balance: any) => {
+        const unsub = await (api.query.pdex as any).tokenBalances(address, PCHML_TOKEN_ID, (balance: any) => {
           callback(new BN(balance.toString()));
         });
         unsubscribe = unsub as any;
