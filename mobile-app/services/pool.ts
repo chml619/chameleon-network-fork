@@ -54,6 +54,17 @@ class PoolService {
     return PoolService.instance;
   }
 
+  /**
+   * Parse amount that may be hex string from chain
+   */
+  private parseChainAmount(amount: string): number {
+    if (!amount) return 0;
+    if (amount.startsWith('0x')) {
+      return parseInt(amount, 16);
+    }
+    return parseFloat(amount) || 0;
+  }
+
   getTokenSymbol(tokenId: number): string {
     return TOKEN_SYMBOLS[tokenId] || `Token${tokenId}`;
   }
@@ -146,8 +157,8 @@ class PoolService {
       const sharePercent = (userLp / totalLp) * 100;
       
       // Calculate user's share of reserves
-      const reserveA = parseFloat(pool.reserveA);
-      const reserveB = parseFloat(pool.reserveB);
+      const reserveA = this.parseChainAmount(pool.reserveA);
+      const reserveB = this.parseChainAmount(pool.reserveB);
       const valueA = ((userLp / totalLp) * reserveA).toString();
       const valueB = ((userLp / totalLp) * reserveB).toString();
       
@@ -176,8 +187,8 @@ class PoolService {
   ): string {
     const a = parseFloat(amountA);
     const b = parseFloat(amountB);
-    const rA = parseFloat(reserveA);
-    const rB = parseFloat(reserveB);
+    const rA = this.parseChainAmount(reserveA);
+    const rB = this.parseChainAmount(reserveB);
     const totalLp = parseFloat(totalLpTokens);
     
     if (totalLp === 0) {
@@ -196,8 +207,8 @@ class PoolService {
    */
   calculateOptimalAmountB(amountA: string, reserveA: string, reserveB: string): string {
     const a = parseFloat(amountA);
-    const rA = parseFloat(reserveA);
-    const rB = parseFloat(reserveB);
+    const rA = this.parseChainAmount(reserveA);
+    const rB = this.parseChainAmount(reserveB);
     
     if (rA === 0) return '0';
     return ((a * rB) / rA).toString();
@@ -307,10 +318,16 @@ class PoolService {
    */
   formatAmount(amount: string, displayDecimals: number = 4): string {
     const DECIMALS = 1_000_000_000_000; // 10^12
-    const num = parseFloat(amount) / DECIMALS;
-    if (num === 0) return '0';
-    if (num < 0.0001) return num.toExponential(2);
-    return num.toLocaleString(undefined, { maximumFractionDigits: displayDecimals });
+    // Handle hex strings from chain (u128 values)
+    let numValue: number;
+    if (amount.startsWith('0x')) {
+      numValue = parseInt(amount, 16) / DECIMALS;
+    } else {
+      numValue = parseFloat(amount) / DECIMALS;
+    }
+    if (numValue === 0 || isNaN(numValue)) return '0';
+    if (numValue < 0.0001) return numValue.toExponential(2);
+    return numValue.toLocaleString(undefined, { maximumFractionDigits: displayDecimals });
   }
 }
 

@@ -36,6 +36,16 @@ export default function AddLiquidityScreen() {
   const [selectedPool, setSelectedPool] = useState<PoolInfo | null>(null);
   const [amountA, setAmountA] = useState('');
   const [amountB, setAmountB] = useState('');
+
+  // Helper to parse chain amounts that may be hex
+  const parseChainAmount = (amount: string): number => {
+    if (!amount) return 0;
+    if (amount.startsWith('0x')) {
+      return parseInt(amount, 16);
+    }
+    return parseFloat(amount) || 0;
+  };
+
   const [balanceA, setBalanceA] = useState('0');
   const [balanceB, setBalanceB] = useState('0');
   const [expectedLP, setExpectedLP] = useState('0');
@@ -122,8 +132,8 @@ export default function AddLiquidityScreen() {
     
     // Get reserves in human-readable form (after BUG-A fix)
     const DECIMALS = 1_000_000_000_000; // 10^12
-    const reserveA = parseFloat(selectedPool.reserveA) / DECIMALS;
-    const reserveB = parseFloat(selectedPool.reserveB) / DECIMALS;
+    const reserveA = parseChainAmount(selectedPool.reserveA) / DECIMALS;
+    const reserveB = parseChainAmount(selectedPool.reserveB) / DECIMALS; 
     
     if (reserveA > 0 && reserveB > 0) {
       // Calculate optimal Token B amount to maintain pool ratio
@@ -140,8 +150,8 @@ export default function AddLiquidityScreen() {
     setAmountA(balanceA);
     if (selectedPool) {
       const DECIMALS = 1_000_000_000_000; // 10^12
-      const reserveA = parseFloat(selectedPool.reserveA) / DECIMALS;
-      const reserveB = parseFloat(selectedPool.reserveB) / DECIMALS;
+      const reserveA = parseChainAmount(selectedPool.reserveA) / DECIMALS;
+      const reserveB = parseChainAmount(selectedPool.reserveB) / DECIMALS;
       
       if (reserveA > 0 && reserveB > 0) {
         const optimalB = (parseFloat(balanceA) * reserveB) / reserveA;

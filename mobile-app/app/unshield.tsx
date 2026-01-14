@@ -281,7 +281,7 @@ export default function UnshieldScreen() {
                   if (dispatchError) {
                     if (dispatchError.isModule) {
                       const decoded = api.registry.findMetaError(dispatchError.asModule);
-                      reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
+	       	      reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
                     } else {
                       reject(new Error(dispatchError.toString()));
                     }

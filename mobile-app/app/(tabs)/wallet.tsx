@@ -201,7 +201,7 @@ export default function WalletScreen() {
   }
 
   // Extract balance for display
-  const balanceNumber = formattedFreeBalance ? formattedFreeBalance.split(' ')[0] : '0';
+  const balanceNumber = formatBalance(publicBalance);
   const pchmlBalanceNumber = formatBalance(pchmlBalance);
 
   // Helper function to get token balance
