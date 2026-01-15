@@ -54,7 +54,7 @@ pub mod pallet {
     use super::*;
     use frame_support::{
         pallet_prelude::*,
-        traits::{Currency, Hooks},
+        traits::{Currency, ExistenceRequirement, Hooks, WithdrawReasons},
         PalletId,
     };
     use frame_system::pallet_prelude::*;
@@ -308,6 +308,11 @@ pub mod pallet {
             /// Amount converted.
             amount: T::Balance,
         },
+        /// Public CHML was burned and pCHML minted.
+        MintedFromPublic {
+            from: T::AccountId,
+            amount: T::Balance,
+        },
     }
 
     /// Errors that can be returned by this pallet.
@@ -343,7 +348,6 @@ pub mod pallet {
         InvalidAmounts,
     }
 
-    /// Dispatchable functions of this pallet.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Create a new liquidity pool for an asset pair.
@@ -879,8 +883,39 @@ pub mod pallet {
             
             Ok(())
         }
-    }
 
+        /// Burn public CHML and mint pCHML to sender (Shield).
+        #[pallet::call_index(7)]
+        #[pallet::weight(Weight::from_parts(50_000_000, 0))]
+        pub fn mint_from_public(
+            origin: OriginFor<T>,
+            amount: T::Balance,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(!amount.is_zero(), Error::<T>::InvalidAmounts);
+
+            let amount_u128: u128 = amount.into();
+            let currency_amount = amount_u128.saturated_into();
+
+            T::NativeCurrency::withdraw(
+                &who,
+                currency_amount,
+                WithdrawReasons::TRANSFER,
+                ExistenceRequirement::KeepAlive,
+            )?;
+
+            let pchml_id: T::AssetId = 0u32.into();
+            Self::do_mint(pchml_id, &who, amount)?;
+
+            Self::deposit_event(Event::MintedFromPublic {
+                from: who,
+                amount,
+            });
+
+            Ok(())
+        }
+
+    }
     impl<T: Config> Pallet<T> {
         /// Get the pool account for a given pool_id.
         pub fn pool_account(pool_id: u32) -> T::AccountId {
