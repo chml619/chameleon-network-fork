@@ -133,7 +133,7 @@ class PoolService {
    */
   async getUserLPBalance(api: ApiPromise, poolId: number, address: string): Promise<string> {
     try {
-      const balance = await api.query.pdex.lpBalances(poolId, address);
+      const balance = await api.query.pdex.userLPTokens(address, poolId);
       return balance.toString();
     } catch (error) {
       console.error('[Pool] Error fetching LP balance:', error);

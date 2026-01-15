@@ -40,10 +40,11 @@ import { THEME, GRADIENTS } from '@/constants/theme';
 // Quick test accounts for easy selection
 // Supported tokens for sending
 const TOKENS = [
-  { id: "CHML", symbol: "pCHML", name: "Chameleon", color: "#6366F1", icon: "diamond-outline", assetId: 0 },
-  { id: "BTC", symbol: "pBTC", name: "Bitcoin", color: "#F7931A", icon: "logo-bitcoin", assetId: 2 },
-  { id: "ETH", symbol: "pETH", name: "Ethereum", color: "#627EEA", icon: "logo-electron", assetId: 1 },
-  { id: "USDT", symbol: "pUSDT", name: "Tether", color: "#26A17B", icon: "logo-usd", assetId: 3 },
+  { id: "PUBLIC_CHML", symbol: "CHML", name: "Chameleon (Public)", color: "#22B958", icon: "diamond-outline", assetId: -1, isPublic: true },
+  { id: "CHML", symbol: "pCHML", name: "Chameleon", color: "#6366F1", icon: "diamond-outline", assetId: 0, isPublic: false },
+  { id: "BTC", symbol: "pBTC", name: "Bitcoin", color: "#F7931A", icon: "logo-bitcoin", assetId: 2, isPublic: false },
+  { id: "ETH", symbol: "pETH", name: "Ethereum", color: "#627EEA", icon: "logo-electron", assetId: 1, isPublic: false },
+  { id: "USDT", symbol: "pUSDT", name: "Tether", color: "#26A17B", icon: "logo-usd", assetId: 3, isPublic: false },
 ];
 
 const QUICK_TEST_ACCOUNTS = [
@@ -354,21 +355,44 @@ export default function SendScreen() {
       const amountBN = parseAmount(amount);
       const formattedAmount = `${amount} ${selectedToken.symbol}`;
 
-      // Transferring via pDEX
-      // Transferring via pDEX
-      const result = await pdexService.transfer(
-        keyPair,
-        selectedToken.assetId,
-        recipient,
-        amountBN
-      );
+      let txHash = "";
+      let transferType = "";
 
-      if (!result.success) {
-        throw new Error(result.error || "Transfer failed");
+      if ((selectedToken as any).isPublic) {
+        // Public CHML - use balances.transfer
+        transferType = "Public Transfer";
+        txHash = await new Promise<string>((resolve, reject) => {
+          api.tx.balances.transferKeepAlive(recipient, amountBN.toString())
+            .signAndSend(keyPair, ({ status, dispatchError, txHash: hash }) => {
+              if (status.isInBlock || status.isFinalized) {
+                if (dispatchError) {
+                  if (dispatchError.isModule) {
+                    const decoded = api.registry.findMetaError(dispatchError.asModule);
+                    reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
+                  } else {
+                    reject(new Error(dispatchError.toString()));
+                  }
+                } else {
+                  resolve(hash?.toHex() || status.asInBlock.toString());
+                }
+              }
+            }).catch(reject);
+        });
+      } else {
+        // pTokens - use pDEX transfer
+        transferType = "pToken Transfer";
+        const result = await pdexService.transfer(
+          keyPair,
+          selectedToken.assetId,
+          recipient,
+          amountBN
+        );
+        if (!result.success) {
+          throw new Error(result.error || "Transfer failed");
+        }
+        txHash = result.txHash || "";
       }
 
-      const txHash = result.txHash || "";
-      const transferType = "pToken Transfer";
       // Create transaction result
       const txResult = {
         hash: txHash,

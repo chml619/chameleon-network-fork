@@ -27,10 +27,11 @@ import { walletService } from '@/services/wallet';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 const TOKENS = [
-  { id: "CHML", symbol: "pCHML", name: "Chameleon", color: "#6366F1", icon: "diamond-outline" },
-  { id: "BTC", symbol: "pBTC", name: "Bitcoin", color: "#F7931A", icon: "logo-bitcoin" },
-  { id: "ETH", symbol: "pETH", name: "Ethereum", color: "#627EEA", icon: "logo-electron" },
-  { id: "USDT", symbol: "pUSDT", name: "Tether", color: "#26A17B", icon: "logo-usd" },
+  { id: "PUBLIC_CHML", symbol: "CHML", name: "Chameleon (Public)", color: "#22B958", icon: "diamond-outline", isPublic: true },
+  { id: "CHML", symbol: "pCHML", name: "Chameleon", color: "#6366F1", icon: "diamond-outline", isPublic: false },
+  { id: "BTC", symbol: "pBTC", name: "Bitcoin", color: "#F7931A", icon: "logo-bitcoin", isPublic: false },
+  { id: "ETH", symbol: "pETH", name: "Ethereum", color: "#627EEA", icon: "logo-electron", isPublic: false },
+  { id: "USDT", symbol: "pUSDT", name: "Tether", color: "#26A17B", icon: "logo-usd", isPublic: false },
 ];
 
 export default function ReceiveScreen() {

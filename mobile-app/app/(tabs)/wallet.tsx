@@ -200,22 +200,18 @@ export default function WalletScreen() {
     );
   }
 
-  // Extract balance for display
-  const balanceNumber = formatBalance(publicBalance);
-  const pchmlBalanceNumber = formatBalance(pchmlBalance);
-
-  // Helper function to get token balance
+   // Helper function to get token balance - returns formatted string ready for display
   const getTokenBalance = (token: typeof TOKENS[0]): string => {
     if (token.isNative) {
-      return balanceLoading ? '...' : balanceNumber;
+      return balanceLoading ? '...' : formatDisplayBalance(publicBalance, 2);
     }
     if ((token as any).isPCHML) {
-      return pchmlBalanceNumber;
+      return formatDisplayBalance(pchmlBalance, 2);
     }
-    // pTokens from pdex
+    // pTokens from pdex - already formatted
     const pBalance = pTokenBalances[token.symbol];
-    return pBalance || '0';
-  };
+    return pBalance || '0.00';
+  }; 
 
   return (
     <LinearGradient
@@ -290,7 +286,7 @@ export default function WalletScreen() {
                     (token as any).isPCHML && { color: '#6366F1' },
                   ]}
                 >
-                  {formatDisplayBalance(getTokenBalance(token), 2)} {token.symbol}
+		{getTokenBalance(token)} {token.symbol}
                 </Text>
                 <Ionicons name="chevron-forward" size={16} color={THEME.colors.textMuted} />
               </View>
