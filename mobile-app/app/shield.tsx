@@ -249,13 +249,25 @@ export default function ShieldScreen() {
           console.error('[Shield] Failed to save bridge to history:', e);
         }
       } else {
-        // CHML - use privacy shield
-        privacyService.setApi(api);
-        const stealthMetaAddress = { spendPubkey: keyPair.publicKey, viewPubkey: keyPair.publicKey };
-        const outputStealthHash = generateStealthHash(stealthMetaAddress);
-        txHash = await privacyService.shield(keyPair, amountBN, outputStealthHash);
-        successMessage = "Tokens shielded successfully! Transaction: " + txHash.slice(0, 10) + "...";
-        
+        // CHML - use pdex.mintFromPublic to convert public CHML to pCHML
+        txHash = await new Promise<string>((resolve, reject) => {
+          api.tx.pdex.mintFromPublic(amountBN.toString())
+            .signAndSend(keyPair, ({ status, dispatchError, txHash: hash }: any) => {
+              if (status.isInBlock || status.isFinalized) {
+                if (dispatchError) {
+                  if (dispatchError.isModule) {
+                    const decoded = api.registry.findMetaError(dispatchError.asModule);
+                    reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
+                  } else {
+                    reject(new Error(dispatchError.toString()));
+                  }
+                } else {
+                  resolve(hash?.toHex() || status.asInBlock.toString());
+                }
+              }
+            }).catch(reject);
+        });
+        successMessage = "CHML shielded to pCHML! Transaction: " + txHash.slice(0, 10) + "...";
         // Save to transaction history
         try {
           await transactionHistoryService.saveTransaction(wallet.address, {
