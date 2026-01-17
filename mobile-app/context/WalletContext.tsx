@@ -12,6 +12,7 @@ import { privacyService, generateStealthMetaAddress, generateStealthHash } from 
 import { apiService } from '../services/api';
 import { pdexService } from '../services/pdex';
 import BN from 'bn.js';
+import { transactionHistoryService } from '../services/transactionHistory';
 
 interface WalletContextType {
   wallet: WalletState | null;
@@ -427,6 +428,65 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
     
     return unsubscribe;
+  }, [wallet?.address, refreshBalances]);
+
+  // Subscribe to incoming transfer events
+  useEffect(() => {
+    if (!wallet?.address) return;
+    
+    const api = apiService.getApi();
+    if (!api) return;
+    
+    let unsubscribe: (() => void) | null = null;
+    
+    const subscribeToEvents = async () => {
+      try {
+        unsubscribe = await api.query.system.events((events: any[]) => {
+          events.forEach((record: any) => {
+            const { event } = record;
+            
+            // Check for pdex.Transfer events
+            if (event.section === 'pdex' && event.method === 'Transfer') {
+              const [assetId, from, to, amount] = event.data;
+              const toAddress = to.toString();
+              const fromAddress = from.toString();
+              
+              // If this wallet is the recipient (incoming transfer)
+              if (toAddress === wallet.address && fromAddress !== wallet.address) {
+                const tokenSymbols: { [key: number]: string } = { 0: 'pCHML', 1: 'pETH', 2: 'pBTC', 3: 'pUSDT' };
+                const symbol = tokenSymbols[assetId.toNumber()] || `Token${assetId}`;
+                const amountStr = amount.toString();
+                
+                // Save incoming transfer to history
+                transactionHistoryService.saveTransaction(wallet.address, {
+                  hash: `incoming_${Date.now()}`,
+                  from: fromAddress,
+                  to: toAddress,
+                  amount: amountStr,
+                  formattedAmount: `Received ${symbol}`,
+                  status: 'finalized',
+                  usedMEVProtection: false,
+                  type: 'receive',
+                });
+                
+                // Refresh balances
+                refreshBalances();
+              }
+            }
+          });
+        }) as unknown as () => void;
+      } catch (error) {
+        console.error('[WalletContext] Error subscribing to events:', error);
+      }
+    };
+    
+    subscribeToEvents();
+    
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [wallet?.address, refreshBalances]);
 
   const clearError = useCallback(() => {

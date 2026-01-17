@@ -120,9 +120,17 @@ export default function SendScreen() {
       try {
         const api = apiService.getApi();
         if (!api) return;
-        // Note: tokenBalances query is (tokenId, address) - fixed parameter order
-        const balance = await api.query.pdex.tokenBalances(selectedToken.assetId, wallet.address) as any;
-        const balStr = balance.toString();
+        
+        let balStr = "0";
+        if ((selectedToken as any).isPublic) {
+          // Public CHML - get from system.account
+          const accountInfo = await api.query.system.account(wallet.address) as any;
+          balStr = accountInfo.data.free.toString();
+        } else {
+          // pTokens - query is (address, tokenId)
+          const balance = await api.query.pdex.tokenBalances(wallet.address, selectedToken.assetId) as any;
+          balStr = balance.toString();
+        }
         setTokenBalance(balStr);
       } catch (error) {
         console.error("[Send] Error fetching token balance:", error);
@@ -219,17 +227,18 @@ export default function SendScreen() {
   };
 
   const handleMaxAmount = () => {
-    if (!tokenBalance || tokenBalance === '0') return;
-    
+    if (!tokenBalance || tokenBalance === '0') {
+      console.log('[Send] MAX: No balance available', tokenBalance);
+      return;
+    }
     // Use selected token balance, subtract fee estimate if available
     let maxBN = new BN(tokenBalance);
-    
-    // Only subtract fee for native token (pCHML) since fees are paid in native token
-    if (selectedToken.assetId === 0 && feeEstimate?.partialFee) {
+    // Only subtract fee for public CHML since fees are paid in public CHML
+    if ((selectedToken as any).isPublic && feeEstimate?.partialFee) {
       const feeBN = new BN(feeEstimate.partialFee);
-      maxBN = maxBN.sub(feeBN);
+      // Add small buffer (2x fee) to ensure tx doesn't fail
+      maxBN = maxBN.sub(feeBN.muln(2));
     }
-    
     if (maxBN.gt(new BN(0))) {
       const formatted = formatBalance(maxBN);
       setAmount(formatted.replace(/,/g, ''));
@@ -471,14 +480,13 @@ export default function SendScreen() {
           <Ionicons name="chevron-back" size={24} color={THEME.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
-          {transferMode === 'checking' ? 'Transfer' : 
-           transferMode === 'private' ? 'Private Transfer' : 'Public Transfer'}
+          {(selectedToken as any).isPublic ? 'Public Transfer' : 'Private Transfer'}
         </Text>
         <View style={styles.privacyHeaderBadge}>
           <Ionicons 
-            name={transferMode === 'private' ? 'shield-checkmark' : 'eye'} 
-            size={16} 
-            color={transferMode === 'private' ? THEME.colors.success : THEME.colors.warning} 
+            name={(selectedToken as any).isPublic ? 'eye' : 'shield-checkmark'}
+            size={16}
+            color={(selectedToken as any).isPublic ? THEME.colors.warning : THEME.colors.success}
           />
         </View>
       </View>
@@ -489,21 +497,19 @@ export default function SendScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Transfer Mode Indicator */}
-        {transferMode !== 'checking' && (
-          <View style={styles.transferModeIndicator}>
-            <Ionicons 
-              name={transferMode === 'private' ? 'shield-checkmark' : 'eye'} 
-              size={14} 
-              color={transferMode === 'private' ? THEME.colors.success : THEME.colors.warning} 
-            />
-            <Text style={[
-              styles.transferModeText,
-              { color: transferMode === 'private' ? THEME.colors.success : THEME.colors.warning }
-            ]}>
-              {transferMode === 'private' ? 'Using private balance' : 'Using public balance'}
-            </Text>
-          </View>
-        )}
+        <View style={styles.transferModeIndicator}>
+          <Ionicons
+            name={(selectedToken as any).isPublic ? 'eye' : 'shield-checkmark'}
+            size={14}
+            color={(selectedToken as any).isPublic ? THEME.colors.warning : THEME.colors.success}
+          />
+          <Text style={[
+            styles.transferModeText,
+            { color: (selectedToken as any).isPublic ? THEME.colors.warning : THEME.colors.success }
+          ]}>
+            {(selectedToken as any).isPublic ? 'Using public balance' : 'Using shielded balance'}
+          </Text>
+        </View>
 
         {/* Recipient Input */}
         <View style={styles.inputSection}>

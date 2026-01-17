@@ -131,11 +131,45 @@ export default function PowerScreen() {
     setIsLoadingLP(true);
     try {
       // Mock LP rewards for now - will connect to emissions pallet
-      // In production: const rewards = await api.query.emissions.pendingLpRewards(wallet.address);
       setLpRewards('0.0000');
       
-      // Mock empty positions for now - will query pDEX pallet
-      setLpPositions([]);
+      // Query LP positions from all pools
+      const positions: LPPosition[] = [];
+      const poolCount = await api.query.pdex.poolCount();
+      const numPools = parseInt(poolCount.toString());
+      
+      for (let poolId = 0; poolId < numPools; poolId++) {
+        try {
+          // Query user's LP tokens for this pool - parameter order is (address, poolId)
+          const lpBalance = await (api.query.pdex as any).userLPTokens(wallet.address, poolId);
+          const lpBalanceStr = lpBalance.toString();
+          
+          if (lpBalanceStr !== '0') {
+            // Get pool info
+            const poolData = await api.query.pdex.pools(poolId);
+            const pool = poolData.toJSON() as any;
+            
+            if (pool) {
+              const tokenSymbols: { [key: number]: string } = { 0: 'pCHML', 1: 'pETH', 2: 'pBTC', 3: 'pUSDT' };
+              const symbolA = tokenSymbols[pool.assetA] || `Token${pool.assetA}`;
+              const symbolB = tokenSymbols[pool.assetB] || `Token${pool.assetB}`;
+              
+              positions.push({
+                poolId,
+                poolName: `${symbolA}/${symbolB}`,
+                tokenA: symbolA,
+                tokenB: symbolB,
+                liquidity: lpBalanceStr,
+                sharePercent: '0',
+              });  
+            }
+          }
+        } catch (e) {
+          console.error(`Error loading LP for pool ${poolId}:`, e);
+        }
+      }
+      
+      setLpPositions(positions);
     } catch (error) {
       console.error('Error loading LP data:', error);
     } finally {

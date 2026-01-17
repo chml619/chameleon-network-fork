@@ -36,7 +36,7 @@ type TabType = 'swap' | 'liquidity';
 export default function TradeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { wallet } = useWallet();
+  const { wallet, refreshBalances, refreshPCHMLBalance } = useWallet();
   const { api } = useApi();
   const {
     tokens,
@@ -144,7 +144,10 @@ export default function TradeScreen() {
               
               if (success) {
                 Alert.alert('Success', 'Swap completed successfully!');
-              } else {
+                // Refresh all balances
+                refreshBalances();
+                refreshPCHMLBalance(); 
+	      } else {
                 Alert.alert('Error', result?.error || 'Swap failed');
               }
             } catch (error) {
@@ -160,8 +163,8 @@ export default function TradeScreen() {
                   from: wallet.address,
                   to: wallet.address,
                   amount: amountIn,
-                  formattedAmount: success 
-                    ? `${amountIn} ${selectedTokenIn.symbol} → ${result?.amountOut || quote.amountOut} ${selectedTokenOut.symbol}`
+                  formattedAmount: success
+		    ? `${amountIn} ${selectedTokenIn.symbol} → ${result?.amountOut || quote.amountOut}`
                     : `Failed: ${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
                   status: success ? 'finalized' : 'failed',
                   usedMEVProtection: mevProtection,

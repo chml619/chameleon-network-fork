@@ -151,16 +151,14 @@ class PoolService {
       
       const lpBalance = await this.getUserLPBalance(api, poolId, address);
       if (lpBalance === '0') return null;
-      
-      const totalLp = parseFloat(pool.totalLpTokens) || 1;
+      const totalLp = this.parseChainAmount(pool.totalLpTokens) || 1;
       const userLp = parseFloat(lpBalance);
-      const sharePercent = (userLp / totalLp) * 100;
-      
+      const sharePercent = parseFloat(((userLp / totalLp) * 100).toFixed(6));
       // Calculate user's share of reserves
       const reserveA = this.parseChainAmount(pool.reserveA);
       const reserveB = this.parseChainAmount(pool.reserveB);
-      const valueA = ((userLp / totalLp) * reserveA).toString();
-      const valueB = ((userLp / totalLp) * reserveB).toString();
+      const valueA = Math.floor((userLp / totalLp) * reserveA).toString();
+      const valueB = Math.floor((userLp / totalLp) * reserveB).toString();
       
       return {
         poolId,
