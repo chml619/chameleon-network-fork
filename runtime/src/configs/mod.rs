@@ -200,7 +200,6 @@ impl frame_support::traits::Get<AccountId> for TreasuryAccount {
         ])
     }
 }
-
 parameter_types! {
 
     
@@ -213,8 +212,8 @@ parameter_types! {
     pub const MinimumDeposit: Balance = 1_000_000_000_000; // 1 CHML
     pub const MaximumWithdrawal: Balance = 1_000_000_000_000_000_000; // 1000 CHML
     // Bridge fees
-    pub const MinShieldFee: Balance = 100_000_000_000_000_000; // 0.1 CHML
-    pub const MinUnshieldFee: Balance = 250_000_000_000_000_000; // 0.25 CHML
+    pub const MinShieldFee: Balance = 100_000_000_000; // 0.1 CHML
+    pub const MinUnshieldFee: Balance = 250_000_000_000; // 0.25 CHML
     pub const ShieldFeePercent: Permill = Permill::from_parts(200); // 0.02%
     pub const UnshieldFeePercent: Permill = Permill::from_parts(500); // 0.05%
     pub const MaxValidators: u32 = 10;

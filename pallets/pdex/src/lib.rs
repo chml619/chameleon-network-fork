@@ -462,19 +462,35 @@ pub mod pallet {
                     let minimum_liquidity: u128 = T::MinimumLiquidity::get().into();
                     ensure!(sqrt_product > minimum_liquidity, Error::<T>::InsufficientLiquidity);
                     T::Balance::from(sqrt_product - minimum_liquidity)
+
                 } else {
-                    // Proportional minting: min(a * total / reserve_a, b * total / reserve_b)
-                    let lp_a: u128 = amount_a.into()
+                    // For existing pools, verify amounts match pool ratio (within 0.5% tolerance)
+                    let reserve_a: u128 = pool.reserve_a.into();
+                    let reserve_b: u128 = pool.reserve_b.into();
+                    let input_a: u128 = amount_a.into();
+                    let input_b: u128 = amount_b.into();
+                    
+                    // Calculate expected amount_b based on amount_a and pool ratio
+                    let expected_b = input_a
+                        .checked_mul(reserve_b)
+                        .ok_or(Error::<T>::Overflow)?
+                        .checked_div(reserve_a)
+                        .ok_or(Error::<T>::Overflow)?;
+                    
+                    // Check tolerance (0.5% = 1/200)
+                    let tolerance = expected_b / 200;
+                    let min_b = expected_b.saturating_sub(tolerance);
+                    let max_b = expected_b.saturating_add(tolerance);
+                    ensure!(input_b >= min_b && input_b <= max_b, Error::<T>::InvalidAmounts);
+                    
+                    // Calculate LP tokens
+                    let lp_tokens: u128 = input_a
                         .checked_mul(pool.total_lp_tokens.into())
                         .ok_or(Error::<T>::Overflow)?
-                        .checked_div(pool.reserve_a.into())
+                        .checked_div(reserve_a)
                         .ok_or(Error::<T>::Overflow)?;
-                    let lp_b: u128 = amount_b.into()
-                        .checked_mul(pool.total_lp_tokens.into())
-                        .ok_or(Error::<T>::Overflow)?
-                        .checked_div(pool.reserve_b.into())
-                        .ok_or(Error::<T>::Overflow)?;
-                    T::Balance::from(lp_a.min(lp_b))
+                    
+                    T::Balance::from(lp_tokens)
                 };
 
                 // Check slippage

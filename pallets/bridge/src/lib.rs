@@ -504,9 +504,9 @@ pub mod pallet {
                 let token_id = deposit.asset.to_token_id().into();
                 pallet_pdex::Pallet::<T>::do_mint(token_id, &deposit.destination, <T as pallet_pdex::Config>::Balance::from(net_amount.into()))?;
                 
-                // Mint fee to treasury (30%) - custodians get 70% off-chain
+                // Mint fee to treasury (100% - no custodians in devnet)
                 let treasury = <T as pallet::Config>::TreasuryAccount::get();
-                let treasury_share = fee.saturating_mul(30u32.into()) / 100u32.into();
+                let treasury_share = fee; // 100% to Treasury (v2.0)
                 let _treasury_imbalance = T::Currency::deposit_creating(&treasury, treasury_share);
                 
                 // Update total bridged in
@@ -570,14 +570,14 @@ pub mod pallet {
             let fee = if percent_fee > min_fee { percent_fee } else { min_fee };
             let _net_amount = amount.saturating_sub(fee);
             
-            // Transfer fee to treasury (30%) - custodians get 70% off-chain
+            // Transfer fee to treasury (100% - no custodians in devnet)
             let treasury = <T as pallet::Config>::TreasuryAccount::get();
-            let treasury_share = fee.saturating_mul(30u32.into()) / 100u32.into();
+            let treasury_share = fee; // 100% to Treasury (v2.0)
             // Burn pToken via pDEX (instead of native CHML)
             let token_id = asset.to_token_id().into();
             pallet_pdex::Pallet::<T>::do_burn(token_id, &who, <T as pallet_pdex::Config>::Balance::from(amount.into()))?;
             
-            // Mint treasury share as pToken (30% of fee)
+            // Mint treasury share as pToken (100% of fee)
             pallet_pdex::Pallet::<T>::do_mint(token_id, &treasury, <T as pallet_pdex::Config>::Balance::from(treasury_share.into()))?;
 
             let current_block = frame_system::Pallet::<T>::block_number();
