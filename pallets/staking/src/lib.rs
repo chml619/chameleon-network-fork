@@ -371,6 +371,10 @@ pub mod pallet {
             Stakers::<T>::mutate(&who, |stake_info| {
                 stake_info.amount = stake_info.amount.saturating_add(amount);
                 stake_info.last_claim_block = frame_system::Pallet::<T>::block_number();
+                // Auto-transition to Waiting when minimum stake is met
+                if stake_info.status == NodeStatus::Registered && stake_info.amount >= T::MinimumStake::get() {
+                    stake_info.status = NodeStatus::Waiting;
+                }
             });
             
             // Update total staked
@@ -765,21 +769,30 @@ pub mod pallet {
 impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
     fn new_session(new_index: u32) -> Option<Vec<T::AccountId>> {
         log::info!("[Staking] New session {} starting", new_index);
-        
-        // Collect all active validators (those with Active status and minimum stake)
+        // Collect eligible validators (Active or Waiting with minimum stake)
         let min_stake = T::MinimumStake::get();
         let validators: Vec<T::AccountId> = Stakers::<T>::iter()
             .filter(|(_, info)| {
-                info.status == NodeStatus::Active && info.amount >= min_stake
+                (info.status == NodeStatus::Active || info.status == NodeStatus::Waiting) 
+                    && info.amount >= min_stake
             })
             .map(|(account, _)| account)
             .collect();
-        
+
+        // Transition selected Waiting validators to Active
+        for validator in &validators {
+            Stakers::<T>::mutate(validator, |info| {
+                if info.status == NodeStatus::Waiting {
+                    info.status = NodeStatus::Active;
+                    log::info!("[Staking] Validator {:?} promoted to Active", validator);
+                }
+            });
+        }
+
         if validators.is_empty() {
             log::warn!("[Staking] No active validators, keeping previous set");
             return None;
         }
-        
         log::info!("[Staking] Returning {} validators for session {}", validators.len(), new_index);
         Some(validators)
     }
