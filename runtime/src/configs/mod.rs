@@ -26,7 +26,11 @@
 // Substrate and Polkadot dependencies
 use frame_support::{
 	derive_impl, parameter_types,
-	traits::{ConstBool, ConstU128, ConstU32, ConstU64, ConstU8, VariantCountOf},
+    traits::{
+            ConstBool, ConstU128, ConstU32, ConstU64, ConstU8, VariantCountOf,
+            fungible::Balanced,
+            tokens::imbalance::ResolveTo,
+    },    
 	weights::{
 		constants::{RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND},
 		IdentityFee, Weight,
@@ -137,16 +141,24 @@ impl pallet_balances::Config for Runtime {
 	type DoneSlashHandler = ();
 }
 
+/// Flat fee of 0.1 CHML per transaction
+pub struct FlatFee;
+impl frame_support::weights::WeightToFee for FlatFee {
+    type Balance = Balance;
+    fn weight_to_fee(_weight: &frame_support::weights::Weight) -> Self::Balance {
+        100_000_000_000 // 0.1 CHML (12 decimals)
+    }
+}
 parameter_types! {
 	pub FeeMultiplier: Multiplier = Multiplier::one();
 }
 
 impl pallet_transaction_payment::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type OnChargeTransaction = FungibleAdapter<Balances, ()>;
+    type OnChargeTransaction = FungibleAdapter<Balances, ResolveTo<TreasuryAccount, Balances>>;
 	type OperationalFeeMultiplier = ConstU8<5>;
-	type WeightToFee = IdentityFee<Balance>;
-	type LengthToFee = IdentityFee<Balance>;
+    type WeightToFee = FlatFee;
+    type LengthToFee = frame_support::weights::ConstantMultiplier<Balance, ConstU128<0>>;
 	type FeeMultiplierUpdate = ConstFeeMultiplier<FeeMultiplier>;
 	type WeightInfo = pallet_transaction_payment::weights::SubstrateWeight<Runtime>;
 }
@@ -192,6 +204,17 @@ pub struct TreasuryAccount;
 impl frame_support::traits::Get<AccountId> for TreasuryAccount {
     fn get() -> AccountId {
         // Eve well-known dev account
+        AccountId::from([
+            0x8e, 0xaf, 0x04, 0x15, 0x16, 0x87, 0x73, 0x63,
+            0x26, 0xc9, 0xfe, 0xa1, 0x7e, 0x25, 0xfc, 0x52,
+            0x87, 0x61, 0x36, 0x93, 0xc9, 0x12, 0x90, 0x9c,
+            0xb2, 0x26, 0xaa, 0x47, 0x94, 0xf2, 0x6a, 0x48
+        ])
+    }
+}
+impl frame_support::traits::TypedGet for TreasuryAccount {
+    type Type = AccountId;
+    fn get() -> Self::Type {
         AccountId::from([
             0x8e, 0xaf, 0x04, 0x15, 0x16, 0x87, 0x73, 0x63,
             0x26, 0xc9, 0xfe, 0xa1, 0x7e, 0x25, 0xfc, 0x52,
