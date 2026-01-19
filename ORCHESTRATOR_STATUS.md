@@ -22,8 +22,8 @@
 - ✅ **Devnet Redeployed:** Fresh chain with all fixes
 
 **Deferred to Hardening:**
-- ⏳ Gas fees to Treasury (SDK type mismatch - requires new fungible::Imbalance implementation)
-- ⏳ Flat 0.1 CHML gas fee (currently weight-based)
+- ✅ Gas fees to Treasury (100% to Treasury via ResolveTo)
+- ✅ Flat 0.1 CHML gas fee (FlatFee struct replacing IdentityFee)
 
 **Week 12 Status:** ✅ MOBILE APP COMPLETE - ALL 13 PHASES DONE
 
@@ -68,7 +68,7 @@
 | MinShieldFee | 100,000,000,000,000,000 (100K CHML) | 100,000,000,000 (0.1 CHML) | ✅ Deployed |
 | MinUnshieldFee | 250,000,000,000,000,000 (250K CHML) | 250,000,000,000 (0.25 CHML) | ✅ Deployed |
 | add_liquidity proportional | Accepted imbalanced deposits | Enforces 0.5% tolerance | ✅ Deployed |
-| Gas fees to Treasury | Burned (dropped) | 100% Treasury | ⏳ Deferred |
+| Gas fees to Treasury | Burned (dropped) | 100% Treasury | ✅ Deployed |
 
 **Commit:** `0c70336a` - "Fix: bridge fees 100% treasury, min fee decimals, add_liquidity proportional deposits"
 
@@ -120,7 +120,7 @@
 **Blockchain Hardening:**
 | Item | Description | Priority |
 |------|-------------|----------|
-| Gas fees to Treasury | Implement `OnUnbalanced` for new `fungible::Imbalance` type | High |
+| Gas fees to Treasury | ✅ COMPLETE - ResolveTo + TypedGet | Done |
 | Flat gas fee | Custom SignedExtension for 0.1 CHML per tx | Medium |
 | Edge case testing | Zero amounts, dust amounts, overflow scenarios | High |
 | Error handling | Graceful failures, meaningful error messages | Medium |
@@ -341,8 +341,8 @@ curl -H "Content-Type: application/json" \
 - [ ] Report results for Week 14 planning
 
 ### Week 14 (Hardening)
-- [ ] Gas fees to Treasury implementation
-- [ ] Flat 0.1 CHML gas fee
+- [x] Gas fees to Treasury implementation
+- [x] Flat 0.1 CHML gas fee
 - [ ] Multi-validator stress testing
 - [ ] Security audit prep
 - [ ] Documentation finalization
@@ -365,7 +365,7 @@ curl -H "Content-Type: application/json" \
 
 | Item | Description | Priority | Target |
 |------|-------------|----------|--------|
-| Gas fees to Treasury | 100% gas → Treasury (currently burned) | High | Week 14 |
+| Gas fees to Treasury | 100% gas → Treasury | ✅ Done | Week 14 |
 | Flat gas fee | 0.1 CHML per tx (currently weight-based) | Medium | Week 14 |
 | pCHML gas payment | Pay gas with pCHML instead of public CHML | Low | Future |
 
