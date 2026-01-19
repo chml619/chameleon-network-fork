@@ -22,6 +22,7 @@ scale-info = { features = ["derive"], workspace = true }
 sp-runtime = { workspace = true, default-features = false }
 sp-std = { workspace = true, default-features = false }
 pallet-pdex = { path = "../pdex", default-features = false }
+pallet-session.workspace = true
 
 [dev-dependencies]
 sp-core = { default-features = true, workspace = true }
@@ -41,6 +42,7 @@ std = [
     "sp-runtime/std",
     "sp-std/std",
     "pallet-pdex/std",
+    "pallet-session/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking/runtime-benchmarks",

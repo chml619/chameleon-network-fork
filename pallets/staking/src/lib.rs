@@ -30,6 +30,8 @@
 
 // Re-export pallet items so that they can be accessed from the crate namespace.
 pub use pallet::*;
+use frame_support::traits::Get;
+use sp_std::vec::Vec;
 
 // FRAME pallets require their own "mock runtimes" to be able to run unit tests.
 #[cfg(test)]
@@ -748,5 +750,45 @@ pub mod pallet {
         pub fn get_reward_pool_balance() -> BalanceOf<T> {
             RewardPool::<T>::get()
         }
+    }
+
+    /// Converts AccountId to ValidatorId (same type for us)
+    pub struct StashOf<T>(sp_std::marker::PhantomData<T>);
+    impl<T: Config> sp_runtime::traits::Convert<T::AccountId, Option<T::AccountId>> for StashOf<T> {
+        fn convert(account: T::AccountId) -> Option<T::AccountId> {
+            Some(account)
+        }
+    }
+}
+
+/// SessionManager implementation for dynamic validator rotation
+impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
+    fn new_session(new_index: u32) -> Option<Vec<T::AccountId>> {
+        log::info!("[Staking] New session {} starting", new_index);
+        
+        // Collect all active validators (those with Active status and minimum stake)
+        let min_stake = T::MinimumStake::get();
+        let validators: Vec<T::AccountId> = Stakers::<T>::iter()
+            .filter(|(_, info)| {
+                info.status == NodeStatus::Active && info.amount >= min_stake
+            })
+            .map(|(account, _)| account)
+            .collect();
+        
+        if validators.is_empty() {
+            log::warn!("[Staking] No active validators, keeping previous set");
+            return None;
+        }
+        
+        log::info!("[Staking] Returning {} validators for session {}", validators.len(), new_index);
+        Some(validators)
+    }
+
+    fn start_session(start_index: u32) {
+        log::info!("[Staking] Session {} started", start_index);
+    }
+
+    fn end_session(end_index: u32) {
+        log::info!("[Staking] Session {} ended", end_index);
     }
 }

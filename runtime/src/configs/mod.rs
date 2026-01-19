@@ -39,14 +39,15 @@ use frame_support::{
 use frame_system::limits::{BlockLength, BlockWeights};
 use pallet_transaction_payment::{ConstFeeMultiplier, FungibleAdapter, Multiplier};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_runtime::{traits::One, Perbill};
+use sp_runtime::{traits::{One, OpaqueKeys}, Perbill, impl_opaque_keys};
+use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
 
 // Local module imports
 use super::{
 	AccountId, Aura, Balance, Balances, Block, BlockNumber, Hash, Nonce, PalletInfo, Runtime,
 	RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask,
-	System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION, UNIT,
+	System, Grandpa, Staking, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION, UNIT,
 };
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
@@ -111,7 +112,29 @@ impl pallet_grandpa::Config for Runtime {
 	type MaxSetIdSessionEntries = ConstU64<0>;
 
 	type KeyOwnerProof = sp_core::Void;
-	type EquivocationReportSystem = ();
+        type EquivocationReportSystem = ();
+}
+
+// Session keys for validators
+impl_opaque_keys! {
+    pub struct SessionKeys {
+        pub aura: Aura,
+        pub grandpa: Grandpa,
+    }
+}
+
+/// Session pallet configuration
+impl pallet_session::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type ValidatorId = AccountId;
+    type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
+    type ShouldEndSession = pallet_session::PeriodicSessions<ConstU32<50>, ConstU32<0>>;
+    type NextSessionRotation = pallet_session::PeriodicSessions<ConstU32<50>, ConstU32<0>>;
+    type SessionManager = Staking;
+    type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+    type Keys = SessionKeys;
+    type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
+    type DisablingStrategy = ();
 }
 
 impl pallet_timestamp::Config for Runtime {

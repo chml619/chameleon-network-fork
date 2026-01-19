@@ -231,8 +231,10 @@ mod runtime {
         #[runtime::pallet_index(8)]
         pub type MevProtection = pallet_mev_protection;
 
-        #[runtime::pallet_index(9)]
+                #[runtime::pallet_index(9)]
         pub type Emissions = pallet_emissions;
+        #[runtime::pallet_index(10)]
+        pub type Session = pallet_session;
 
 
         #[runtime::pallet_index(11)]
