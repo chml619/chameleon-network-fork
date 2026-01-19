@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{AccountId, BalancesConfig, RuntimeGenesisConfig, SudoConfig, PdexConfig};
+use crate::{AccountId, BalancesConfig, RuntimeGenesisConfig, SudoConfig, PdexConfig, SessionConfig, SessionKeys};
 use alloc::{vec, vec::Vec};
 use frame_support::build_struct_json_patch;
 use serde_json::Value;
@@ -92,6 +92,12 @@ fn testnet_genesis(
                         authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>(),
                 },
                 sudo: SudoConfig { key: Some(root) },
+                session: SessionConfig {
+                        keys: initial_authorities.iter().map(|x| {
+                                let account = AccountId::from(<[u8; 32]>::try_from(x.0.as_ref() as &[u8]).unwrap());
+                                (account.clone(), account, SessionKeys { aura: x.0.clone(), grandpa: x.1.clone() })
+                        }).collect(),
+                },
                 pdex: PdexConfig {
                         token_balances: pdex_token_balances,
                 },
