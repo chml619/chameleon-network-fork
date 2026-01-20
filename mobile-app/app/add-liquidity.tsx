@@ -238,7 +238,7 @@ export default function AddLiquidityScreen() {
           to: 'pool',
           amount: `${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`,
           formattedAmount: success 
-            ? `Added: ${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`
+            ? `${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`
             : `Failed: ${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)}`,
           status: success ? 'finalized' : 'failed',
           usedMEVProtection: false,

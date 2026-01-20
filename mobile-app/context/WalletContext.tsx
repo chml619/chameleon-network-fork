@@ -12,6 +12,7 @@ import { privacyService, generateStealthMetaAddress, generateStealthHash } from 
 import { apiService } from '../services/api';
 import { pdexService } from '../services/pdex';
 import BN from 'bn.js';
+import { formatBalance } from '../utils/balance';
 import { transactionHistoryService } from '../services/transactionHistory';
 
 interface WalletContextType {
@@ -463,7 +464,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
                   from: fromAddress,
                   to: toAddress,
                   amount: amountStr,
-                  formattedAmount: `Received ${symbol}`,
+                  formattedAmount: `${formatBalance(new BN(amountStr))} ${symbol}`,
                   status: 'finalized',
                   usedMEVProtection: false,
                   type: 'receive',

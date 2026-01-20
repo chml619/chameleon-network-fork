@@ -244,6 +244,7 @@ export default function ShieldScreen() {
             formattedAmount: `Bridge ${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`,
             status: 'pending',
             usedMEVProtection: false,
+            type: 'shield',
           });
         } catch (e) {
           console.error('[Shield] Failed to save bridge to history:', e);
@@ -279,6 +280,7 @@ export default function ShieldScreen() {
             status: 'finalized',
             usedMEVProtection: false,
           });
+            type: 'shield',
         } catch (e) {
           console.error('[Shield] Failed to save to history:', e);
         }

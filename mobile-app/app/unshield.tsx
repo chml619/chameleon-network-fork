@@ -319,7 +319,7 @@ export default function UnshieldScreen() {
           : `${amount} ${selectedToken.symbol} → ${amount} ${selectedToken.outputSymbol}`,
         status: success ? 'finalized' : 'pending',
         usedMEVProtection: false,
-        type: selectedToken.requiresBridge ? 'send' : 'unshield',
+        type: 'unshield',
       });
 
       Alert.alert(
