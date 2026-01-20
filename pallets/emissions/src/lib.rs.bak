@@ -511,40 +511,15 @@ pub mod pallet {
                 "[EMISSIONS] LP rewards distribution: {:?} total to distribute",
                 total_lp_share
             );
+
             if total_lp_share.is_zero() {
-                return;
-            }
-
-            let total_share: u128 = total_lp_share.saturated_into();
-
-            // SPLIT: 40% two-sided LP, 60% single-sided
-            let two_sided_share: u128 = total_share.saturating_mul(40) / 100;
-            let single_sided_share: u128 = total_share.saturating_sub(two_sided_share);
-
-            log::info!(
-                "[EMISSIONS] LP split - Two-sided: {:?}, Single-sided: {:?}",
-                two_sided_share, single_sided_share
-            );
-
-            // ========== TWO-SIDED LP DISTRIBUTION (40%) ==========
-            Self::distribute_two_sided_rewards(two_sided_share);
-
-            // ========== SINGLE-SIDED DISTRIBUTION (60%) ==========
-            Self::distribute_single_sided_rewards(single_sided_share);
-
-            log::info!("[EMISSIONS] LP rewards distribution complete");
-        }
-
-        /// Distribute rewards to two-sided LP providers (40% of LP pool)
-        fn distribute_two_sided_rewards(two_sided_share: u128) {
-            if two_sided_share == 0 {
                 return;
             }
 
             // Get pool count from pDEX
             let pool_count = pallet_pdex::PoolCount::<T>::get();
             if pool_count == 0 {
-                log::info!("[EMISSIONS] No pools, skipping two-sided LP distribution");
+                log::info!("[EMISSIONS] No pools, skipping LP distribution");
                 return;
             }
 
@@ -556,6 +531,7 @@ pub mod pallet {
                 if let Some(pool) = pallet_pdex::Pools::<T>::get(pool_id) {
                     let total_lp: u128 = pool.total_lp_tokens.saturated_into();
                     let apy = PoolAPY::<T>::get(pool_id).unwrap_or_default();
+                    
                     if total_lp > 0 && !apy.is_zero() {
                         let weighted = apy.mul_floor(total_lp);
                         total_weighted = total_weighted.saturating_add(weighted);
@@ -565,9 +541,11 @@ pub mod pallet {
             }
 
             if total_weighted == 0 || pools_info.is_empty() {
-                log::info!("[EMISSIONS] No active pools with APY, skipping two-sided distribution");
+                log::info!("[EMISSIONS] No active pools with APY, skipping LP distribution");
                 return;
             }
+
+            let total_share: u128 = total_lp_share.saturated_into();
 
             // Iterate all LP token holders and distribute rewards
             for (account, pool_id, lp_balance) in pallet_pdex::UserLPTokens::<T>::iter() {
@@ -576,14 +554,17 @@ pub mod pallet {
                     continue;
                 }
 
+                // Find pool info for this pool_id
                 if let Some((_, pool_total_lp, apy)) = pools_info.iter().find(|(pid, _, _)| *pid == pool_id) {
                     if *pool_total_lp == 0 {
                         continue;
                     }
 
+                    // Calculate user's share:
+                    // user_share = total_share * apy.mul_floor(lp_amount) / total_weighted
                     let user_weighted = apy.mul_floor(lp_amount);
                     let user_share = user_weighted
-                        .saturating_mul(two_sided_share)
+                        .saturating_mul(total_share)
                         .checked_div(total_weighted)
                         .unwrap_or(0);
 
@@ -593,86 +574,25 @@ pub mod pallet {
                             let current = maybe_rewards.unwrap_or_default();
                             *maybe_rewards = Some(current.saturating_add(reward));
                         });
+                        
                         log::info!(
-                            "[EMISSIONS] Two-sided LP reward {:?} to {:?} for pool {}",
-                            reward, account, pool_id
+                            "[EMISSIONS] LP reward {:?} to {:?} for pool {}",
+                            reward,
+                            account,
+                            pool_id
                         );
                     }
                 }
             }
-            log::info!("[EMISSIONS] Two-sided LP rewards distributed across {} pools", pools_info.len());
+
+            log::info!("[EMISSIONS] LP rewards distributed across {} pools", pools_info.len());
         }
 
-        /// Distribute rewards to single-sided liquidity providers (60% of LP pool)
-        /// Split by tier: NoLock 8%, 6mo 12%, 12mo 15%, 24mo 25% (of the 60%)
-        fn distribute_single_sided_rewards(single_sided_share: u128) {
-            use pallet_pdex::LockTier;
-
-            if single_sided_share == 0 {
-                return;
-            }
-
-            // Tier percentages (of the 60% single-sided pool)
-            // NoLock: 8/60, 6mo: 12/60, 12mo: 15/60, 24mo: 25/60
-            let tier_percentages: [(LockTier, u128); 4] = [
-                (LockTier::NoLock, 8),
-                (LockTier::SixMonths, 12),
-                (LockTier::TwelveMonths, 15),
-                (LockTier::TwentyFourMonths, 25),
-            ];
-
-            // Calculate total for each tier across all tokens
-            for (tier, tier_percent) in tier_percentages.iter() {
-                let tier_pool = single_sided_share.saturating_mul(*tier_percent) / 60;
-                if tier_pool == 0 {
-                    continue;
-                }
-
-                // Get total staked in this tier across all tokens
-                let mut tier_total: u128 = 0;
-                for token_id in 0u32..4u32 { // pCHML=0, pBTC=1, pETH=2, pUSDT=3
-                    let token_asset: <T as pallet_pdex::Config>::AssetId = token_id.into();
-                    let amount: u128 = pallet_pdex::TotalSingleSided::<T>::get(token_asset, *tier).saturated_into();
-                    tier_total = tier_total.saturating_add(amount);
-                }
-
-                if tier_total == 0 {
-                    log::info!("[EMISSIONS] No single-sided deposits in tier {:?}", tier);
-                    continue;
-                }
-
-                // Distribute to each position in this tier
-                for (position_id, mut position) in pallet_pdex::SingleSidedPositions::<T>::iter() {
-                    if position.lock_tier != *tier {
-                        continue;
-                    }
-
-                    let position_amount: u128 = position.amount.saturated_into();
-                    if position_amount == 0 {
-                        continue;
-                    }
-
-                    // Calculate proportional reward
-                    let position_reward = position_amount
-                        .saturating_mul(tier_pool)
-                        .checked_div(tier_total)
-                        .unwrap_or(0);
-
-                    if position_reward > 0 {
-                        // Accumulate rewards in position
-                        let reward_balance: <T as pallet_pdex::Config>::Balance = position_reward.into();
-                        position.rewards_accumulated = position.rewards_accumulated.saturating_add(reward_balance);
-                        position.last_reward_block = frame_system::Pallet::<T>::block_number();
-                        pallet_pdex::SingleSidedPositions::<T>::insert(position_id, &position);
-
-                        log::info!(
-                            "[EMISSIONS] Single-sided reward {:?} to position {} (tier {:?})",
-                            position_reward, position_id, tier
-                        );
-                    }
-                }
-            }
-            log::info!("[EMISSIONS] Single-sided rewards distributed");
+        /// Initialize the pallet with the initial emission rate.
+        pub fn initialize() {
+            // Emission rate is now calculated dynamically based on block number
+            // No need to store a static rate
+            log::info!("[EMISSIONS] Pallet initialized with dynamic emission calculation");
         }
     }
 
