@@ -65,7 +65,7 @@ curl -H "Content-Type: application/json" \
 git clone https://github.com/anthropics/chameleon-network.git
 cd chameleon-network/node-template
 cargo build --release
-./target/release/solochain-template-node --dev
+./target/release/chameleon-node-devnet --dev
 ```
 
 ### Mobile App Development

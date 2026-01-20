@@ -245,7 +245,7 @@
 | Bob (NYC) | P2P | `/ip4/104.131.167.75/tcp/30333` | ✅ Active |
 
 ### Binary Info
-- **Binary:** solochain-template-node v0.1.0
+- **Binary:** chameleon-node-devnet v0.1.0
 - **Commit:** 0c70336a
 - **Build:** Jan 18, 2026
 

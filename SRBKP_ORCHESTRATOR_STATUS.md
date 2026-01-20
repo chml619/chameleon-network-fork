@@ -165,7 +165,7 @@
 | Bob (NYC) | P2P | `/ip4/104.131.167.75/tcp/30333` | ✅ Active |
 
 ### Binary Info
-- **Binary:** solochain-template-node v0.1.0
+- **Binary:** chameleon-node-devnet v0.1.0
 - **Commit:** cf8dcbcd
 - **Build:** Jan 2, 2026
 
@@ -563,7 +563,7 @@ After extensive troubleshooting of Cargo.lock dependency conflicts (sc-network-t
 
 **Devnet Deployment:**
 - **Endpoint:** ws://64.23.233.36:9944
-- **Binary:** solochain-template-node v0.1.0
+- **Binary:** chameleon-node-devnet v0.1.0
 - **Block Production:** ✅ Active (~6 sec blocks)
 - **Commit:** 72c6a14
 

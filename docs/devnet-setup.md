@@ -98,7 +98,7 @@ cd chameleon-network/node-template
 cargo build --release
 
 # Verify build
-./target/release/solochain-template-node --version
+./target/release/chameleon-node-devnet --version
 ```
 
 ### Build on Remote Server (Contabo)
@@ -111,13 +111,13 @@ See `/scripts/BUILD_ON_CONTABO.md` for detailed instructions on building on the 
 
 ```bash
 # Quick start for local development
-./target/release/solochain-template-node --dev
+./target/release/chameleon-node-devnet --dev
 ```
 
 ### Production Mode (External Access)
 
 ```bash
-./target/release/solochain-template-node \
+./target/release/chameleon-node-devnet \
   --dev \
   --rpc-external \
   --rpc-cors all \
@@ -127,7 +127,7 @@ See `/scripts/BUILD_ON_CONTABO.md` for detailed instructions on building on the 
 ### With Custom Chain Spec
 
 ```bash
-./target/release/solochain-template-node \
+./target/release/chameleon-node-devnet \
   --chain chameleon-devnet \
   --rpc-external \
   --rpc-cors all

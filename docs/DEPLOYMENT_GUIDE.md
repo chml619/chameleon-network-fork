@@ -91,17 +91,17 @@ cd chameleon-network/node-template
 cargo build --release
 
 # Binary location
-./target/release/solochain-template-node --version
+./target/release/chameleon-node-devnet --version
 ```
 
 ### Running the Node
 
 ```bash
 # Development mode (local testing)
-./target/release/solochain-template-node --dev
+./target/release/chameleon-node-devnet --dev
 
 # Production mode with external RPC
-./target/release/solochain-template-node \
+./target/release/chameleon-node-devnet \
   --dev \
   --rpc-external \
   --rpc-cors all \
@@ -136,7 +136,7 @@ mevProtection.cancelProtectedTx(tx_hash)
 **Solutions**:
 ```bash
 # Check if node is running
-ps aux | grep solochain-template-node
+ps aux | grep chameleon-node-devnet
 
 # Check if port is listening
 ss -tlnp | grep 9944
@@ -156,7 +156,7 @@ ufw allow 9944/tcp
 journalctl -u chameleon-node -f
 
 # Verify binary permissions
-chmod +x ./target/release/solochain-template-node
+chmod +x ./target/release/chameleon-node-devnet
 
 # Check disk space
 df -h
