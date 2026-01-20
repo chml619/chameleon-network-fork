@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{AccountId, BalancesConfig, RuntimeGenesisConfig, SudoConfig, PdexConfig, SessionConfig, SessionKeys};
+use crate::{AccountId, BalancesConfig, RuntimeGenesisConfig, SudoConfig, PdexConfig, SessionConfig, SessionKeys, StakingConfig};
 use alloc::{vec, vec::Vec};
 use frame_support::build_struct_json_patch;
 use serde_json::Value;
@@ -86,10 +86,10 @@ fn testnet_genesis(
                         balances: endowed_accounts,
                 },
                 aura: pallet_aura::GenesisConfig {
-                        authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect::<Vec<_>>(),
+                        authorities: vec![],
                 },
                 grandpa: pallet_grandpa::GenesisConfig {
-                        authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>(),
+                        authorities: vec![],
                 },
                 sudo: SudoConfig { key: Some(root) },
                 session: SessionConfig {
@@ -98,7 +98,13 @@ fn testnet_genesis(
                                 (account.clone(), account, SessionKeys { aura: x.0.clone(), grandpa: x.1.clone() })
                         }).collect(),
                 },
-                pdex: PdexConfig {
+                staking: StakingConfig {
+                        initial_validators: initial_authorities.iter().map(|x| {
+                                let account = AccountId::from(<[u8; 32]>::try_from(x.0.as_ref() as &[u8]).unwrap());
+                                (account, 1_750_000_000_000_000u128) // 1,750 pCHML minimum stake
+                        }).collect(),
+                },
+                pdex: PdexConfig {                
                         token_balances: pdex_token_balances,
                 },
         })

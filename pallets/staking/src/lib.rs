@@ -750,13 +750,41 @@ pub mod pallet {
             !Stakers::<T>::get(account).amount.is_zero()
         }
 
-        /// Get the current reward pool balance.
         pub fn get_reward_pool_balance() -> BalanceOf<T> {
             RewardPool::<T>::get()
         }
     }
 
+    /// Genesis configuration for staking pallet
+    #[pallet::genesis_config]
+    #[derive(frame_support::DefaultNoBound)]
+    pub struct GenesisConfig<T: Config> {
+        /// Initial validators with their stakes (account, stake_amount)
+        pub initial_validators: Vec<(T::AccountId, BalanceOf<T>)>,
+    }
+
+    #[pallet::genesis_build]
+    impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
+        fn build(&self) {
+            for (account, stake) in &self.initial_validators {
+                let stake_info = StakeInfo {
+                    amount: *stake,
+                    status: NodeStatus::Active,
+                    last_claim_block: frame_system::Pallet::<T>::block_number(),
+                    rewards_accumulated: BalanceOf::<T>::zero(),
+                    unbonding_block: None,
+                };
+                Stakers::<T>::insert(account, stake_info);
+                TotalStaked::<T>::mutate(|total| {
+                    *total = total.saturating_add(*stake);
+                });
+                log::info!("[Staking] Genesis: Added validator {:?} with stake {:?}", account, stake);
+            }
+        }
+    }
+
     /// Converts AccountId to ValidatorId (same type for us)
+
     pub struct StashOf<T>(sp_std::marker::PhantomData<T>);
     impl<T: Config> sp_runtime::traits::Convert<T::AccountId, Option<T::AccountId>> for StashOf<T> {
         fn convert(account: T::AccountId) -> Option<T::AccountId> {

@@ -234,11 +234,11 @@ mod runtime {
                 #[runtime::pallet_index(9)]
         pub type Emissions = pallet_emissions;
         #[runtime::pallet_index(10)]
-        pub type Session = pallet_session;
+        pub type Staking = pallet_staking;
 
 
         #[runtime::pallet_index(11)]
-        pub type Staking = pallet_staking;
+        pub type Session = pallet_session;
 
         #[runtime::pallet_index(12)]
         pub type Bridge = pallet_bridge;
