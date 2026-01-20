@@ -211,7 +211,88 @@ pub mod pallet {
         ValueQuery,
     >;
 
+    // ============ SINGLE-SIDED LIQUIDITY STORAGE ============
+
+    /// Lock tier for single-sided provisioning.
+    #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen, Copy, DecodeWithMemTracking)]
+    pub enum LockTier {
+        /// No lock - 8% of single-sided pool
+        NoLock,
+        /// 6 month lock - 12% of single-sided pool
+        SixMonths,
+        /// 12 month lock - 15% of single-sided pool
+        TwelveMonths,
+        /// 24 month lock - 25% of single-sided pool
+        TwentyFourMonths,
+    }
+
+    impl Default for LockTier {
+        fn default() -> Self {
+            LockTier::NoLock
+        }
+    }
+
+    /// Single-sided liquidity position.
+    #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+    pub struct SingleSidedPosition<AssetId, Balance, BlockNumber> {
+        /// Token deposited.
+        pub token_id: AssetId,
+        /// Amount deposited.
+        pub amount: Balance,
+        /// Lock tier selected.
+        pub lock_tier: LockTier,
+        /// Block when position was created.
+        pub start_block: BlockNumber,
+        /// Block when lock ends (None for NoLock).
+        pub end_block: Option<BlockNumber>,
+        /// Accumulated rewards not yet claimed.
+        pub rewards_accumulated: Balance,
+        /// Last block when rewards were calculated.
+        pub last_reward_block: BlockNumber,
+    }
+
+    /// Counter for single-sided position IDs.
+    #[pallet::storage]
+    #[pallet::getter(fn single_sided_count)]
+    pub type SingleSidedCount<T: Config> = StorageValue<_, u64, ValueQuery>;
+
+    /// Single-sided positions by position ID.
+    #[pallet::storage]
+    #[pallet::getter(fn single_sided_positions)]
+    pub type SingleSidedPositions<T: Config> = StorageMap<
+        _,
+        Blake2_128Concat,
+        u64, // position_id
+        SingleSidedPosition<T::AssetId, T::Balance, BlockNumberFor<T>>,
+        OptionQuery,
+    >;
+
+    /// User's single-sided position IDs.
+    #[pallet::storage]
+    #[pallet::getter(fn user_single_sided)]
+    pub type UserSingleSided<T: Config> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        BoundedVec<u64, ConstU32<100>>, // max 100 positions per user
+        ValueQuery,
+    >;
+
+    /// Total single-sided deposits per token per tier.
+    #[pallet::storage]
+    #[pallet::getter(fn total_single_sided)]
+    pub type TotalSingleSided<T: Config> = StorageDoubleMap<
+        _,
+        Blake2_128Concat,
+        T::AssetId, // token_id
+        Blake2_128Concat,
+        LockTier,
+        T::Balance, // total deposited
+        ValueQuery,
+    >;
+
     /// Events emitted by this pallet.
+
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
@@ -308,14 +389,40 @@ pub mod pallet {
             /// Amount converted.
             amount: T::Balance,
         },
+
         /// Public CHML was burned and pCHML minted.
         MintedFromPublic {
             from: T::AccountId,
             amount: T::Balance,
         },
+        /// Single-sided liquidity was provisioned.
+        SingleSidedProvisioned {
+            position_id: u64,
+            provider: T::AccountId,
+            token_id: T::AssetId,
+            amount: T::Balance,
+            lock_tier: LockTier,
+            end_block: Option<BlockNumberFor<T>>,
+        },
+        /// Single-sided liquidity was withdrawn.
+        SingleSidedWithdrawn {
+            position_id: u64,
+            provider: T::AccountId,
+            token_id: T::AssetId,
+            amount_returned: T::Balance,
+            rewards_claimed: T::Balance,
+            early_unlock: bool,
+            rewards_forfeited: T::Balance,
+        },
+        /// Single-sided rewards were claimed.
+        SingleSidedRewardsClaimed {
+            position_id: u64,
+            provider: T::AccountId,
+            amount: T::Balance,
+        },
     }
-
     /// Errors that can be returned by this pallet.
+        
     #[pallet::error]
     pub enum Error<T> {
         /// The specified pool was not found.
@@ -344,11 +451,22 @@ pub mod pallet {
         LpTokenMintFailed,
         /// LP token burning failed.
         LpTokenBurnFailed,
+
         /// Invalid amounts provided.
         InvalidAmounts,
+        /// Single-sided position not found.
+        PositionNotFound,
+        /// Position is still locked.
+        PositionLocked,
+        /// Invalid lock tier.
+        InvalidLockTier,
+        /// No rewards to claim.
+        NoRewardsToClaim,
+        /// Not position owner.
+        NotPositionOwner,
     }
-
-    #[pallet::call]
+    #[pallet::call]        
+        
     impl<T: Config> Pallet<T> {
         /// Create a new liquidity pool for an asset pair.
         ///
@@ -927,18 +1045,228 @@ pub mod pallet {
                 from: who,
                 amount,
             });
+            Ok(())
+        }
+
+        /// Provision single-sided liquidity with optional lock period.
+        ///
+        /// Deposit a single token type to earn emission rewards.
+        /// Longer lock periods earn higher reward shares.
+        ///
+        /// Parameters:
+        /// - `token_id`: Token to deposit (0=pCHML, 1=pBTC, 2=pETH, 3=pUSDT)
+        /// - `amount`: Amount to deposit
+        /// - `lock_tier`: Lock period (NoLock, SixMonths, TwelveMonths, TwentyFourMonths)
+        #[pallet::call_index(8)]
+        #[pallet::weight(Weight::from_parts(100_000_000, 0))]
+        pub fn provision_single_sided(
+            origin: OriginFor<T>,
+            token_id: T::AssetId,
+            amount: T::Balance,
+            lock_tier: LockTier,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            ensure!(!amount.is_zero(), Error::<T>::ZeroAmount);
+
+            // Transfer tokens to pallet account
+            let pallet_account = Self::single_sided_account();
+            Self::do_transfer(token_id, &who, &pallet_account, amount)?;
+
+            // Calculate lock end block
+            let current_block = frame_system::Pallet::<T>::block_number();
+            let blocks_per_month: u32 = 432_000; // ~30 days at 6 sec blocks
+            let end_block = match lock_tier {
+                LockTier::NoLock => None,
+                LockTier::SixMonths => Some(current_block + (blocks_per_month * 6).into()),
+                LockTier::TwelveMonths => Some(current_block + (blocks_per_month * 12).into()),
+                LockTier::TwentyFourMonths => Some(current_block + (blocks_per_month * 24).into()),
+            };
+
+            // Create position
+            let position_id = SingleSidedCount::<T>::get();
+            let position = SingleSidedPosition {
+                token_id,
+                amount,
+                lock_tier,
+                start_block: current_block,
+                end_block,
+                rewards_accumulated: T::Balance::zero(),
+                last_reward_block: current_block,
+            };
+
+            // Store position
+            SingleSidedPositions::<T>::insert(position_id, &position);
+            SingleSidedCount::<T>::put(position_id + 1);
+
+            // Update user's position list
+            UserSingleSided::<T>::mutate(&who, |positions| {
+                let _ = positions.try_push(position_id);
+            });
+
+            // Update totals
+            TotalSingleSided::<T>::mutate(token_id, lock_tier, |total| {
+                *total = total.saturating_add(amount);
+            });
+
+            Self::deposit_event(Event::SingleSidedProvisioned {
+                position_id,
+                provider: who,
+                token_id,
+                amount,
+                lock_tier,
+                end_block,
+            });
 
             Ok(())
         }
 
+        /// Withdraw single-sided liquidity position.
+        ///
+        /// Early withdrawal from locked positions forfeits unvested rewards.
+        /// Forfeiture schedule: 0-25% term = keep 25%, 25-50% = keep 50%, etc.
+        ///
+        /// Parameters:
+        /// - `position_id`: ID of the position to withdraw
+        #[pallet::call_index(9)]
+        #[pallet::weight(Weight::from_parts(100_000_000, 0))]
+        pub fn withdraw_single_sided(
+            origin: OriginFor<T>,
+            position_id: u64,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+
+            // Verify ownership
+            let user_positions = UserSingleSided::<T>::get(&who);
+            ensure!(user_positions.contains(&position_id), Error::<T>::NotPositionOwner);
+
+            // Get position
+            let position = SingleSidedPositions::<T>::get(position_id)
+                .ok_or(Error::<T>::PositionNotFound)?;
+
+            let current_block = frame_system::Pallet::<T>::block_number();
+            let mut early_unlock = false;
+            let mut rewards_forfeited = T::Balance::zero();
+            let mut rewards_to_pay = position.rewards_accumulated;
+
+            // Check if early unlock (locked position withdrawn before end)
+            if let Some(end_block) = position.end_block {
+                if current_block < end_block {
+                    early_unlock = true;
+                    // Calculate forfeiture based on % of term completed
+                    let total_term = end_block - position.start_block;
+                    let elapsed = current_block - position.start_block;
+                    
+                    // Convert to u128 for percentage calculation
+                    let elapsed_u128: u128 = elapsed.try_into().unwrap_or(0);
+                    let total_u128: u128 = total_term.try_into().unwrap_or(1);
+                    let percent_complete = (elapsed_u128 * 100) / total_u128;
+
+                    // Forfeiture schedule: keep 25/50/75/100% based on quartile
+                    let keep_percent: u128 = if percent_complete < 25 {
+                        25
+                    } else if percent_complete < 50 {
+                        50
+                    } else if percent_complete < 75 {
+                        75
+                    } else {
+                        100
+                    };
+
+                    let total_rewards: u128 = rewards_to_pay.into();
+                    let kept = (total_rewards * keep_percent) / 100;
+                    rewards_to_pay = kept.into();
+                    rewards_forfeited = (total_rewards - kept).into();
+                }
+            }
+
+            // Transfer tokens back to user
+            let pallet_account = Self::single_sided_account();
+            Self::do_transfer(position.token_id, &pallet_account, &who, position.amount)?;
+
+            // Pay rewards (as pCHML)
+            if !rewards_to_pay.is_zero() {
+                let pchml_id: T::AssetId = 0u32.into();
+                Self::do_mint(pchml_id, &who, rewards_to_pay)?;
+            }
+
+            // Update totals
+            TotalSingleSided::<T>::mutate(position.token_id, position.lock_tier, |total| {
+                *total = total.saturating_sub(position.amount);
+            });
+
+            // Remove position
+            SingleSidedPositions::<T>::remove(position_id);
+            UserSingleSided::<T>::mutate(&who, |positions| {
+                positions.retain(|&id| id != position_id);
+            });
+
+            Self::deposit_event(Event::SingleSidedWithdrawn {
+                position_id,
+                provider: who,
+                token_id: position.token_id,
+                amount_returned: position.amount,
+                rewards_claimed: rewards_to_pay,
+                early_unlock,
+                rewards_forfeited,
+            });
+
+            Ok(())
+        }
+
+        /// Claim accumulated rewards from a single-sided position without withdrawing.
+        ///
+        /// Parameters:
+        /// - `position_id`: ID of the position to claim rewards from
+        #[pallet::call_index(10)]
+        #[pallet::weight(Weight::from_parts(50_000_000, 0))]
+        pub fn claim_single_sided_rewards(
+            origin: OriginFor<T>,
+            position_id: u64,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+
+            // Verify ownership
+            let user_positions = UserSingleSided::<T>::get(&who);
+            ensure!(user_positions.contains(&position_id), Error::<T>::NotPositionOwner);
+
+            // Get position
+            let mut position = SingleSidedPositions::<T>::get(position_id)
+                .ok_or(Error::<T>::PositionNotFound)?;
+
+            ensure!(!position.rewards_accumulated.is_zero(), Error::<T>::NoRewardsToClaim);
+
+            let rewards = position.rewards_accumulated;
+
+            // Mint pCHML rewards to user
+            let pchml_id: T::AssetId = 0u32.into();
+            Self::do_mint(pchml_id, &who, rewards)?;
+
+            // Reset accumulated rewards
+            position.rewards_accumulated = T::Balance::zero();
+            position.last_reward_block = frame_system::Pallet::<T>::block_number();
+            SingleSidedPositions::<T>::insert(position_id, &position);
+
+            Self::deposit_event(Event::SingleSidedRewardsClaimed {
+                position_id,
+                provider: who,
+                amount: rewards,
+            });
+
+            Ok(())
+        }
     }
     impl<T: Config> Pallet<T> {
+            
         /// Get the pool account for a given pool_id.
         pub fn pool_account(pool_id: u32) -> T::AccountId {
             T::PalletId::get().into_sub_account_truncating(pool_id)
         }
-
+        /// Get the single-sided liquidity account.
+        pub fn single_sided_account() -> T::AccountId {
+            T::PalletId::get().into_sub_account_truncating(b"sslp")
+        }
         /// Get a pool by its ID.
+        
         pub fn get_pool(pool_id: u32) -> Option<LiquidityPool<T::AssetId, T::Balance>> {
             Pools::<T>::get(pool_id)
         }
