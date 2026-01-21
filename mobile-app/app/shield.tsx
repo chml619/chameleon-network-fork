@@ -279,8 +279,8 @@ export default function ShieldScreen() {
             formattedAmount: `${amount} ${selectedToken.symbol} → ${amount} ${selectedToken.outputSymbol}`,
             status: 'finalized',
             usedMEVProtection: false,
-          });
             type: 'shield',
+          });
         } catch (e) {
           console.error('[Shield] Failed to save to history:', e);
         }

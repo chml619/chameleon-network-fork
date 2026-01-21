@@ -98,7 +98,7 @@ export default function UnshieldScreen() {
       }
     };
     
-    if (!selectedToken.requiresBridge && isValidAddress && amount && wallet?.address && parseFloat(amount) > 0) {
+    if (isValidAddress && amount && wallet?.address && parseFloat(amount) > 0) {
       estimateFee();
     } else {
       setEstimatedFee(null);

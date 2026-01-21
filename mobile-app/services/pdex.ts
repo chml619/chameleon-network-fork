@@ -292,7 +292,7 @@ class PDEXService {
         const found = balances.find(b => b.symbol === token.symbol);
         if (found) {
           token.balanceRaw = found.balance;
-          token.balance = chainService.formatBalance(found.balance.toString());
+          token.balance = chainService.formatBalance(found.balance.toString(), 12, token.symbol);
         }
       });
     } catch (error) {

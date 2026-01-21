@@ -162,7 +162,7 @@ class ChainService {
   /**
    * Format balance with proper decimals and symbol
    */
-  public formatBalance(raw: string | BN, decimals: number = NETWORK_CONFIG.tokenDecimals): string {
+  public formatBalance(raw: string | BN, decimals: number = NETWORK_CONFIG.tokenDecimals, symbol: string = NETWORK_CONFIG.tokenSymbol): string {
     const balance = new BN(raw.toString());
     
     // Convert from planck units to token units
@@ -188,7 +188,7 @@ class ChainService {
     const parts = formatted.split('.');
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     
-    return parts.join('.') + ' ' + NETWORK_CONFIG.tokenSymbol;
+    return parts.join('.') + ' ' + symbol;
   }
 
   /**

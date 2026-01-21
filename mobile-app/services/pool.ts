@@ -133,7 +133,7 @@ class PoolService {
    */
   async getUserLPBalance(api: ApiPromise, poolId: number, address: string): Promise<string> {
     try {
-      const balance = await api.query.pdex.userLPTokens(address, poolId);
+      const balance = await api.query.pdex.userLPTokens(poolId, address);
       return balance.toString();
     } catch (error) {
       console.error('[Pool] Error fetching LP balance:', error);
@@ -150,9 +150,9 @@ class PoolService {
       if (!pool) return null;
       
       const lpBalance = await this.getUserLPBalance(api, poolId, address);
-      if (lpBalance === '0') return null;
+      if (lpBalance === '0' || lpBalance === '0x0' || lpBalance === '0x00' || this.parseChainAmount(lpBalance) === 0) return null;
       const totalLp = this.parseChainAmount(pool.totalLpTokens) || 1;
-      const userLp = parseFloat(lpBalance);
+      const userLp = this.parseChainAmount(lpBalance);
       const sharePercent = parseFloat(((userLp / totalLp) * 100).toFixed(6));
       // Calculate user's share of reserves
       const reserveA = this.parseChainAmount(pool.reserveA);

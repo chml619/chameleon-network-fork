@@ -137,6 +137,7 @@ export default function RemoveLiquidityScreen() {
                   formattedAmount: `${getExpectedA()} ${poolService.getTokenSymbol(pool.assetA)} + ${getExpectedB()} ${poolService.getTokenSymbol(pool.assetB)}`,
                   status: 'finalized',
                   usedMEVProtection: false,
+                  type: 'remove_liquidity',
                 });
 
                 if (refreshBalances) await refreshBalances();
