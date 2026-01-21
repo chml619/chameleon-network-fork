@@ -15,6 +15,7 @@ import {
   Modal,
   StyleSheet,
   Switch,
+  Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -580,8 +581,14 @@ export default function SendScreen() {
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View style={[styles.tokenIcon, { backgroundColor: selectedToken.color + "20" }]}>
-                {selectedToken.id === "CHML" ? (
-                  <Ionicons name="diamond" size={20} color={selectedToken.color} />
+                {selectedToken.id === "PUBLIC_CHML" || selectedToken.id === "CHML" ? (
+                  <Image source={require("@/assets/images/Logo.png")} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                ) : selectedToken.id === "BTC" ? (
+                  <Image source={require("@/assets/images/tokens/btc.png")} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                ) : selectedToken.id === "ETH" ? (
+                  <Image source={require("@/assets/images/tokens/eth.png")} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                ) : selectedToken.id === "USDT" ? (
+                  <Image source={require("@/assets/images/tokens/usdt.png")} style={{ width: 20, height: 20 }} resizeMode="contain" />
                 ) : (
                   <Ionicons name={selectedToken.icon as any} size={20} color={selectedToken.color} />
                 )}
@@ -753,8 +760,14 @@ export default function SendScreen() {
                 }}
               >
                 <View style={[styles.tokenIcon, { backgroundColor: token.color + "20" }]}>
-                  {token.id === "CHML" ? (
-                    <Ionicons name="diamond" size={20} color={token.color} />
+                  {token.id === "PUBLIC_CHML" || token.id === "CHML" ? (
+                    <Image source={require("@/assets/images/Logo.png")} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  ) : token.id === "BTC" ? (
+                    <Image source={require("@/assets/images/tokens/btc.png")} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  ) : token.id === "ETH" ? (
+                    <Image source={require("@/assets/images/tokens/eth.png")} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  ) : token.id === "USDT" ? (
+                    <Image source={require("@/assets/images/tokens/usdt.png")} style={{ width: 20, height: 20 }} resizeMode="contain" />
                   ) : (
                     <Ionicons name={token.icon as any} size={20} color={token.color} />
                   )}

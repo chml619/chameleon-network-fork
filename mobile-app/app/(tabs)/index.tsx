@@ -559,21 +559,21 @@ export default function HomeScreen() {
             <View style={styles.privateAssetsList}>
               <View style={styles.privateAssetRow}>
                 <View style={[styles.assetIcon, { backgroundColor: "#F7931A20" }]}>
-                  <Ionicons name="logo-bitcoin" size={16} color="#F7931A" />
+                  <Image source={require("@/assets/images/tokens/btc.png")} style={{ width: 16, height: 16 }} resizeMode="contain" />
                 </View>
                 <Text style={styles.assetSymbol}>pBTC</Text>
                 <Text style={styles.assetBalance}>{formatBalance(pTokenBalances.pBTC)}</Text>
               </View>
               <View style={styles.privateAssetRow}>
                 <View style={[styles.assetIcon, { backgroundColor: "#627EEA20" }]}>
-                  <Ionicons name="logo-electron" size={16} color="#627EEA" />
+                  <Image source={require("@/assets/images/tokens/eth.png")} style={{ width: 16, height: 16 }} resizeMode="contain" />
                 </View>
                 <Text style={styles.assetSymbol}>pETH</Text>
                 <Text style={styles.assetBalance}>{formatBalance(pTokenBalances.pETH)}</Text>
               </View>
               <View style={styles.privateAssetRow}>
                 <View style={[styles.assetIcon, { backgroundColor: "#26A17B20" }]}>
-                  <Ionicons name="logo-usd" size={16} color="#26A17B" />
+                  <Image source={require("@/assets/images/tokens/usdt.png")} style={{ width: 16, height: 16 }} resizeMode="contain" />
                 </View>
                 <Text style={styles.assetSymbol}>pUSDT</Text>
                 <Text style={styles.assetBalance}>{formatBalance(pTokenBalances.pUSDT)}</Text>

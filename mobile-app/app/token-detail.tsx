@@ -97,8 +97,13 @@ export default function TokenDetailScreen() {
               <Image 
                 source={require('@/assets/images/Logo.png')} 
                 style={{ width: 32, height: 32 }} 
-                resizeMode="contain"
-              />
+                resizeMode="contain" />
+            ) : symbol === 'pBTC' ? (
+              <Image source={require("@/assets/images/tokens/btc.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
+            ) : symbol === 'pETH' ? (
+              <Image source={require("@/assets/images/tokens/eth.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
+            ) : symbol === 'pUSDT' ? (
+              <Image source={require("@/assets/images/tokens/usdt.png")} style={{ width: 32, height: 32 }} resizeMode="contain" />
             ) : (
               <Ionicons name={tokenInfo.icon as any} size={32} color={tokenInfo.color} />
             )}
@@ -151,6 +156,7 @@ export default function TokenDetailScreen() {
               <Text style={styles.actionText}>Unshield</Text>
             </TouchableOpacity>
           )}
+          {symbol !== 'CHML' && (
 
           <TouchableOpacity 
             style={styles.actionButton}
@@ -161,6 +167,7 @@ export default function TokenDetailScreen() {
             </View>
             <Text style={styles.actionText}>Trade</Text>
           </TouchableOpacity>
+          )}
         </View>
 
         {/* Transaction History */}

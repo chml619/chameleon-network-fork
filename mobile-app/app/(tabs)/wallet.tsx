@@ -31,9 +31,9 @@ import { pdexService } from '@/services/pdex';
 const TOKENS = [
   { id: 'chml', symbol: 'CHML', name: 'Chameleon (Public)', icon: require('@/assets/images/Logo.png'), isNative: true, isPublic: true, color: '#22B958' },
   { id: 'pchml', symbol: 'pCHML', name: 'Privacy CHML', icon: require('@/assets/images/Logo.png'), isNative: false, isPCHML: true, color: '#6366F1' },
-  { id: 'peth', symbol: 'pETH', name: 'Privacy ETH', icon: null, color: '#627EEA', tokenId: 1 },
-  { id: 'pbtc', symbol: 'pBTC', name: 'Privacy BTC', icon: null, color: '#F7931A', tokenId: 2 },
-  { id: 'pusdt', symbol: 'pUSDT', name: 'Privacy USDT', icon: null, color: '#26A17B', tokenId: 3 },
+  { id: 'peth', symbol: 'pETH', name: 'Privacy ETH', icon: require('@/assets/images/tokens/eth.png'), color: '#627EEA', tokenId: 1 },
+  { id: 'pbtc', symbol: 'pBTC', name: 'Privacy BTC', icon: require('@/assets/images/tokens/btc.png'), color: '#F7931A', tokenId: 2 },
+  { id: 'pusdt', symbol: 'pUSDT', name: 'Privacy USDT', icon: require('@/assets/images/tokens/usdt.png'), color: '#26A17B', tokenId: 3 },
 ];
 
 export default function WalletScreen() {
