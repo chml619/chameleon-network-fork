@@ -20,6 +20,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { BN } from '@polkadot/util';
@@ -76,6 +77,8 @@ export default function SendScreen() {
   
   // Transaction state
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
   const [isSending, setIsSending] = useState(false);
   const [transactionResult, setTransactionResult] = useState<any>(null);
   const [showResult, setShowResult] = useState(false);
@@ -225,6 +228,22 @@ export default function SendScreen() {
     } catch (error) {
       Alert.alert('Error', 'Failed to paste from clipboard');
     }
+  };
+  const handleScanQR = async () => {
+    if (!permission?.granted) {
+      const result = await requestPermission();
+      if (!result.granted) {
+        Alert.alert("Permission Required", "Camera permission is needed to scan QR codes");
+        return;
+      }
+    }
+    setShowScanner(true);
+  };
+
+  const handleBarCodeScanned = ({ data }: { data: string }) => {
+    setShowScanner(false);
+    const address = data.startsWith("chameleon:") ? data.replace("chameleon:", "") : data;
+    setRecipient(address.trim());
   };
 
   const handleMaxAmount = () => {
@@ -530,6 +549,9 @@ export default function SendScreen() {
             <TouchableOpacity style={styles.iconButton} onPress={handlePasteAddress}>
               <Ionicons name="clipboard-outline" size={20} color={THEME.colors.textSecondary} />
             </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} onPress={handleScanQR}>
+              <Ionicons name="qr-code-outline" size={20} color={THEME.colors.textSecondary} />
+            </TouchableOpacity>
           </View>
           {recipient.length > 0 && !isValidAddress && (
             <Text style={styles.errorText}>Invalid address format</Text>
@@ -740,6 +762,22 @@ export default function SendScreen() {
         </View>
       </Modal>
 
+      {/* QR Scanner Modal */}
+      <Modal visible={showScanner} transparent animationType="slide">
+        <View style={styles.scannerContainer}>
+          <View style={styles.scannerHeader}>
+            <Text style={styles.scannerTitle}>Scan QR Code</Text>
+            <TouchableOpacity onPress={() => setShowScanner(false)}>
+              <Ionicons name="close" size={28} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+          <CameraView
+            style={styles.scanner}
+            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+            onBarcodeScanned={handleBarCodeScanned}
+          />
+        </View>
+      </Modal>
       {/* Token Selector Modal */}
       <Modal visible={showTokenSelector} transparent animationType="slide">
         <View style={styles.modalOverlay}>
@@ -1122,5 +1160,24 @@ const styles = StyleSheet.create({
   tokenSubtext: {
     fontSize: THEME.fontSize.sm,
     color: THEME.colors.textMuted,
+  },
+  scannerContainer: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  scannerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: THEME.spacing.lg,
+    paddingTop: 60,
+  },
+  scannerTitle: {
+    fontSize: THEME.fontSize.lg,
+    fontWeight: THEME.fontWeight.bold,
+    color: "#FFFFFF",
+  },
+  scanner: {
+    flex: 1,
   },
 });

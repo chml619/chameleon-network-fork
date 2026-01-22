@@ -33,6 +33,8 @@ export default function RegisterNodeScreen() {
   
   const [ip, setIp] = useState('');
   const [port, setPort] = useState('30333');
+  const [auraKey, setAuraKey] = useState("");
+  const [grandpaKey, setGrandpaKey] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
 
   const validateForm = (): string | null => {
@@ -170,6 +172,32 @@ export default function RegisterNodeScreen() {
                 value={port}
                 onChangeText={setPort}
                 keyboardType="number-pad"
+              />
+            </View>
+            <Text style={styles.label}>Aura Session Key (Sr25519)</Text>
+            <View style={styles.inputContainer}>
+              <Ionicons name="key-outline" size={20} color={THEME.colors.textMuted} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="0x..."
+                placeholderTextColor={THEME.colors.textMuted}
+                value={auraKey}
+                onChangeText={setAuraKey}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+            <Text style={styles.label}>Grandpa Session Key (Ed25519)</Text>
+            <View style={styles.inputContainer}>
+              <Ionicons name="key-outline" size={20} color={THEME.colors.textMuted} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="0x..."
+                placeholderTextColor={THEME.colors.textMuted}
+                value={grandpaKey}
+                onChangeText={setGrandpaKey}
+                autoCapitalize="none"
+                autoCorrect={false}
               />
             </View>
 
