@@ -737,6 +737,13 @@ export default function PowerScreen() {
                     <Ionicons name="add-circle" size={20} color={THEME.colors.primary} />
                     <Text style={styles.addLiquidityText}>Add Liquidity</Text>
                   </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.addLiquidityButton, { marginTop: THEME.spacing.sm }]}
+                    onPress={() => router.push("/single-sided" as any)}
+                  >
+                    <Ionicons name="water" size={20} color={THEME.colors.secondary} />
+                    <Text style={[styles.addLiquidityText, { color: THEME.colors.secondary }]}>Single-Sided (No IL)</Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
                 <>
@@ -763,6 +770,13 @@ export default function PowerScreen() {
                   >
                     <Ionicons name="add" size={18} color={THEME.colors.primary} />
                     <Text style={styles.addMoreText}>Add More Liquidity</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.addMoreLiquidity, { marginTop: THEME.spacing.xs }]}
+                    onPress={() => router.push("/single-sided" as any)}
+                  >
+                    <Ionicons name="water" size={18} color={THEME.colors.secondary} />
+                    <Text style={[styles.addMoreText, { color: THEME.colors.secondary }]}>Single-Sided (No IL)</Text>
                   </TouchableOpacity>
                 </>
               )}
