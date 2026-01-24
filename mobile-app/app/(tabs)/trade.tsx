@@ -83,8 +83,8 @@ export default function TradeScreen() {
       // Calculate TVL from pool reserves (simplified)
       let totalTVL = 0;
       pools.forEach((pool: any) => {
-        const reserveA = parseFloat(pool.reserveA) / Math.pow(10, 12);
-        const reserveB = parseFloat(pool.reserveB) / Math.pow(10, 12);
+        const reserveA = (pool.reserveA.startsWith('0x') ? parseInt(pool.reserveA, 16) : parseFloat(pool.reserveA)) / Math.pow(10, 12);
+        const reserveB = (pool.reserveB.startsWith('0x') ? parseInt(pool.reserveB, 16) : parseFloat(pool.reserveB)) / Math.pow(10, 12);
         // Simplified TVL calculation (assuming 1:1 USD for demo)
         totalTVL += reserveA + reserveB;
       });
@@ -289,7 +289,7 @@ export default function TradeScreen() {
                 <View style={styles.swapSectionHeader}>
                   <Text style={styles.swapLabel}>From</Text>
                   <Text style={styles.balanceText}>
-                    Balance: {selectedTokenIn.balance} {selectedTokenIn.symbol}
+                    Balance: {selectedTokenIn.balance}
                   </Text>
                 </View>
                 <View style={styles.swapRow}>
@@ -325,7 +325,7 @@ export default function TradeScreen() {
                 <View style={styles.swapSectionHeader}>
                   <Text style={styles.swapLabel}>To</Text>
                   <Text style={styles.balanceText}>
-                    Balance: {selectedTokenOut.balance} {selectedTokenOut.symbol}
+                    Balance: {selectedTokenOut.balance}
                   </Text>
                 </View>
                 <View style={styles.swapRow}>

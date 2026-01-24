@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import {
+  Image,
   View,
   Text,
   TouchableOpacity,
@@ -12,10 +13,14 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TokenInfo } from '@/services/pdex';
-import { THEME } from '@/constants/theme';
+import {
+  Ionicons } from '@expo/vector-icons';
+import {
+  useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  TokenInfo } from '@/services/pdex';
+import {
+  THEME } from '@/constants/theme';
 
 interface TokenSelectorProps {
   selectedToken: TokenInfo;
@@ -52,11 +57,17 @@ export function TokenSelector({
         disabled={disabled}
       >
         <View style={styles.tokenInfo}>
-          <View style={[styles.tokenIcon, { backgroundColor: selectedToken.color }]}>
-            <Text style={styles.tokenIconText}>
-              {selectedToken.symbol.charAt(0)}
-            </Text>
-          </View>
+          {selectedToken.symbol === "pCHML" || selectedToken.symbol === "CHML" ? (
+            <Image source={require("@/assets/images/Logo.png")} style={{width: 36, height: 36, marginRight: 8}} resizeMode="contain" />
+          ) : selectedToken.symbol === "pBTC" ? (
+            <Image source={require("@/assets/images/tokens/btc.png")} style={{width: 36, height: 36, marginRight: 8}} resizeMode="contain" />
+          ) : selectedToken.symbol === "pETH" ? (
+            <Image source={require("@/assets/images/tokens/eth.png")} style={{width: 36, height: 36, marginRight: 8}} resizeMode="contain" />
+          ) : selectedToken.symbol === "pUSDT" ? (
+            <Image source={require("@/assets/images/tokens/usdt.png")} style={{width: 36, height: 36, marginRight: 8}} resizeMode="contain" />
+          ) : (
+            <View style={[styles.tokenIcon, { backgroundColor: selectedToken.color }]}><Text style={styles.tokenIconText}>{selectedToken.symbol.charAt(0)}</Text></View>
+          )}
           <View>
             <Text style={styles.tokenSymbol}>{selectedToken.symbol}</Text>
             {showBalance && (
@@ -99,11 +110,17 @@ export function TokenSelector({
                   onPress={() => handleSelectToken(item)}
                 >
                   <View style={styles.tokenItemLeft}>
-                    <View style={[styles.tokenIcon, { backgroundColor: item.color }]}>
-                      <Text style={styles.tokenIconText}>
-                        {item.symbol.charAt(0)}
-                      </Text>
-                    </View>
+                    {item.symbol === "pCHML" || item.symbol === "CHML" ? (
+                      <Image source={require("@/assets/images/Logo.png")} style={{width: 36, height: 36, marginRight: 8}} resizeMode="contain" />
+                    ) : item.symbol === "pBTC" ? (
+                      <Image source={require("@/assets/images/tokens/btc.png")} style={{width: 36, height: 36, marginRight: 8}} resizeMode="contain" />
+                    ) : item.symbol === "pETH" ? (
+                      <Image source={require("@/assets/images/tokens/eth.png")} style={{width: 36, height: 36, marginRight: 8}} resizeMode="contain" />
+                    ) : item.symbol === "pUSDT" ? (
+                      <Image source={require("@/assets/images/tokens/usdt.png")} style={{width: 36, height: 36, marginRight: 8}} resizeMode="contain" />
+                    ) : (
+                      <View style={[styles.tokenIcon, { backgroundColor: item.color }]}><Text style={styles.tokenIconText}>{item.symbol.charAt(0)}</Text></View>
+                    )}
                     <View>
                       <Text style={styles.tokenItemSymbol}>{item.symbol}</Text>
                       <Text style={styles.tokenItemName}>{item.name}</Text>

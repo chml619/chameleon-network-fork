@@ -32,6 +32,7 @@ import { NetworkBadge } from '@/components/NetworkBadge';
 import { THEME, GRADIENTS } from '@/constants/theme';
 import { NodeStatus } from '@/services/staking';
 import { formatBalance, parseAmount } from '@/utils/balance';
+import { singleSidedService, SingleSidedPosition, LOCK_TIER_INFO } from "@/services/singleSided";
 
 // Status colors mapping
 const STATUS_COLORS: Record<NodeStatus, string> = {
@@ -105,6 +106,7 @@ export default function PowerScreen() {
   // Add these state variables inside the component
   const [lpRewards, setLpRewards] = useState('0');
   const [lpPositions, setLpPositions] = useState<LPPosition[]>([]);
+  const [singleSidedPositions, setSingleSidedPositions] = useState<SingleSidedPosition[]>([]);
   const [isLoadingLP, setIsLoadingLP] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   
@@ -159,8 +161,8 @@ export default function PowerScreen() {
                 poolName: `${symbolA}/${symbolB}`,
                 tokenA: symbolA,
                 tokenB: symbolB,
-                liquidity: lpBalanceStr,
-                sharePercent: '0',
+                liquidity: (parseInt(lpBalanceStr) / Math.pow(10, 12)).toFixed(4),
+                sharePercent: pool.totalLpTokens ? ((parseInt(lpBalanceStr) / parseInt(pool.totalLpTokens.toString())) * 100).toFixed(2) : '0',
               });  
             }
           }
@@ -170,6 +172,9 @@ export default function PowerScreen() {
       }
       
       setLpPositions(positions);
+      // Load single-sided positions
+      const ssPositions = await singleSidedService.getUserPositions(api, wallet.address);
+      setSingleSidedPositions(ssPositions);
     } catch (error) {
       console.error('Error loading LP data:', error);
     } finally {
@@ -778,6 +783,23 @@ export default function PowerScreen() {
                     <Ionicons name="water" size={18} color={THEME.colors.secondary} />
                     <Text style={[styles.addMoreText, { color: THEME.colors.secondary }]}>Single-Sided (No IL)</Text>
                   </TouchableOpacity>
+                </>
+              )}
+              {/* Single-Sided Positions */}
+              {singleSidedPositions.length > 0 && (
+                <>
+                  <Text style={[styles.subsectionTitle, { marginTop: THEME.spacing.lg }]}>Your Single-Sided Positions</Text>
+                  {singleSidedPositions.map((pos) => (
+                    <View key={pos.positionId} style={styles.lpPositionCard}>
+                      <View style={styles.lpPositionInfo}>
+                        <Text style={styles.lpPoolName}>{pos.tokenSymbol}</Text>
+                        <Text style={styles.lpSharePercent}>{pos.isLocked ? "Locked" : "Unlocked"} - {LOCK_TIER_INFO[pos.lockTier].label}</Text>
+                      </View>
+                      <View style={styles.lpPositionRight}>
+                        <Text style={styles.lpLiquidity}>{(parseInt(pos.amount) / Math.pow(10, 12)).toFixed(2)}</Text>
+                      </View>
+                    </View>
+                  ))}
                 </>
               )}
             </View>

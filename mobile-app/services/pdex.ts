@@ -163,6 +163,7 @@ class PDEXService {
   // Add balance cache
   private balanceCache: Map<string, { balance: BN; timestamp: number }> = new Map();
   private CACHE_TTL_MS = 5000; // 5 second cache
+  clearBalanceCache(): void { this.balanceCache.clear(); }
 
   private constructor() {}
 

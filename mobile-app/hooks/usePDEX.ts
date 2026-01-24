@@ -182,6 +182,7 @@ export function usePDEX() {
       
       if (result.success) {
         // Refresh balances
+        pdexService.clearBalanceCache();
         await fetchTokenBalances();
         setAmountIn('');
         setQuote(null);

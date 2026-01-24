@@ -174,7 +174,7 @@ export default function ReceiveScreen() {
 
             <View style={styles.privacyBadge}>
               <Ionicons name="shield-checkmark" size={16} color={THEME.colors.success} />
-              <Text style={styles.privacyText}>All pTokens use this address</Text>
+              <Text style={styles.privacyText}>{selectedToken.isPublic ? "Public CHML address" : "All pTokens use this address"}</Text>
             </View>
 
             {/* Action Buttons */}
