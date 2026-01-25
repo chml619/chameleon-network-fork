@@ -732,7 +732,7 @@ export default function SendScreen() {
         onRequestClose={handleCloseResult}
       >
         <View style={styles.modalOverlay}>
-          <TransactionStatus result={transactionResult} onClose={handleCloseResult} />
+          <TransactionStatus result={{...transactionResult, isPrivate: !(selectedToken as any).isPublic}} onClose={handleCloseResult} />
         </View>
       </Modal>
 

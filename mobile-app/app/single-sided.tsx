@@ -3,6 +3,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import {
+  Image,
   View,
   Text,
   TouchableOpacity,
@@ -12,17 +13,28 @@ import {
   StyleSheet,
   TextInput,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BN } from '@polkadot/util';
-import { useWallet } from '@/context/WalletContext';
-import { useApi } from '@/hooks/useApi';
-import { walletService } from '@/services/wallet';
-import { singleSidedService, LockTier, LOCK_TIER_INFO } from '@/services/singleSided';
-import { pdexService } from '@/services/pdex';
-import { THEME, GRADIENTS } from '@/constants/theme';
+import {
+  useRouter } from 'expo-router';
+import {
+  Ionicons } from '@expo/vector-icons';
+import {
+  LinearGradient } from 'expo-linear-gradient';
+import {
+  useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  BN } from '@polkadot/util';
+import {
+  useWallet } from '@/context/WalletContext';
+import {
+  useApi } from '@/hooks/useApi';
+import {
+  walletService } from '@/services/wallet';
+import {
+  singleSidedService, LockTier, LOCK_TIER_INFO } from '@/services/singleSided';
+import {
+  pdexService } from '@/services/pdex';
+import {
+  THEME, GRADIENTS } from '@/constants/theme';
 
 const TOKENS = [
   { id: 0, symbol: 'pCHML', name: 'Privacy CHML', color: '#6366F1' },
@@ -151,11 +163,17 @@ export default function SingleSidedScreen() {
               ]}
               onPress={() => setSelectedToken(token)}
             >
-              <View style={[styles.tokenIcon, { backgroundColor: token.color + '20' }]}>
-                <Text style={[styles.tokenIconText, { color: token.color }]}>
-                  {token.symbol.charAt(0)}
-                </Text>
-              </View>
+              {token.symbol === "pCHML" ? (
+                <Image source={require("@/assets/images/Logo.png")} style={{width: 40, height: 40}} resizeMode="contain" />
+              ) : token.symbol === "pBTC" ? (
+                <Image source={require("@/assets/images/tokens/btc.png")} style={{width: 40, height: 40}} resizeMode="contain" />
+              ) : token.symbol === "pETH" ? (
+                <Image source={require("@/assets/images/tokens/eth.png")} style={{width: 40, height: 40}} resizeMode="contain" />
+              ) : token.symbol === "pUSDT" ? (
+                <Image source={require("@/assets/images/tokens/usdt.png")} style={{width: 40, height: 40}} resizeMode="contain" />
+              ) : (
+                <View style={[styles.tokenIcon, { backgroundColor: token.color + "20" }]}><Text style={[styles.tokenIconText, { color: token.color }]}>{token.symbol.charAt(0)}</Text></View>
+              )}
               <Text style={styles.tokenSymbol}>{token.symbol}</Text>
             </TouchableOpacity>
           ))}

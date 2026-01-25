@@ -2,7 +2,7 @@
  * Power Screen - vNode Management & Liquidity Provision
  * Two sections:
  * 1. Validate - Manage validator node operations
- * 2. Provide Liquidity - LP management and rewards
+ * 2. Provision Liquidity - LP management and rewards
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -452,7 +452,7 @@ export default function PowerScreen() {
             color={activeSection === 'liquidity' ? THEME.colors.white : THEME.colors.textSecondary}
           />
           <Text style={[styles.tabText, activeSection === 'liquidity' && styles.tabTextActive]}>
-            Provide Liquidity
+            Provision Liquidity
           </Text>
         </TouchableOpacity>
       </View>
@@ -530,8 +530,8 @@ export default function PowerScreen() {
                         <Text style={styles.statValue}>{stakingInfo?.apy?.toFixed(1) || '0'}%</Text>
                       </View>
                       <View style={styles.statItem}>
-                        <Text style={styles.statLabel}>Min Stake</Text>
-                        <Text style={styles.statValue}>{stakingInfo?.minStake || '1,750 CHML'}</Text>
+                        <Text style={styles.statLabel}>Validators (Devnet)</Text>
+                        <Text style={styles.statValue}>{stakingInfo?.totalValidators || 0}</Text>
                       </View>
                     </View>
                   )}
@@ -718,77 +718,22 @@ export default function PowerScreen() {
                   )}
                 </TouchableOpacity>
               </View>
-
-              {/* LP Positions */}
-              <Text style={styles.subsectionTitle}>Your Liquidity Positions</Text>
-              
+              {/* Single-Sided Liquidity Section */}
+              <Text style={styles.subsectionTitle}>Your Single-Sided Positions</Text>
               {isLoadingLP ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="small" color={THEME.colors.primary} />
-                </View>
-              ) : lpPositions.length === 0 ? (
+                <View style={styles.loadingContainer}><ActivityIndicator size="small" color={THEME.colors.primary} /></View>
+              ) : singleSidedPositions.length === 0 ? (
                 <View style={styles.emptyLP}>
-                  <View style={styles.emptyLPIcon}>
-                    <Ionicons name="water-outline" size={40} color={THEME.colors.textMuted} />
-                  </View>
-                  <Text style={styles.emptyLPText}>No liquidity positions yet</Text>
-                  <Text style={styles.emptyLPSubtext}>
-                    Provide liquidity to earn trading fees and LP rewards
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.addLiquidityButton}
-                    onPress={() => router.push('/add-liquidity' as any)}
-                  >
-                    <Ionicons name="add-circle" size={20} color={THEME.colors.primary} />
-                    <Text style={styles.addLiquidityText}>Add Liquidity</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.addLiquidityButton, { marginTop: THEME.spacing.sm }]}
-                    onPress={() => router.push("/single-sided" as any)}
-                  >
-                    <Ionicons name="water" size={20} color={THEME.colors.secondary} />
-                    <Text style={[styles.addLiquidityText, { color: THEME.colors.secondary }]}>Single-Sided (No IL)</Text>
+                  <View style={styles.emptyLPIcon}><Ionicons name="water-outline" size={40} color={THEME.colors.textMuted} /></View>
+                  <Text style={styles.emptyLPText}>No single-sided positions yet</Text>
+                  <Text style={styles.emptyLPSubtext}>Provide single-sided liquidity to earn rewards with no impermanent loss risk</Text>
+                  <TouchableOpacity style={[styles.addLiquidityButton, { backgroundColor: THEME.colors.primary, borderWidth: 0 }]} onPress={() => router.push("/single-sided" as any)}>
+                    <Ionicons name="add-circle" size={20} color={THEME.colors.white} />
+                    <Text style={[styles.addLiquidityText, { color: THEME.colors.white }]}>Provision Single-Sided Liquidity</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
                 <>
-                  {lpPositions.map((position) => (
-                    <TouchableOpacity
-                      key={position.poolId}
-                      style={styles.lpPositionCard}
-                      onPress={() => router.push(`/pool-detail?poolId=${position.poolId}` as any)}
-                    >
-                      <View style={styles.lpPositionInfo}>
-                        <Text style={styles.lpPoolName}>{position.tokenA}/{position.tokenB}</Text>
-                        <Text style={styles.lpSharePercent}>{position.sharePercent}% pool share</Text>
-                      </View>
-                      <View style={styles.lpPositionRight}>
-                        <Text style={styles.lpLiquidity}>{position.liquidity} LP</Text>
-                        <Ionicons name="chevron-forward" size={20} color={THEME.colors.textMuted} />
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                  
-                  <TouchableOpacity
-                    style={styles.addMoreLiquidity}
-                    onPress={() => router.push('/add-liquidity' as any)}
-                  >
-                    <Ionicons name="add" size={18} color={THEME.colors.primary} />
-                    <Text style={styles.addMoreText}>Add More Liquidity</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.addMoreLiquidity, { marginTop: THEME.spacing.xs }]}
-                    onPress={() => router.push("/single-sided" as any)}
-                  >
-                    <Ionicons name="water" size={18} color={THEME.colors.secondary} />
-                    <Text style={[styles.addMoreText, { color: THEME.colors.secondary }]}>Single-Sided (No IL)</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-              {/* Single-Sided Positions */}
-              {singleSidedPositions.length > 0 && (
-                <>
-                  <Text style={[styles.subsectionTitle, { marginTop: THEME.spacing.lg }]}>Your Single-Sided Positions</Text>
                   {singleSidedPositions.map((pos) => (
                     <View key={pos.positionId} style={styles.lpPositionCard}>
                       <View style={styles.lpPositionInfo}>
@@ -800,6 +745,10 @@ export default function PowerScreen() {
                       </View>
                     </View>
                   ))}
+                  <TouchableOpacity style={[styles.addLiquidityButton, { backgroundColor: THEME.colors.primary, borderWidth: 0, marginTop: THEME.spacing.md }]} onPress={() => router.push("/single-sided" as any)}>
+                    <Ionicons name="add" size={18} color={THEME.colors.white} />
+                    <Text style={[styles.addLiquidityText, { color: THEME.colors.white }]}>Add More Single-Sided Liquidity</Text>
+                  </TouchableOpacity>
                 </>
               )}
             </View>

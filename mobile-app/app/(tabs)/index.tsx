@@ -1354,6 +1354,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   transactionTitle: {
+    flex: 1,
     fontSize: THEME.fontSize.base,
     fontWeight: THEME.fontWeight.medium,
     color: THEME.colors.text,

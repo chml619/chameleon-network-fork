@@ -18,7 +18,7 @@ import { BN } from '@polkadot/util';
 import { chainService } from './chain';
 
 // Minimum stake required (1,750 CHML in planck units - 18 decimals)
-const MINIMUM_STAKE = new BN('1750000000000000000');
+const MINIMUM_STAKE = new BN('1750000000000000');
 
 // Unbonding period in blocks (~7 days at 6 sec blocks)
 const UNBONDING_PERIOD = 100800;
@@ -38,6 +38,7 @@ export interface StakingInfo {
   apy: number;
   minStake: string;
   status: NodeStatus;
+  totalValidators: number;
   unbondingBlock: number | null;
 }
 
@@ -139,6 +140,14 @@ class StakingService {
         // Extract fields from StakeInfo { amount, rewards_accumulated, last_claim_block, status, unbonding_block }
         staked = new BN(info.amount?.toString() || '0');
         rewards = new BN(info.rewards_accumulated?.toString() || info.rewardsAccumulated?.toString() || '0');
+        // Also check emissions pallet for validator rewards (primary source)
+        try {
+          const emissionsRewards = await (api.query.emissions as any).validatorRewards(address);
+          if (emissionsRewards && !emissionsRewards.isEmpty) {
+            const emRewards = new BN(emissionsRewards.toString());
+            if (emRewards.gt(rewards)) rewards = emRewards;
+          }
+        } catch (e) { console.log("[Staking] Emissions rewards query failed:", e); }
         
         // Parse status enum
         const rawStatus = info.status;
@@ -186,6 +195,12 @@ class StakingService {
       } catch (e) {
         console.log('[Staking] Could not calculate APY, using default:', e);
       }
+      // Get total validator count
+      let totalValidators = 0;
+      try {
+        const stakerEntries = await (api.query.staking as any).stakers.entries();
+        totalValidators = stakerEntries.filter((e: any) => e[1].toJSON()?.status === "Active").length;
+      } catch (e) { console.log("[Staking] Could not get validator count:", e); }
       
       return {
         staked: chainService.formatBalance(staked.toString()),
@@ -198,6 +213,7 @@ class StakingService {
         unbondingRaw: unbonding,
         apy,
         minStake: chainService.formatBalance(MINIMUM_STAKE.toString()),
+        totalValidators,
         status,
         unbondingBlock,
       };
@@ -234,6 +250,7 @@ class StakingService {
       unbondingRaw: this.mockStakingData.unbonding,
       apy: 12.5,
       minStake: chainService.formatBalance(MINIMUM_STAKE.toString()),
+      totalValidators: 2,
       status: this.mockStakingData.status,
       unbondingBlock: this.mockStakingData.unbondingBlock,
     };

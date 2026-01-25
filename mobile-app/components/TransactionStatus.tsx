@@ -19,6 +19,7 @@ interface TransactionStatusProps {
     amount?: string;
     to?: string;
     from?: string;
+    isPrivate?: boolean;
   };
   onClose?: () => void;
   showExplorerLink?: boolean;
@@ -146,7 +147,7 @@ export const TransactionStatus: React.FC<TransactionStatusProps> = ({
               styles.mevBadgeText,
               { color: result.usedMEVProtection ? THEME.colors.primary : THEME.colors.textMuted }
             ]}>
-              {result.usedMEVProtection ? 'MEV Protected' : 'Standard Transaction'}
+              {result.usedMEVProtection ? 'MEV Protected' : result.isPrivate ? 'Private Transaction' : 'Standard Transaction'}
             </Text>
           </View>
         )}

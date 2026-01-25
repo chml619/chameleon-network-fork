@@ -158,7 +158,7 @@ export default function PoolDetailScreen() {
               <View style={styles.positionActions}>
                 <TouchableOpacity
                   style={styles.addMoreButton}
-                  onPress={() => router.push(`/add-liquidity?poolId=${pool.id}` as any)}
+                  onPress={() => router.push('/add-liquidity?poolId=' + pool.id as any)}
                 >
                   <Ionicons name="add" size={18} color={THEME.colors.primary} />
                   <Text style={styles.addMoreText}>Add More</Text>
@@ -166,8 +166,7 @@ export default function PoolDetailScreen() {
                 
                 <TouchableOpacity
                   style={styles.removeButtonSmall}
-                  onPress={() => router.push(`/remove-liquidity?poolId=${pool.id}` as any)}
-                >
+                  onPress={() => router.push('/remove-liquidity?poolId=' + pool.id as any)}>
                   <Ionicons name="remove" size={18} color="#D32F2F" />
                   <Text style={styles.removeText}>Remove</Text>
                 </TouchableOpacity>
@@ -179,7 +178,7 @@ export default function PoolDetailScreen() {
               <Text style={styles.noPositionText}>No liquidity in this pool</Text>
               <TouchableOpacity
                 style={styles.addLiquidityButton}
-                onPress={() => router.push(`/add-liquidity?poolId=${pool.id}` as any)}
+                onPress={() => router.push('/add-liquidity?poolId=' + pool.id as any)}
               >
                 <Text style={styles.addLiquidityText}>Add Liquidity</Text>
               </TouchableOpacity>
