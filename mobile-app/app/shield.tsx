@@ -29,6 +29,7 @@ import { apiService } from '@/services/api';
 import { transactionService } from '@/services/transaction';
 import { bridgeService } from '@/services/bridge';
 import { transactionHistoryService } from '@/services/transactionHistory';
+import { notificationService } from '@/services/notifications';
 import { formatBalance, parseAmount } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 const TOKENS = [
@@ -252,21 +253,49 @@ export default function ShieldScreen() {
       } else {
         // CHML - use pdex.mintFromPublic to convert public CHML to pCHML
         txHash = await new Promise<string>((resolve, reject) => {
+          let resolved = false;
+          const timeout = setTimeout(() => {
+            if (!resolved) {
+              resolved = true;
+              reject(new Error('Transaction timeout - please check your balance and try again'));
+            }
+          }, 60000); // 60 second timeout
+
           api.tx.pdex.mintFromPublic(amountBN.toString())
             .signAndSend(keyPair, ({ status, dispatchError, txHash: hash }: any) => {
+              // Handle error statuses
+              if (status.isDropped || status.isInvalid || status.isUsurped) {
+                if (!resolved) {
+                  resolved = true;
+                  clearTimeout(timeout);
+                  reject(new Error(`Transaction failed: ${status.type}`));
+                }
+                return;
+              }
+
               if (status.isInBlock || status.isFinalized) {
-                if (dispatchError) {
-                  if (dispatchError.isModule) {
-                    const decoded = api.registry.findMetaError(dispatchError.asModule);
-                    reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
+                if (!resolved) {
+                  resolved = true;
+                  clearTimeout(timeout);
+                  if (dispatchError) {
+                    if (dispatchError.isModule) {
+                      const decoded = api.registry.findMetaError(dispatchError.asModule);
+                      reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
+                    } else {
+                      reject(new Error(dispatchError.toString()));
+                    }
                   } else {
-                    reject(new Error(dispatchError.toString()));
+                    resolve(hash?.toHex() || status.asInBlock?.toString() || status.asFinalized?.toString());
                   }
-                } else {
-                  resolve(hash?.toHex() || status.asInBlock.toString());
                 }
               }
-            }).catch(reject);
+            }).catch((err: any) => {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                reject(err);
+              }
+            });
         });
         successMessage = "CHML shielded to pCHML! Transaction: " + txHash.slice(0, 10) + "...";
         // Save to transaction history
@@ -285,6 +314,13 @@ export default function ShieldScreen() {
           console.error('[Shield] Failed to save to history:', e);
         }
       }
+      // Send success notification
+      await notificationService.notifyTransactionConfirmed(
+        `${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`,
+        wallet.address,
+        txHash
+      );
+
       Alert.alert(
         'Shield Successful',
         successMessage,
@@ -294,11 +330,11 @@ export default function ShieldScreen() {
             onPress: async () => {
               setAmount('');
               setFeeEstimate(null);
-              
+
               // Refresh all balances including pTokens
               await refreshBalances();
               await refreshPCHMLBalance();
-              
+
               // Small delay to ensure state updates propagate and balance is refreshed
               setTimeout(async () => {
                 // Force another balance refresh to ensure UI updates
@@ -321,6 +357,13 @@ export default function ShieldScreen() {
           errorMessage = 'Network connection issue. Please try again.';
         }
       }
+
+      // Send failure notification
+      await notificationService.notifyTransactionFailed(
+        `${amount} ${selectedToken.symbol} shield`,
+        errorMessage
+      );
+
       Alert.alert('Shield Failed', errorMessage);
     } finally {
       setIsShielding(false);

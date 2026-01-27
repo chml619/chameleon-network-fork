@@ -26,6 +26,7 @@ import { useApi } from '@/hooks/useApi';
 import { pdexService } from '@/services/pdex';
 import { poolService, PoolInfo } from '@/services/pool';
 import { transactionHistoryService } from '@/services/transactionHistory';
+import { notificationService } from '@/services/notifications';
 import { TokenSelector } from '@/components/TokenSelector';
 import { FeatureBadge } from '@/components/FeatureBadge';
 import { formatBalance, formatDisplayBalance } from '@/utils/balance';
@@ -143,15 +144,31 @@ export default function TradeScreen() {
               txHash = result?.txHash || '';
               
               if (success) {
+                // Send success notification
+                await notificationService.notifyTransactionConfirmed(
+                  `${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
+                  wallet?.address || '',
+                  txHash
+                );
                 Alert.alert('Success', 'Swap completed successfully!');
                 // Refresh all balances
                 refreshBalances();
-                refreshPCHMLBalance(); 
-	      } else {
+                refreshPCHMLBalance();
+              } else {
+                // Send failure notification
+                await notificationService.notifyTransactionFailed(
+                  `${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
+                  result?.error || 'Swap failed'
+                );
                 Alert.alert('Error', result?.error || 'Swap failed');
               }
             } catch (error) {
               console.error('[Trade] Swap execution error:', error);
+              // Send failure notification
+              await notificationService.notifyTransactionFailed(
+                `${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
+                'Network or validation error'
+              );
               Alert.alert('Error', 'Swap failed due to network or validation error');
             }
             

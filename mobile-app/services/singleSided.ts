@@ -59,29 +59,61 @@ class SingleSidedService {
   ): Promise<{ success: boolean; positionId?: string; error?: string }> {
     try {
       return new Promise((resolve) => {
+        let resolved = false;
+        const timeout = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            resolve({ success: false, error: 'Transaction timeout - please try again' });
+          }
+        }, 60000);
+
         api.tx.pdex
           .provisionSingleSided(tokenId, amount, lockTier)
           .signAndSend(keyPair, ({ status, events, dispatchError }) => {
-            if (dispatchError) {
-              if (dispatchError.isModule) {
-                const decoded = api.registry.findMetaError(dispatchError.asModule);
-                resolve({ success: false, error: `${decoded.section}.${decoded.name}` });
-              } else {
-                resolve({ success: false, error: dispatchError.toString() });
+            // Handle error statuses
+            if (status.isDropped || status.isInvalid || status.isUsurped) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                resolve({ success: false, error: `Transaction failed: ${status.type}` });
               }
+              return;
             }
-            if (status.isFinalized) {
-              let positionId = '0';
-              events.forEach(({ event }) => {
-                if (event.section === 'pdex' && event.method === 'SingleSidedProvisioned') {
-                  positionId = event.data[1]?.toString() || '0';
+
+            if (dispatchError) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                if (dispatchError.isModule) {
+                  const decoded = api.registry.findMetaError(dispatchError.asModule);
+                  resolve({ success: false, error: `${decoded.section}.${decoded.name}` });
+                } else {
+                  resolve({ success: false, error: dispatchError.toString() });
                 }
-              });
-              resolve({ success: true, positionId });
+              }
+              return;
+            }
+
+            if (status.isInBlock || status.isFinalized) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                let positionId = '0';
+                events.forEach(({ event }) => {
+                  if (event.section === 'pdex' && event.method === 'SingleSidedProvisioned') {
+                    positionId = event.data[1]?.toString() || '0';
+                  }
+                });
+                resolve({ success: true, positionId });
+              }
             }
           })
           .catch((error) => {
-            resolve({ success: false, error: error.message });
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeout);
+              resolve({ success: false, error: error.message });
+            }
           });
       });
     } catch (error) {
@@ -96,23 +128,55 @@ class SingleSidedService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       return new Promise((resolve) => {
+        let resolved = false;
+        const timeout = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            resolve({ success: false, error: 'Transaction timeout - please try again' });
+          }
+        }, 60000);
+
         api.tx.pdex
           .withdrawSingleSided(positionId)
           .signAndSend(keyPair, ({ status, dispatchError }) => {
-            if (dispatchError) {
-              if (dispatchError.isModule) {
-                const decoded = api.registry.findMetaError(dispatchError.asModule);
-                resolve({ success: false, error: `${decoded.section}.${decoded.name}` });
-              } else {
-                resolve({ success: false, error: dispatchError.toString() });
+            // Handle error statuses
+            if (status.isDropped || status.isInvalid || status.isUsurped) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                resolve({ success: false, error: `Transaction failed: ${status.type}` });
               }
+              return;
             }
-            if (status.isFinalized) {
-              resolve({ success: true });
+
+            if (dispatchError) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                if (dispatchError.isModule) {
+                  const decoded = api.registry.findMetaError(dispatchError.asModule);
+                  resolve({ success: false, error: `${decoded.section}.${decoded.name}` });
+                } else {
+                  resolve({ success: false, error: dispatchError.toString() });
+                }
+              }
+              return;
+            }
+
+            if (status.isInBlock || status.isFinalized) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                resolve({ success: true });
+              }
             }
           })
           .catch((error) => {
-            resolve({ success: false, error: error.message });
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeout);
+              resolve({ success: false, error: error.message });
+            }
           });
       });
     } catch (error) {
@@ -127,23 +191,55 @@ class SingleSidedService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       return new Promise((resolve) => {
+        let resolved = false;
+        const timeout = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            resolve({ success: false, error: 'Transaction timeout - please try again' });
+          }
+        }, 60000);
+
         api.tx.pdex
           .claimSingleSidedRewards(positionId)
           .signAndSend(keyPair, ({ status, dispatchError }) => {
-            if (dispatchError) {
-              if (dispatchError.isModule) {
-                const decoded = api.registry.findMetaError(dispatchError.asModule);
-                resolve({ success: false, error: `${decoded.section}.${decoded.name}` });
-              } else {
-                resolve({ success: false, error: dispatchError.toString() });
+            // Handle error statuses
+            if (status.isDropped || status.isInvalid || status.isUsurped) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                resolve({ success: false, error: `Transaction failed: ${status.type}` });
               }
+              return;
             }
-            if (status.isFinalized) {
-              resolve({ success: true });
+
+            if (dispatchError) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                if (dispatchError.isModule) {
+                  const decoded = api.registry.findMetaError(dispatchError.asModule);
+                  resolve({ success: false, error: `${decoded.section}.${decoded.name}` });
+                } else {
+                  resolve({ success: false, error: dispatchError.toString() });
+                }
+              }
+              return;
+            }
+
+            if (status.isInBlock || status.isFinalized) {
+              if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                resolve({ success: true });
+              }
             }
           })
           .catch((error) => {
-            resolve({ success: false, error: error.message });
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeout);
+              resolve({ success: false, error: error.message });
+            }
           });
       });
     } catch (error) {

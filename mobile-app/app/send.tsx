@@ -450,16 +450,21 @@ export default function SendScreen() {
       setTransactionResult(txResult);
       setIsSending(false);
       setShowResult(true);
-      
+
       // Refresh balances after successful send
       refreshBalances();
       refreshPCHMLBalance();
-      
-      // Transaction successful
+
+      // Send success notification
+      await notificationService.notifyTransactionConfirmed(
+        formattedAmount,
+        recipient,
+        txHash
+      );
     } catch (error) {
       console.error('Error sending transaction:', error);
       setIsSending(false);
-      
+
       let errorMessage = 'Unknown error occurred';
       if (error instanceof Error) {
         errorMessage = error.message;
@@ -470,7 +475,13 @@ export default function SendScreen() {
           errorMessage = 'Unable to unlock wallet. Please try re-importing your wallet from the Wallet tab.';
         }
       }
-      
+
+      // Send failure notification
+      await notificationService.notifyTransactionFailed(
+        `${amount} ${selectedToken.symbol}`,
+        errorMessage
+      );
+
       Alert.alert('Transaction Failed', errorMessage);
     }
   };

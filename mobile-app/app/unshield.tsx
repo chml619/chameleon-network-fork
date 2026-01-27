@@ -30,6 +30,7 @@ import { bridgeService } from '@/services/bridge';
 import { transactionService } from '@/services/transaction';
 import { formatBalance, parseAmount } from '@/utils/balance';
 import { transactionHistoryService } from '@/services/transactionHistory';
+import { notificationService } from '@/services/notifications';
 import { THEME, GRADIENTS } from '@/constants/theme';
 const TOKENS = [
   { id: 'CHML', symbol: 'pCHML', outputSymbol: 'CHML', name: 'Chameleon', color: '#6366F1', icon: 'diamond-outline', assetId: 0, requiresBridge: false },
@@ -314,13 +315,20 @@ export default function UnshieldScreen() {
         from: wallet.address,
         to: destinationAddress,
         amount: amountBN.toString(),
-        formattedAmount: selectedToken.requiresBridge 
+        formattedAmount: selectedToken.requiresBridge
           ? `Withdraw ${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`
           : `${amount} ${selectedToken.symbol} → ${amount} ${selectedToken.outputSymbol}`,
         status: success ? 'finalized' : 'pending',
         usedMEVProtection: false,
         type: 'unshield',
       });
+
+      // Send success notification
+      await notificationService.notifyTransactionConfirmed(
+        `${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`,
+        destinationAddress,
+        txHash || ''
+      );
 
       Alert.alert(
         "Unshield Successful",
@@ -377,6 +385,13 @@ export default function UnshieldScreen() {
           errorMessage = error.message.length > 5 ? error.message : errorMessage;
         }
       }
+
+      // Send failure notification
+      await notificationService.notifyTransactionFailed(
+        `${amount} ${selectedToken.symbol} unshield`,
+        errorMessage
+      );
+
       Alert.alert('Unshield Failed', errorMessage);
     } finally {
       setIsUnshielding(false);

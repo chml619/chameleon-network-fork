@@ -784,26 +784,52 @@ class PDEXService {
    */
   private signAndSendLP(tx: any, keyPair: KeyringPair): Promise<LPResult> {
     return new Promise((resolve) => {
+      let resolved = false;
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          resolve({ success: false, error: 'Transaction timeout - please try again' });
+        }
+      }, 60000); // 60 second timeout
+
       tx.signAndSend(keyPair, ({ status, dispatchError, txHash }: any) => {
+        // Handle error statuses
+        if (status.isDropped || status.isInvalid || status.isUsurped) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            resolve({ success: false, error: `Transaction failed: ${status.type}` });
+          }
+          return;
+        }
+
         if (status.isInBlock || status.isFinalized) {
-          if (dispatchError) {
-            resolve({
-              success: false,
-              txHash: txHash?.toHex(),
-              error: 'Transaction failed on chain',
-            });
-          } else {
-            resolve({
-              success: true,
-              txHash: txHash?.toHex(),
-            });
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            if (dispatchError) {
+              resolve({
+                success: false,
+                txHash: txHash?.toHex(),
+                error: 'Transaction failed on chain',
+              });
+            } else {
+              resolve({
+                success: true,
+                txHash: txHash?.toHex(),
+              });
+            }
           }
         }
       }).catch((error: Error) => {
-        resolve({
-          success: false,
-          error: error.message,
-        });
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          resolve({
+            success: false,
+            error: error.message,
+          });
+        }
       });
     });
   }
@@ -869,26 +895,52 @@ class PDEXService {
     tokenOut: string
   ): Promise<SwapResult> {
     return new Promise((resolve) => {
+      let resolved = false;
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          resolve({ success: false, error: 'Transaction timeout - please try again' });
+        }
+      }, 60000); // 60 second timeout
+
       tx.signAndSend(keyPair, ({ status, dispatchError, txHash }: any) => {
+        // Handle error statuses
+        if (status.isDropped || status.isInvalid || status.isUsurped) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            resolve({ success: false, error: `Transaction failed: ${status.type}` });
+          }
+          return;
+        }
+
         if (status.isInBlock || status.isFinalized) {
-          if (dispatchError) {
-            resolve({
-              success: false,
-              txHash: txHash?.toHex(),
-              error: 'Swap failed on chain',
-            });
-          } else {
-            resolve({
-              success: true,
-              txHash: txHash?.toHex(),
-            });
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            if (dispatchError) {
+              resolve({
+                success: false,
+                txHash: txHash?.toHex(),
+                error: 'Swap failed on chain',
+              });
+            } else {
+              resolve({
+                success: true,
+                txHash: txHash?.toHex(),
+              });
+            }
           }
         }
       }).catch((error: Error) => {
-        resolve({
-          success: false,
-          error: error.message,
-        });
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          resolve({
+            success: false,
+            error: error.message,
+          });
+        }
       });
     });
   }
@@ -913,16 +965,42 @@ class PDEXService {
     try {
       const tx = api.tx.pdex.transfer(assetId, to, amount.toString());
       return new Promise((resolve) => {
+        let resolved = false;
+        const timeout = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            resolve({ success: false, error: 'Transaction timeout - please try again' });
+          }
+        }, 60000); // 60 second timeout
+
         tx.signAndSend(keyPair, ({ status, dispatchError, txHash }: any) => {
+          // Handle error statuses
+          if (status.isDropped || status.isInvalid || status.isUsurped) {
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeout);
+              resolve({ success: false, error: `Transaction failed: ${status.type}` });
+            }
+            return;
+          }
+
           if (status.isInBlock || status.isFinalized) {
-            if (dispatchError) {
-              resolve({ success: false, txHash: txHash?.toHex(), error: "Transfer failed" });
-            } else {
-              resolve({ success: true, txHash: txHash?.toHex() });
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeout);
+              if (dispatchError) {
+                resolve({ success: false, txHash: txHash?.toHex(), error: "Transfer failed" });
+              } else {
+                resolve({ success: true, txHash: txHash?.toHex() });
+              }
             }
           }
         }).catch((error: Error) => {
-          resolve({ success: false, error: error.message });
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            resolve({ success: false, error: error.message });
+          }
         });
       });
     } catch (error: any) {

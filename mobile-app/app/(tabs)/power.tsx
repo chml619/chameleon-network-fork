@@ -31,8 +31,9 @@ import { NetworkBadge } from '@/components/NetworkBadge';
 // MockViewBanner removed - functionality is now real
 import { THEME, GRADIENTS } from '@/constants/theme';
 import { NodeStatus } from '@/services/staking';
-import { formatBalance, parseAmount } from '@/utils/balance';
+import { formatBalance, parseAmount, formatBalanceWithUnit } from '@/utils/balance';
 import { singleSidedService, SingleSidedPosition, LOCK_TIER_INFO } from "@/services/singleSided";
+import { walletService } from "@/services/wallet";
 
 // Status colors mapping
 const STATUS_COLORS: Record<NodeStatus, string> = {
@@ -116,6 +117,12 @@ export default function PowerScreen() {
   const [amountA, setAmountA] = useState('');
   const [amountB, setAmountB] = useState('');
 
+  // Single-sided position modal state
+  const [showSingleSidedModal, setShowSingleSidedModal] = useState(false);
+  const [selectedSingleSidedPosition, setSelectedSingleSidedPosition] = useState<SingleSidedPosition | null>(null);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isClaimingSSRewards, setIsClaimingSSRewards] = useState(false);
+
   // Get current block number for unbonding countdown
   useEffect(() => {
     if (connectionState.blockNumber) {
@@ -184,7 +191,7 @@ export default function PowerScreen() {
 
   const handleClaimLPRewards = async () => {
     if (!api || !wallet) return;
-    
+
     // For now, we'll mock the keyPair requirement
     // const keyPair = await walletService.getOrDeriveKeyPair();
     // if (!keyPair) {
@@ -197,7 +204,7 @@ export default function PowerScreen() {
       // Will connect to emissions.claimLpRewards() when pallet is ready
       // For now, show success with mock
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // if (refreshPCHMLBalance) await refreshPCHMLBalance();
       Alert.alert('Success', 'LP rewards claimed successfully!');
       await loadLPData();
@@ -206,6 +213,92 @@ export default function PowerScreen() {
     } finally {
       setActionLoading(null);
     }
+  };
+
+  // Single-sided position handlers
+  const handleSingleSidedPositionTap = (position: SingleSidedPosition) => {
+    setSelectedSingleSidedPosition(position);
+    setShowSingleSidedModal(true);
+  };
+
+  const handleClaimSingleSidedRewards = async () => {
+    if (!api || !selectedSingleSidedPosition) return;
+
+    const keyPair = await walletService.getOrDeriveKeyPair();
+    if (!keyPair) {
+      Alert.alert('Error', 'Wallet not unlocked. Please re-import your wallet.');
+      return;
+    }
+
+    setIsClaimingSSRewards(true);
+    try {
+      const result = await singleSidedService.claimSingleSidedRewards(
+        api,
+        keyPair,
+        selectedSingleSidedPosition.positionId
+      );
+      if (result.success) {
+        Alert.alert('Success', 'Rewards claimed successfully!');
+        await loadLPData();
+        setShowSingleSidedModal(false);
+      } else {
+        Alert.alert('Error', result.error || 'Failed to claim rewards');
+      }
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Claim failed');
+    } finally {
+      setIsClaimingSSRewards(false);
+    }
+  };
+
+  const handleWithdrawSingleSided = async () => {
+    if (!api || !selectedSingleSidedPosition) return;
+
+    if (selectedSingleSidedPosition.isLocked) {
+      Alert.alert(
+        'Position Locked',
+        `This position is locked until ${selectedSingleSidedPosition.unlockDate?.toLocaleDateString() || 'the lock period ends'}.`
+      );
+      return;
+    }
+
+    const keyPair = await walletService.getOrDeriveKeyPair();
+    if (!keyPair) {
+      Alert.alert('Error', 'Wallet not unlocked. Please re-import your wallet.');
+      return;
+    }
+
+    Alert.alert(
+      'Confirm Withdrawal',
+      `Withdraw ${(parseInt(selectedSingleSidedPosition.amount) / 1e12).toFixed(4)} ${selectedSingleSidedPosition.tokenSymbol}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Withdraw',
+          onPress: async () => {
+            setIsWithdrawing(true);
+            try {
+              const result = await singleSidedService.withdrawSingleSided(
+                api,
+                keyPair,
+                selectedSingleSidedPosition.positionId
+              );
+              if (result.success) {
+                Alert.alert('Success', 'Position withdrawn successfully!');
+                await loadLPData();
+                setShowSingleSidedModal(false);
+              } else {
+                Alert.alert('Error', result.error || 'Failed to withdraw');
+              }
+            } catch (error) {
+              Alert.alert('Error', error instanceof Error ? error.message : 'Withdrawal failed');
+            } finally {
+              setIsWithdrawing(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   // Pull to refresh
@@ -522,7 +615,7 @@ export default function PowerScreen() {
                       <View style={styles.statItem}>
                         <Text style={styles.statLabel}>Rewards</Text>
                         <Text style={[styles.statValue, { color: THEME.colors.success }]}>
-                          {stakingInfo?.rewards || '0 CHML'}
+                          {formatBalanceWithUnit(stakingInfo?.rewardsRaw)}
                         </Text>
                       </View>
                       <View style={styles.statItem}>
@@ -735,15 +828,28 @@ export default function PowerScreen() {
               ) : (
                 <>
                   {singleSidedPositions.map((pos) => (
-                    <View key={pos.positionId} style={styles.lpPositionCard}>
+                    <TouchableOpacity
+                      key={pos.positionId}
+                      style={styles.lpPositionCard}
+                      onPress={() => handleSingleSidedPositionTap(pos)}
+                      activeOpacity={0.7}
+                    >
                       <View style={styles.lpPositionInfo}>
                         <Text style={styles.lpPoolName}>{pos.tokenSymbol}</Text>
-                        <Text style={styles.lpSharePercent}>{pos.isLocked ? "Locked" : "Unlocked"} - {LOCK_TIER_INFO[pos.lockTier].label}</Text>
+                        <Text style={styles.lpSharePercent}>
+                          {pos.isLocked ? "Locked" : "Unlocked"} - {LOCK_TIER_INFO[pos.lockTier]?.label || pos.lockTier}
+                        </Text>
+                        {pos.pendingRewards && pos.pendingRewards !== '0' && (
+                          <Text style={[styles.lpSharePercent, { color: THEME.colors.success }]}>
+                            Rewards: {(parseInt(pos.pendingRewards) / 1e12).toFixed(4)} pCHML
+                          </Text>
+                        )}
                       </View>
                       <View style={styles.lpPositionRight}>
                         <Text style={styles.lpLiquidity}>{(parseInt(pos.amount) / Math.pow(10, 12)).toFixed(2)}</Text>
+                        <Ionicons name="chevron-forward" size={16} color={THEME.colors.textMuted} />
                       </View>
-                    </View>
+                    </TouchableOpacity>
                   ))}
                   <TouchableOpacity style={[styles.addLiquidityButton, { backgroundColor: THEME.colors.primary, borderWidth: 0, marginTop: THEME.spacing.md }]} onPress={() => router.push("/single-sided" as any)}>
                     <Ionicons name="add" size={18} color={THEME.colors.white} />
@@ -814,6 +920,96 @@ export default function PowerScreen() {
                 <Text style={styles.actionButtonText}>Confirm Add Liquidity</Text>
               )}
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Single-Sided Position Modal */}
+      <Modal
+        visible={showSingleSidedModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowSingleSidedModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Position Details</Text>
+              <TouchableOpacity onPress={() => setShowSingleSidedModal(false)}>
+                <Ionicons name="close" size={24} color={THEME.colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            {selectedSingleSidedPosition && (
+              <>
+                <View style={styles.ssDetailRow}>
+                  <Text style={styles.ssDetailLabel}>Token</Text>
+                  <Text style={styles.ssDetailValue}>{selectedSingleSidedPosition.tokenSymbol}</Text>
+                </View>
+                <View style={styles.ssDetailRow}>
+                  <Text style={styles.ssDetailLabel}>Amount</Text>
+                  <Text style={styles.ssDetailValue}>
+                    {(parseInt(selectedSingleSidedPosition.amount) / 1e12).toFixed(4)} {selectedSingleSidedPosition.tokenSymbol}
+                  </Text>
+                </View>
+                <View style={styles.ssDetailRow}>
+                  <Text style={styles.ssDetailLabel}>Lock Tier</Text>
+                  <Text style={styles.ssDetailValue}>
+                    {LOCK_TIER_INFO[selectedSingleSidedPosition.lockTier]?.label || selectedSingleSidedPosition.lockTier}
+                  </Text>
+                </View>
+                <View style={styles.ssDetailRow}>
+                  <Text style={styles.ssDetailLabel}>Status</Text>
+                  <Text style={[styles.ssDetailValue, { color: selectedSingleSidedPosition.isLocked ? THEME.colors.warning : THEME.colors.success }]}>
+                    {selectedSingleSidedPosition.isLocked ? 'Locked' : 'Unlocked'}
+                  </Text>
+                </View>
+                {selectedSingleSidedPosition.isLocked && selectedSingleSidedPosition.unlockDate && (
+                  <View style={styles.ssDetailRow}>
+                    <Text style={styles.ssDetailLabel}>Unlocks</Text>
+                    <Text style={styles.ssDetailValue}>{selectedSingleSidedPosition.unlockDate.toLocaleDateString()}</Text>
+                  </View>
+                )}
+                <View style={styles.ssDetailRow}>
+                  <Text style={styles.ssDetailLabel}>Pending Rewards</Text>
+                  <Text style={[styles.ssDetailValue, { color: THEME.colors.success }]}>
+                    {(parseInt(selectedSingleSidedPosition.pendingRewards || '0') / 1e12).toFixed(4)} pCHML
+                  </Text>
+                </View>
+
+                {/* Action Buttons */}
+                <View style={{ marginTop: THEME.spacing.lg, gap: THEME.spacing.sm }}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.primaryButton]}
+                    onPress={handleClaimSingleSidedRewards}
+                    disabled={isClaimingSSRewards || parseInt(selectedSingleSidedPosition.pendingRewards || '0') === 0}
+                  >
+                    {isClaimingSSRewards ? (
+                      <ActivityIndicator size="small" color={THEME.colors.white} />
+                    ) : (
+                      <Text style={styles.actionButtonText}>Claim Rewards</Text>
+                    )}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.actionButton,
+                      selectedSingleSidedPosition.isLocked ? styles.disabledButton : styles.warningButton
+                    ]}
+                    onPress={handleWithdrawSingleSided}
+                    disabled={isWithdrawing || selectedSingleSidedPosition.isLocked}
+                  >
+                    {isWithdrawing ? (
+                      <ActivityIndicator size="small" color={THEME.colors.white} />
+                    ) : (
+                      <Text style={[styles.actionButtonText, selectedSingleSidedPosition.isLocked && { color: THEME.colors.textMuted }]}>
+                        {selectedSingleSidedPosition.isLocked ? 'Locked - Cannot Withdraw' : 'Withdraw Position'}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
           </View>
         </View>
       </Modal>
@@ -1052,6 +1248,24 @@ const styles = StyleSheet.create({
   },
   disabledText: {
     color: THEME.colors.textMuted,
+  },
+  // Single-sided detail styles
+  ssDetailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: THEME.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: THEME.colors.border,
+  },
+  ssDetailLabel: {
+    fontSize: THEME.fontSize.sm,
+    color: THEME.colors.textSecondary,
+  },
+  ssDetailValue: {
+    fontSize: THEME.fontSize.base,
+    fontWeight: THEME.fontWeight.semibold as any,
+    color: THEME.colors.text,
   },
   // Info card
   infoCard: {

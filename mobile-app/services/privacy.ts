@@ -124,20 +124,49 @@ export class PrivacyService {
     amount: BN
   ): Promise<string> {
     if (!this.api) throw new Error('API not connected');
-    
+
     const tx = this.api.tx.balances.transferKeepAlive(toAddress, amount.toString());
-    
+
     return new Promise((resolve, reject) => {
+      let resolved = false;
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          reject(new Error('Transaction timeout - please check your balance and try again'));
+        }
+      }, 60000); // 60 second timeout
+
       tx.signAndSend(senderKeypair, (result: any) => {
         const { status, dispatchError } = result;
+
+        // Handle error statuses
+        if (status.isDropped || status.isInvalid || status.isUsurped) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            reject(new Error(`Transaction failed: ${status.type}`));
+          }
+          return;
+        }
+
         if (status.isInBlock || status.isFinalized) {
-          if (dispatchError) {
-            reject(new Error(dispatchError.toString()));
-          } else {
-            resolve(status.asFinalized?.toString() || status.asInBlock.toString());
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            if (dispatchError) {
+              reject(new Error(dispatchError.toString()));
+            } else {
+              resolve(status.asFinalized?.toString() || status.asInBlock?.toString());
+            }
           }
         }
-      }).catch(reject);
+      }).catch((err: any) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          reject(err);
+        }
+      });
     });
   }
 
@@ -212,16 +241,45 @@ export class PrivacyService {
     );
 
     return new Promise((resolve, reject) => {
+      let resolved = false;
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          reject(new Error('Transaction timeout - please check your balance and try again'));
+        }
+      }, 60000); // 60 second timeout
+
       tx.signAndSend(signerKeypair, (result: any) => {
         const { status, dispatchError } = result;
+
+        // Handle error statuses
+        if (status.isDropped || status.isInvalid || status.isUsurped) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            reject(new Error(`Transaction failed: ${status.type}`));
+          }
+          return;
+        }
+
         if (status.isInBlock || status.isFinalized) {
-          if (dispatchError) {
-            reject(new Error(dispatchError.toString()));
-          } else {
-            resolve(status.asFinalized?.toString() || status.asInBlock.toString());
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            if (dispatchError) {
+              reject(new Error(dispatchError.toString()));
+            } else {
+              resolve(status.asFinalized?.toString() || status.asInBlock?.toString());
+            }
           }
         }
-      }).catch(reject);
+      }).catch((err: any) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          reject(err);
+        }
+      });
     });
   }
 
@@ -239,16 +297,45 @@ export class PrivacyService {
     );
 
     return new Promise((resolve, reject) => {
+      let resolved = false;
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          reject(new Error('Transaction timeout - please check your balance and try again'));
+        }
+      }, 60000); // 60 second timeout
+
       tx.signAndSend(signerKeypair, (result: any) => {
         const { status, dispatchError } = result;
+
+        // Handle error statuses
+        if (status.isDropped || status.isInvalid || status.isUsurped) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            reject(new Error(`Transaction failed: ${status.type}`));
+          }
+          return;
+        }
+
         if (status.isInBlock || status.isFinalized) {
-          if (dispatchError) {
-            reject(new Error(dispatchError.toString()));
-          } else {
-            resolve(status.asFinalized?.toString() || status.asInBlock.toString());
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            if (dispatchError) {
+              reject(new Error(dispatchError.toString()));
+            } else {
+              resolve(status.asFinalized?.toString() || status.asInBlock?.toString());
+            }
           }
         }
-      }).catch(reject);
+      }).catch((err: any) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          reject(err);
+        }
+      });
     });
   }
 
@@ -305,26 +392,55 @@ export class PrivacyService {
     );
 
     return new Promise((resolve, reject) => {
+      let resolved = false;
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          reject(new Error('Transaction timeout - please check your balance and try again'));
+        }
+      }, 60000); // 60 second timeout
+
       tx.signAndSend(signerKeypair, (result: any) => {
         const { status, dispatchError } = result;
+
+        // Handle error statuses
+        if (status.isDropped || status.isInvalid || status.isUsurped) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            reject(new Error(`Transaction failed: ${status.type}`));
+          }
+          return;
+        }
+
         if (status.isInBlock || status.isFinalized) {
-          if (dispatchError) {
-            if (dispatchError.isModule) {
-              try {
-                const decoded = this.api!.registry.findMetaError(dispatchError.asModule);
-                console.error('[Privacy] Unshield error:', decoded.section, decoded.name, decoded.docs.join(' '));
-                reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
-              } catch (e) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            if (dispatchError) {
+              if (dispatchError.isModule) {
+                try {
+                  const decoded = this.api!.registry.findMetaError(dispatchError.asModule);
+                  console.error('[Privacy] Unshield error:', decoded.section, decoded.name, decoded.docs.join(' '));
+                  reject(new Error(`${decoded.section}.${decoded.name}: ${decoded.docs.join(' ')}`));
+                } catch (e) {
+                  reject(new Error(dispatchError.toString()));
+                }
+              } else {
                 reject(new Error(dispatchError.toString()));
               }
             } else {
-              reject(new Error(dispatchError.toString()));
+              resolve(status.asFinalized?.toString() || status.asInBlock?.toString());
             }
-          } else {
-            resolve(status.asFinalized?.toString() || status.asInBlock.toString());
           }
         }
-      }).catch(reject);
+      }).catch((err: any) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          reject(err);
+        }
+      });
     });
   }
 }

@@ -148,21 +148,38 @@ export function WalletProvider({ children }: WalletProviderProps) {
     try {
       // Check if wallet exists in storage
       const hasWallet = await storageService.hasWallet();
-      
+
       if (hasWallet) {
         // Get wallet metadata
         const metadata = await storageService.getWalletMetadata();
-        
+
         if (metadata) {
-          // Set wallet state as locked (user needs to unlock with seed)
+          // Set initial wallet state as locked
           setWallet({
             address: metadata.address,
             name: metadata.name,
             isLocked: true,
           });
-          
+
           // Update multi-wallet service
           await multiWalletService.setActiveWallet(metadata.address);
+
+          // Try to automatically restore keypair from stored seed
+          try {
+            const keyPair = await walletService.getOrDeriveKeyPair();
+            if (keyPair) {
+              // Keypair restored successfully, update state to unlocked
+              setWallet({
+                address: metadata.address,
+                name: metadata.name,
+                isLocked: false,
+              });
+              console.log('[WalletContext] Wallet auto-unlocked on startup');
+            }
+          } catch (restoreError) {
+            console.warn('[WalletContext] Could not auto-restore keypair on init:', restoreError);
+            // Keep wallet in locked state
+          }
         }
       }
     } catch (err) {
@@ -274,15 +291,18 @@ export function WalletProvider({ children }: WalletProviderProps) {
     setError(null);
 
     try {
+      // Clear cached keypair from previous wallet before switching
+      walletService.clearCachedKeyPair();
+
       // For dev accounts, we need to find the right URI and re-import
       const savedWallet = await multiWalletService.getWallet(address);
-      
+
       if (savedWallet?.type === 'dev') {
         // Extract account name from various formats:
         // "Alice (Dev)", "Dev Account (Alice)", "alice", etc.
         const nameLower = name.toLowerCase();
         let accountNameLower: 'alice' | 'bob' | 'charlie' | 'dave' | 'eve' | null = null;
-        
+
         const devNames: Array<'alice' | 'bob' | 'charlie' | 'dave' | 'eve'> = ['alice', 'bob', 'charlie', 'dave', 'eve'];
         for (const devName of devNames) {
           if (nameLower.includes(devName)) {
@@ -290,28 +310,44 @@ export function WalletProvider({ children }: WalletProviderProps) {
             break;
           }
         }
-        
+
         if (accountNameLower) {
           const walletState = await walletService.importDevAccount(accountNameLower);
           const uri = DEV_ACCOUNTS[accountNameLower];
-          
+
           await storageService.saveEncryptedSeed(uri);
           await storageService.saveWalletMetadata(walletState.name, walletState.address);
           await multiWalletService.setActiveWallet(walletState.address);
-          
+
           setWallet(walletState);
         } else {
           throw new Error('Could not identify dev account');
         }
       } else {
-        // For custom/imported wallets, just update the state
-        // User would need to re-enter mnemonic to fully unlock
-        setWallet({
+        // For custom/imported wallets, set initial state then try to restore keypair
+        const newWalletState: WalletState = {
           address,
           name,
           isLocked: true,
-        });
+        };
+        setWallet(newWalletState);
         await multiWalletService.setActiveWallet(address);
+
+        // Try to automatically restore keypair from stored seed
+        try {
+          const keyPair = await walletService.getOrDeriveKeyPair();
+          if (keyPair) {
+            // Keypair restored successfully, update state to unlocked
+            setWallet({
+              address,
+              name,
+              isLocked: false,
+            });
+          }
+        } catch (restoreError) {
+          console.warn('[WalletContext] Could not auto-restore keypair:', restoreError);
+          // Keep wallet in locked state - user will need to re-enter mnemonic
+        }
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to switch wallet';
