@@ -133,6 +133,9 @@ sp-runtime = "41.1.0"
 - **SFO (Alice)**: 64.23.233.36
 - **NYC (Bob)**: 104.131.167.75
 
+### Alice Peer ID (for bootnode)
+`12D3KooWRickzzF4SNiSr5S7DMNNDm9ysoLLWsqBvA8RzKRyrsGL`
+
 ### Binary Location
 `/root/chameleon-fresh/target/release/chameleon-node-devnet`
 
