@@ -126,3 +126,48 @@ sp-runtime = "41.1.0"
 
 - **Devnet RPC**: `ws://64.23.233.36:9944`
 - **Polkadot.js UI**: Connect at `https://polkadot.js.org/apps/#/explorer?rpc=ws://localhost:9944`
+
+## Deployment Workflow
+
+### Droplet IPs
+- **SFO (Alice)**: 64.23.233.36
+- **NYC (Bob)**: 104.131.167.75
+
+### Binary Location
+`/root/chameleon-fresh/target/release/chameleon-node-devnet`
+
+### Deployment Steps
+1. Kill nodes on both droplets:
+   ```bash
+   ssh root@64.23.233.36 "pkill -f chameleon-node-devnet || true"
+   ssh root@104.131.167.75 "pkill -f chameleon-node-devnet || true"
+   ```
+2. Copy binary to SFO:
+   ```bash
+   scp target/release/chameleon-node-devnet root@64.23.233.36:/root/
+   ```
+3. Copy binary to NYC:
+   ```bash
+   scp target/release/chameleon-node-devnet root@104.131.167.75:/root/
+   ```
+4. SSH to SFO, generate chainspec, start Alice node in screen
+5. SSH to NYC, start Bob node with bootnode pointing to Alice
+6. Run pool creation scripts from SFO:
+   ```bash
+   node scripts/create-pools.js
+   node scripts/add-liquidity-v3.js
+   ```
+
+## Git Workflow
+
+Always pull before making changes:
+```bash
+git pull origin develop
+```
+
+After changes:
+```bash
+git add <files>
+git commit -m "type: descriptive message"
+git push origin develop
+```
