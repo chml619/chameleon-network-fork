@@ -29,6 +29,7 @@ import { transactionHistoryService } from '@/services/transactionHistory';
 import { notificationService } from '@/services/notifications';
 import { TokenSelector } from '@/components/TokenSelector';
 import { FeatureBadge } from '@/components/FeatureBadge';
+import { TransactionStatus } from '@/components/TransactionStatus';
 import { formatBalance, formatDisplayBalance } from '@/utils/balance';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
@@ -70,6 +71,8 @@ export default function TradeScreen() {
 
   const [slippage, setSlippage] = useState('0.5');
   const [showSlippageModal, setShowSlippageModal] = useState(false);
+  const [showTxStatus, setShowTxStatus] = useState(false);
+  const [txResult, setTxResult] = useState<any>(null);
 
   // Load pool statistics
   const loadPoolStats = async () => {
@@ -134,44 +137,60 @@ export default function TradeScreen() {
         {
           text: 'Swap',
           onPress: async () => {
+            // Show pending status immediately
+            setTxResult({
+              status: 'pending',
+              hash: '',
+              usedMEVProtection: mevProtection,
+            });
+            setShowTxStatus(true);
+
             let result: any = null;
             let txHash = '';
             let success = false;
-            
+
             try {
               result = await executeSwap();
               success = result?.success || false;
               txHash = result?.txHash || '';
-              
+
+              // Update status to finalized or failed
+              setTxResult({
+                status: success ? 'finalized' : 'failed',
+                hash: txHash,
+                blockHash: result?.blockHash,
+                usedMEVProtection: mevProtection,
+                error: result?.error,
+              });
+
               if (success) {
-                // Send success notification
                 await notificationService.notifyTransactionConfirmed(
                   `${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
                   wallet?.address || '',
                   txHash
                 );
-                Alert.alert('Success', 'Swap completed successfully!');
-                // Refresh all balances
                 refreshBalances();
                 refreshPCHMLBalance();
               } else {
-                // Send failure notification
                 await notificationService.notifyTransactionFailed(
                   `${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
                   result?.error || 'Swap failed'
                 );
-                Alert.alert('Error', result?.error || 'Swap failed');
               }
             } catch (error) {
               console.error('[Trade] Swap execution error:', error);
-              // Send failure notification
+              setTxResult({
+                status: 'failed',
+                hash: '',
+                error: 'Network or validation error',
+                usedMEVProtection: mevProtection,
+              });
               await notificationService.notifyTransactionFailed(
                 `${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
                 'Network or validation error'
               );
-              Alert.alert('Error', 'Swap failed due to network or validation error');
             }
-            
+
             // Save swap to transaction history (both success and failure)
             if (wallet?.address) {
               try {
@@ -181,7 +200,7 @@ export default function TradeScreen() {
                   to: wallet.address,
                   amount: amountIn,
                   formattedAmount: success
-		    ? `${amountIn} ${selectedTokenIn.symbol} → ${result?.amountOut || quote.amountOut}`
+                    ? `${amountIn} ${selectedTokenIn.symbol} → ${result?.amountOut || quote.amountOut}`
                     : `Failed: ${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
                   status: success ? 'finalized' : 'failed',
                   usedMEVProtection: mevProtection,
@@ -591,6 +610,21 @@ export default function TradeScreen() {
               <Text style={styles.slippageConfirmText}>Confirm</Text>
             </TouchableOpacity>
           </View>
+        </View>
+      </Modal>
+
+      {/* Transaction Status Modal */}
+      <Modal visible={showTxStatus} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          {txResult && (
+            <TransactionStatus
+              result={txResult}
+              onClose={() => {
+                setShowTxStatus(false);
+                setTxResult(null);
+              }}
+            />
+          )}
         </View>
       </Modal>
     </LinearGradient>

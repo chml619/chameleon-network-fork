@@ -160,9 +160,11 @@ class PDEXService {
   private static instance: PDEXService;
   private mevProtectionEnabled: boolean = true;
   
-  // Add balance cache
+  // Add balance cache - longer TTL to reduce query frequency
+  // Note: If pCHML balance is growing every block, this is a blockchain-side issue
+  // The emissions pallet should credit to a claimable accumulator, not pCHML balance directly
   private balanceCache: Map<string, { balance: BN; timestamp: number }> = new Map();
-  private CACHE_TTL_MS = 5000; // 5 second cache
+  private CACHE_TTL_MS = 10000; // 10 second cache to reduce query frequency
   clearBalanceCache(): void { this.balanceCache.clear(); }
 
   private constructor() {}

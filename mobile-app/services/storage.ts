@@ -7,6 +7,7 @@ import * as SecureStore from 'expo-secure-store';
 // Storage keys
 const STORAGE_KEYS = {
   WALLET_SEED: 'chameleon_wallet_seed',
+  WALLET_SEED_PREFIX: 'chameleon_wallet_seed_', // For per-address seed storage
   WALLET_NAME: 'chameleon_wallet_name',
   WALLET_ADDRESS: 'chameleon_wallet_address',
   HAS_WALLET: 'chameleon_has_wallet',
@@ -25,7 +26,7 @@ class StorageService {
   }
 
   /**
-   * Save encrypted seed phrase
+   * Save encrypted seed phrase (legacy - also saves to current wallet)
    */
   public async saveEncryptedSeed(seed: string): Promise<void> {
     try {
@@ -36,6 +37,41 @@ class StorageService {
     } catch (error) {
       console.error('Error saving encrypted seed:', error);
       throw new Error('Failed to save wallet seed securely');
+    }
+  }
+
+  /**
+   * Save encrypted seed phrase for a specific wallet address
+   */
+  public async saveEncryptedSeedForAddress(seed: string, address: string): Promise<void> {
+    try {
+      const key = `${STORAGE_KEYS.WALLET_SEED_PREFIX}${address}`;
+      await SecureStore.setItemAsync(key, seed, {
+        requireAuthentication: false,
+      });
+      // Also update the current wallet seed
+      await this.saveEncryptedSeed(seed);
+      console.log('[Storage] Seed saved for address:', address.substring(0, 10) + '...');
+    } catch (error) {
+      console.error('Error saving encrypted seed for address:', error);
+      throw new Error('Failed to save wallet seed securely');
+    }
+  }
+
+  /**
+   * Retrieve encrypted seed phrase for a specific wallet address
+   */
+  public async getEncryptedSeedForAddress(address: string): Promise<string | null> {
+    try {
+      const key = `${STORAGE_KEYS.WALLET_SEED_PREFIX}${address}`;
+      const seed = await SecureStore.getItemAsync(key);
+      if (seed) {
+        console.log('[Storage] Seed retrieved for address:', address.substring(0, 10) + '...');
+      }
+      return seed;
+    } catch (error) {
+      console.error('Error retrieving encrypted seed for address:', error);
+      return null;
     }
   }
 
@@ -97,7 +133,7 @@ class StorageService {
   }
 
   /**
-   * Delete all wallet data
+   * Delete all wallet data (current wallet only, not per-address seeds)
    */
   public async deleteWallet(): Promise<void> {
     try {
@@ -110,6 +146,19 @@ class StorageService {
     } catch (error) {
       console.error('Error deleting wallet data:', error);
       throw new Error('Failed to delete wallet data');
+    }
+  }
+
+  /**
+   * Delete seed for a specific wallet address
+   */
+  public async deleteSeedForAddress(address: string): Promise<void> {
+    try {
+      const key = `${STORAGE_KEYS.WALLET_SEED_PREFIX}${address}`;
+      await SecureStore.deleteItemAsync(key);
+      console.log('[Storage] Seed deleted for address:', address.substring(0, 10) + '...');
+    } catch (error) {
+      console.error('Error deleting seed for address:', error);
     }
   }
 

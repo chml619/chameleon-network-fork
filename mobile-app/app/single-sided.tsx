@@ -35,6 +35,8 @@ import {
   pdexService } from '@/services/pdex';
 import {
   THEME, GRADIENTS } from '@/constants/theme';
+import { transactionHistoryService } from '@/services/transactionHistory';
+import { notificationService } from '@/services/notifications';
 
 const TOKENS = [
   { id: 0, symbol: 'pCHML', name: 'Privacy CHML', color: '#6366F1' },
@@ -106,14 +108,28 @@ export default function SingleSidedScreen() {
                 selectedTier
               );
               if (result.success) {
+                // Save to transaction history
+                transactionHistoryService.saveTransaction(wallet.address, {
+                  hash: `ss_provision_${Date.now()}`,
+                  from: wallet.address,
+                  to: 'Single-Sided Pool',
+                  amount: amountBN.toString(),
+                  formattedAmount: `${amount} ${selectedToken.symbol}`,
+                  status: 'finalized',
+                  usedMEVProtection: false,
+                  type: 'add_liquidity',
+                });
+                notificationService.addNotification('success', `Provided ${amount} ${selectedToken.symbol} single-sided liquidity!`);
                 if (refreshBalances) await refreshBalances();
                 Alert.alert('Success', 'Single-sided liquidity provided!', [
                   { text: 'OK', onPress: () => router.back() }
                 ]);
               } else {
+                notificationService.addNotification('error', result.error || 'Provision failed');
                 Alert.alert('Error', result.error || 'Failed to provision');
               }
             } catch (error) {
+              notificationService.addNotification('error', 'Single-sided provision failed');
               Alert.alert('Error', 'Transaction failed');
             } finally {
               setIsSubmitting(false);

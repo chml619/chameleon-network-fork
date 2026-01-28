@@ -197,9 +197,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
     try {
       // Create wallet with wallet service
       const walletState = await walletService.createWallet(mnemonic, name);
-      
-      // Save to secure storage
-      await storageService.saveEncryptedSeed(mnemonic);
+
+      // Save to secure storage - use address-keyed storage
+      await storageService.saveEncryptedSeedForAddress(mnemonic, walletState.address);
       await storageService.saveWalletMetadata(name, walletState.address);
       
       // Save to multi-wallet list
@@ -228,9 +228,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
     try {
       // Import wallet with wallet service
       const walletState = await walletService.importWallet(mnemonic, name);
-      
-      // Save to secure storage
-      await storageService.saveEncryptedSeed(mnemonic);
+
+      // Save to secure storage - use address-keyed storage
+      await storageService.saveEncryptedSeedForAddress(mnemonic, walletState.address);
       await storageService.saveWalletMetadata(name, walletState.address);
       
       // Save to multi-wallet list
@@ -262,9 +262,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
       
       // Get the URI for the dev account (not a plain mnemonic)
       const uri = DEV_ACCOUNTS[accountName];
-      
-      // Save to secure storage (using URI as the "seed" for dev accounts)
-      await storageService.saveEncryptedSeed(uri);
+
+      // Save to secure storage - use address-keyed storage
+      await storageService.saveEncryptedSeedForAddress(uri, walletState.address);
       await storageService.saveWalletMetadata(walletState.name, walletState.address);
       
       // Save to multi-wallet list
@@ -315,7 +315,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
           const walletState = await walletService.importDevAccount(accountNameLower);
           const uri = DEV_ACCOUNTS[accountNameLower];
 
-          await storageService.saveEncryptedSeed(uri);
+          await storageService.saveEncryptedSeedForAddress(uri, walletState.address);
           await storageService.saveWalletMetadata(walletState.name, walletState.address);
           await multiWalletService.setActiveWallet(walletState.address);
 
@@ -324,29 +324,32 @@ export function WalletProvider({ children }: WalletProviderProps) {
           throw new Error('Could not identify dev account');
         }
       } else {
-        // For custom/imported wallets, set initial state then try to restore keypair
-        const newWalletState: WalletState = {
-          address,
-          name,
-          isLocked: true,
-        };
-        setWallet(newWalletState);
-        await multiWalletService.setActiveWallet(address);
+        // For custom/imported wallets, try to restore from address-keyed seed
+        const storedSeed = await storageService.getEncryptedSeedForAddress(address);
 
-        // Try to automatically restore keypair from stored seed
-        try {
-          const keyPair = await walletService.getOrDeriveKeyPair();
-          if (keyPair) {
-            // Keypair restored successfully, update state to unlocked
-            setWallet({
-              address,
-              name,
-              isLocked: false,
-            });
-          }
-        } catch (restoreError) {
-          console.warn('[WalletContext] Could not auto-restore keypair:', restoreError);
-          // Keep wallet in locked state - user will need to re-enter mnemonic
+        if (storedSeed) {
+          // We have the seed for this address, restore the keypair
+          const walletState = await walletService.restoreFromSeed(storedSeed, address, name);
+
+          // Also update current wallet seed for legacy compatibility
+          await storageService.saveEncryptedSeed(storedSeed);
+          await storageService.saveWalletMetadata(name, address);
+          await multiWalletService.setActiveWallet(address);
+
+          setWallet(walletState);
+          console.log('[WalletContext] Wallet restored from address-keyed seed');
+        } else {
+          // No seed found for this address - this shouldn't happen normally
+          // Fall back to locked state
+          const newWalletState: WalletState = {
+            address,
+            name,
+            isLocked: true,
+          };
+          setWallet(newWalletState);
+          await multiWalletService.setActiveWallet(address);
+
+          console.warn('[WalletContext] No seed found for address, wallet will be locked');
         }
       }
     } catch (err) {
@@ -425,17 +428,14 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
     try {
       const balance = await pdexService.getPCHMLBalance(wallet.address);
+      // Always REPLACE the balance - never add to it
+      // Note: If balance is growing every block, this is a blockchain-side emissions issue
+      // The emissions pallet should credit rewards to a claimable accumulator, not pCHML balance
       pchmlBalanceRef.current = balance;
       setPchmlBalance(balance);
     } catch (error) {
       console.error('Error refreshing pCHML balance:', error);
-      // Keep existing balance on error
-      if (pchmlBalanceRef.current.isZero()) {
-        // Set mock balance for demo (1 pCHML)
-        const mockBalance = new BN('1000000000000');
-        pchmlBalanceRef.current = mockBalance;
-        setPchmlBalance(mockBalance);
-      }
+      // Keep existing balance on error - don't set mock
     }
   }, [wallet?.address]);
 

@@ -58,6 +58,11 @@ class SingleSidedService {
     lockTier: LockTier
   ): Promise<{ success: boolean; positionId?: string; error?: string }> {
     try {
+      // Check if extrinsic exists
+      if (!api.tx.pdex || !(api.tx.pdex as any).provisionSingleSided) {
+        return { success: false, error: 'Single-sided provision not available on this network' };
+      }
+
       return new Promise((resolve) => {
         let resolved = false;
         const timeout = setTimeout(() => {
@@ -67,7 +72,7 @@ class SingleSidedService {
           }
         }, 60000);
 
-        api.tx.pdex
+        (api.tx.pdex as any)
           .provisionSingleSided(tokenId, amount, lockTier)
           .signAndSend(keyPair, ({ status, events, dispatchError }) => {
             // Handle error statuses
@@ -127,6 +132,11 @@ class SingleSidedService {
     positionId: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
+      // Check if extrinsic exists
+      if (!api.tx.pdex || !(api.tx.pdex as any).withdrawSingleSided) {
+        return { success: false, error: 'Single-sided withdraw not available on this network' };
+      }
+
       return new Promise((resolve) => {
         let resolved = false;
         const timeout = setTimeout(() => {
@@ -136,7 +146,7 @@ class SingleSidedService {
           }
         }, 60000);
 
-        api.tx.pdex
+        (api.tx.pdex as any)
           .withdrawSingleSided(positionId)
           .signAndSend(keyPair, ({ status, dispatchError }) => {
             // Handle error statuses
@@ -190,6 +200,11 @@ class SingleSidedService {
     positionId: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
+      // Check if extrinsic exists
+      if (!api.tx.pdex || !(api.tx.pdex as any).claimSingleSidedRewards) {
+        return { success: false, error: 'Single-sided rewards claim not available on this network' };
+      }
+
       return new Promise((resolve) => {
         let resolved = false;
         const timeout = setTimeout(() => {
@@ -199,7 +214,7 @@ class SingleSidedService {
           }
         }, 60000);
 
-        api.tx.pdex
+        (api.tx.pdex as any)
           .claimSingleSidedRewards(positionId)
           .signAndSend(keyPair, ({ status, dispatchError }) => {
             // Handle error statuses
@@ -269,6 +284,23 @@ class SingleSidedService {
             unlockDate = new Date(Date.now() + secondsRemaining * 1000);
           }
 
+          // Get pending rewards - check both position data and emissions pallet
+          let pendingRewards = pos.pendingRewards?.toString() || '0';
+
+          // If no rewards in position data, try emissions pallet
+          if (pendingRewards === '0' || !pos.pendingRewards) {
+            try {
+              if (api.query.emissions && (api.query.emissions as any).singleSidedRewards) {
+                const emissionsRewards = await (api.query.emissions as any).singleSidedRewards(id);
+                if (emissionsRewards && !emissionsRewards.isEmpty) {
+                  pendingRewards = emissionsRewards.toString();
+                }
+              }
+            } catch (e) {
+              console.log('[SingleSided] Could not query emissions rewards for position', id);
+            }
+          }
+
           positions.push({
             positionId: id.toString(),
             tokenId: pos.tokenId,
@@ -277,7 +309,7 @@ class SingleSidedService {
             lockTier: pos.lockTier as LockTier,
             startBlock: pos.startBlock?.toString() || '0',
             endBlock: endBlock?.toString() || null,
-            pendingRewards: pos.pendingRewards?.toString() || '0',
+            pendingRewards,
             isLocked,
             unlockDate,
           });

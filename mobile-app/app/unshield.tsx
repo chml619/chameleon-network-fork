@@ -78,29 +78,41 @@ export default function UnshieldScreen() {
     }
   }, [destinationAddress]);
 
-  // Estimate fee when amount and destination change (CHML only)
+  // Estimate fee when amount and destination change
+  // Unshield fee: 0.05% OR 0.25 CHML minimum (whichever is greater)
   useEffect(() => {
-    const estimateFee = async () => {
+    const calculateUnshieldFee = () => {
       if (!amount || parseFloat(amount) <= 0 || !destinationAddress || destinationAddress.length < 10) {
         setEstimatedFee(null);
         return;
       }
-      
+
       setIsEstimatingFee(true);
       try {
-        // Estimate fee (typically small fixed amount for Substrate)
-        // For now, use a reasonable estimate
-        setEstimatedFee('~0.001 CHML');
+        const amountValue = parseFloat(amount);
+        const percentFee = amountValue * 0.0005; // 0.05%
+        const minFee = 0.25; // Minimum 0.25 CHML
+
+        // Fee is max of percentage or minimum
+        const unshieldFee = Math.max(percentFee, minFee);
+
+        if (percentFee >= minFee) {
+          // Using percentage fee
+          setEstimatedFee(`${unshieldFee.toFixed(4)} ${selectedToken.outputSymbol} (0.05%)`);
+        } else {
+          // Using minimum fee
+          setEstimatedFee(`0.25 ${selectedToken.outputSymbol} (minimum)`);
+        }
       } catch (error) {
-        console.error('Fee estimation error:', error);
+        console.error('Fee calculation error:', error);
         setEstimatedFee('Unable to estimate');
       } finally {
         setIsEstimatingFee(false);
       }
     };
-    
+
     if (isValidAddress && amount && wallet?.address && parseFloat(amount) > 0) {
-      estimateFee();
+      calculateUnshieldFee();
     } else {
       setEstimatedFee(null);
     }

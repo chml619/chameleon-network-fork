@@ -342,6 +342,52 @@ class WalletService {
   }
 
   /**
+   * Restore wallet from a specific seed (used when switching wallets)
+   */
+  public async restoreFromSeed(seed: string, expectedAddress: string, name: string): Promise<WalletState> {
+    await this.initializeKeyring();
+
+    if (!this.keyring) {
+      throw new Error('Keyring not initialized');
+    }
+
+    try {
+      // Check if it's a dev account URI (contains //)
+      if (seed.includes('//')) {
+        this.currentPair = this.keyring.addFromUri(seed);
+      } else {
+        // Regular mnemonic
+        if (!this.validateMnemonic(seed)) {
+          throw new Error('Invalid stored mnemonic');
+        }
+        this.currentPair = this.keyring.addFromMnemonic(seed);
+      }
+
+      // Verify address matches
+      if (this.currentPair.address !== expectedAddress) {
+        console.error(`[Wallet] Address mismatch: expected ${expectedAddress}, got ${this.currentPair.address}`);
+        this.currentPair = null;
+        throw new Error('Stored seed does not match wallet address');
+      }
+
+      this.cachedKeyPair = this.currentPair;
+
+      this.walletState = {
+        address: this.currentPair.address,
+        name,
+        isLocked: false,
+      };
+
+      this.notifyListeners();
+      console.log('[Wallet] Successfully restored from seed');
+      return this.walletState;
+    } catch (error) {
+      console.error('[Wallet] Error restoring from seed:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Clear wallet data (logout)
    */
   public clearWallet(): void {

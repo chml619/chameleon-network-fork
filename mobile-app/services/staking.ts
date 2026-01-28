@@ -174,26 +174,55 @@ class StakingService {
         }
       }
       
-      // Get total staked and reward rate for APY calculation
-      let apy = 12.5; // Default APY estimate
+      // Calculate APY based on Year 1 validator emissions (~5.18M CHML = 70% of 7.4M)
+      // APY = (annual_validator_emissions / total_staked) * 100
+      const YEAR1_VALIDATOR_EMISSIONS = new BN('5180000000000000000000000'); // 5.18M CHML with 18 decimals
+      let apy = 12.5; // Default APY estimate for display
+
       try {
-        const totalStaked = await (api.query.staking as any).totalStaked();
-        const rewardRate = await (api.query.staking as any).rewardRate();
-        
-        if (totalStaked && rewardRate && !totalStaked.isZero()) {
-          // Calculate APY based on reward rate
-          // APY = (rewardRate * blocks_per_year / totalStaked) * 100
-          const blocksPerYear = 365 * 24 * 60 * 10; // ~6 sec blocks
-          const totalStakedBN = new BN(totalStaked.toString());
-          const rewardRateBN = new BN(rewardRate.toString());
-          
-          if (!totalStakedBN.isZero()) {
-            const yearlyRewards = rewardRateBN.muln(blocksPerYear);
-            apy = yearlyRewards.muln(100).div(totalStakedBN).toNumber();
+        // Try to get total staked from chain
+        let totalStakedBN = new BN(0);
+
+        if ((api.query.staking as any).totalStaked) {
+          const totalStaked = await (api.query.staking as any).totalStaked();
+          if (totalStaked && !totalStaked.isEmpty) {
+            totalStakedBN = new BN(totalStaked.toString());
           }
+        }
+
+        // If we can't get total staked, estimate from staker entries
+        if (totalStakedBN.isZero()) {
+          try {
+            const stakerEntries = await (api.query.staking as any).stakers.entries();
+            for (const [, value] of stakerEntries) {
+              const info = value.toJSON ? value.toJSON() : value;
+              if (info.amount) {
+                totalStakedBN = totalStakedBN.add(new BN(info.amount.toString()));
+              }
+            }
+          } catch (e) {
+            console.log('[Staking] Could not sum staker amounts:', e);
+          }
+        }
+
+        if (!totalStakedBN.isZero()) {
+          // APY = (yearly_emissions / total_staked) * 100
+          // Use floating point for reasonable precision
+          const yearlyEmissions = parseFloat(YEAR1_VALIDATOR_EMISSIONS.toString());
+          const totalStaked = parseFloat(totalStakedBN.toString());
+          apy = (yearlyEmissions / totalStaked) * 100;
+
+          // Cap APY at reasonable display value (devnet may have very low stake)
+          if (apy > 1000) {
+            apy = 999.9; // Show as "High (Devnet)" indicator
+          }
+        } else {
+          // No stake on chain yet, use default or show high APY for devnet
+          apy = 100; // Attractive APY to encourage staking
         }
       } catch (e) {
         console.log('[Staking] Could not calculate APY, using default:', e);
+        apy = 12.5;
       }
       // Get total validator count
       let totalValidators = 0;
@@ -763,36 +792,64 @@ class StakingService {
   }
 
   /**
-   * Sign and send transaction
+   * Sign and send transaction with timeout and error handling
    */
   private signAndSend(
     tx: any,
     keyPair: KeyringPair
   ): Promise<StakingResult> {
     return new Promise((resolve) => {
+      let resolved = false;
+
+      // 60 second timeout
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          resolve({ success: false, error: 'Transaction timeout - please try again' });
+        }
+      }, 60000);
+
       tx.signAndSend(keyPair, ({ status, dispatchError, txHash }: any) => {
+        // Handle error statuses
+        if (status.isDropped || status.isInvalid || status.isUsurped) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            resolve({ success: false, error: `Transaction failed: ${status.type}` });
+          }
+          return;
+        }
+
         if (status.isInBlock || status.isFinalized) {
-          if (dispatchError) {
-            resolve({
-              success: false,
-              txHash: txHash?.toHex(),
-              error: 'Transaction failed',
-            });
-          } else {
-            resolve({
-              success: true,
-              txHash: txHash?.toHex(),
-              blockHash: status.isFinalized 
-                ? status.asFinalized.toHex() 
-                : status.asInBlock.toHex(),
-            });
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            if (dispatchError) {
+              resolve({
+                success: false,
+                txHash: txHash?.toHex(),
+                error: 'Transaction failed on chain',
+              });
+            } else {
+              resolve({
+                success: true,
+                txHash: txHash?.toHex(),
+                blockHash: status.isFinalized
+                  ? status.asFinalized.toHex()
+                  : status.asInBlock.toHex(),
+              });
+            }
           }
         }
       }).catch((error: Error) => {
-        resolve({
-          success: false,
-          error: error.message,
-        });
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          resolve({
+            success: false,
+            error: error.message,
+          });
+        }
       });
     });
   }

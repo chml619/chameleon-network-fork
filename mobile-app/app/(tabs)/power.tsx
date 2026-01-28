@@ -34,6 +34,8 @@ import { NodeStatus } from '@/services/staking';
 import { formatBalance, parseAmount, formatBalanceWithUnit } from '@/utils/balance';
 import { singleSidedService, SingleSidedPosition, LOCK_TIER_INFO } from "@/services/singleSided";
 import { walletService } from "@/services/wallet";
+import { transactionHistoryService } from "@/services/transactionHistory";
+import { notificationService } from "@/services/notifications";
 
 // Status colors mapping
 const STATUS_COLORS: Record<NodeStatus, string> = {
@@ -238,13 +240,27 @@ export default function PowerScreen() {
         selectedSingleSidedPosition.positionId
       );
       if (result.success) {
+        // Save to transaction history
+        transactionHistoryService.saveTransaction(wallet.address, {
+          hash: `ss_claim_${Date.now()}`,
+          from: wallet.address,
+          to: wallet.address,
+          amount: selectedSingleSidedPosition.pendingRewards || '0',
+          formattedAmount: `${(parseInt(selectedSingleSidedPosition.pendingRewards || '0') / 1e18).toFixed(4)} pCHML`,
+          status: 'finalized',
+          usedMEVProtection: false,
+          type: 'claim_rewards',
+        });
+        notificationService.addNotification('success', 'Single-sided rewards claimed!');
         Alert.alert('Success', 'Rewards claimed successfully!');
         await loadLPData();
         setShowSingleSidedModal(false);
       } else {
+        notificationService.addNotification('error', result.error || 'Claim failed');
         Alert.alert('Error', result.error || 'Failed to claim rewards');
       }
     } catch (error) {
+      notificationService.addNotification('error', error instanceof Error ? error.message : 'Claim failed');
       Alert.alert('Error', error instanceof Error ? error.message : 'Claim failed');
     } finally {
       setIsClaimingSSRewards(false);
@@ -284,13 +300,27 @@ export default function PowerScreen() {
                 selectedSingleSidedPosition.positionId
               );
               if (result.success) {
+                // Save to transaction history
+                transactionHistoryService.saveTransaction(wallet.address, {
+                  hash: `ss_withdraw_${Date.now()}`,
+                  from: wallet.address,
+                  to: wallet.address,
+                  amount: selectedSingleSidedPosition.amount,
+                  formattedAmount: `${(parseInt(selectedSingleSidedPosition.amount) / 1e18).toFixed(4)} ${selectedSingleSidedPosition.tokenSymbol}`,
+                  status: 'finalized',
+                  usedMEVProtection: false,
+                  type: 'withdraw_liquidity',
+                });
+                notificationService.addNotification('success', 'Single-sided position withdrawn!');
                 Alert.alert('Success', 'Position withdrawn successfully!');
                 await loadLPData();
                 setShowSingleSidedModal(false);
               } else {
+                notificationService.addNotification('error', result.error || 'Withdraw failed');
                 Alert.alert('Error', result.error || 'Failed to withdraw');
               }
             } catch (error) {
+              notificationService.addNotification('error', error instanceof Error ? error.message : 'Withdraw failed');
               Alert.alert('Error', error instanceof Error ? error.message : 'Withdrawal failed');
             } finally {
               setIsWithdrawing(false);
@@ -839,11 +869,11 @@ export default function PowerScreen() {
                         <Text style={styles.lpSharePercent}>
                           {pos.isLocked ? "Locked" : "Unlocked"} - {LOCK_TIER_INFO[pos.lockTier]?.label || pos.lockTier}
                         </Text>
-                        {pos.pendingRewards && pos.pendingRewards !== '0' && (
-                          <Text style={[styles.lpSharePercent, { color: THEME.colors.success }]}>
-                            Rewards: {(parseInt(pos.pendingRewards) / 1e12).toFixed(4)} pCHML
-                          </Text>
-                        )}
+                        <Text style={[styles.lpSharePercent, { color: THEME.colors.success }]}>
+                          {pos.pendingRewards && pos.pendingRewards !== '0'
+                            ? `Rewards: ${(parseInt(pos.pendingRewards) / 1e18).toFixed(4)} pCHML`
+                            : 'Rewards: Accumulating...'}
+                        </Text>
                       </View>
                       <View style={styles.lpPositionRight}>
                         <Text style={styles.lpLiquidity}>{(parseInt(pos.amount) / Math.pow(10, 12)).toFixed(2)}</Text>
@@ -973,7 +1003,9 @@ export default function PowerScreen() {
                 <View style={styles.ssDetailRow}>
                   <Text style={styles.ssDetailLabel}>Pending Rewards</Text>
                   <Text style={[styles.ssDetailValue, { color: THEME.colors.success }]}>
-                    {(parseInt(selectedSingleSidedPosition.pendingRewards || '0') / 1e12).toFixed(4)} pCHML
+                    {parseInt(selectedSingleSidedPosition.pendingRewards || '0') > 0
+                      ? `${(parseInt(selectedSingleSidedPosition.pendingRewards || '0') / 1e18).toFixed(4)} pCHML`
+                      : 'Accumulating...'}
                   </Text>
                 </View>
 
