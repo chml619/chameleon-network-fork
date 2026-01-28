@@ -17,7 +17,7 @@ import type { KeyringPair } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
 import { chainService } from './chain';
 
-// Minimum stake required (1,750 CHML in planck units - 18 decimals)
+// Minimum stake required (1,750 CHML in planck units - 12 decimals)
 const MINIMUM_STAKE = new BN('1750000000000000');
 
 // Unbonding period in blocks (~7 days at 6 sec blocks)
@@ -176,7 +176,7 @@ class StakingService {
       
       // Calculate APY based on Year 1 validator emissions (~5.18M CHML = 70% of 7.4M)
       // APY = (annual_validator_emissions / total_staked) * 100
-      const YEAR1_VALIDATOR_EMISSIONS = new BN('5180000000000000000000000'); // 5.18M CHML with 18 decimals
+      const YEAR1_VALIDATOR_EMISSIONS = new BN('5180000000000000000'); // 5.18M CHML with 12 decimals
       let apy = 12.5; // Default APY estimate for display
 
       try {

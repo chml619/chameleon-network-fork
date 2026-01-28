@@ -8,7 +8,7 @@ export const NETWORK_CONFIG = {
   httpEndpoint: 'http://64.23.233.36:9944',
   wsEndpoint: 'ws://64.23.233.36:9944',
   tokenSymbol: 'CHML',
-  tokenDecimals: 18, // CHML uses 18 decimals (like Ethereum)
+  tokenDecimals: 12, // CHML uses 12 decimals (Substrate standard)
   ss58Prefix: 42, // Default Substrate prefix
 };
 

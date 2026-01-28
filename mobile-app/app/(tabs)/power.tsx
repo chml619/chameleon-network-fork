@@ -246,7 +246,7 @@ export default function PowerScreen() {
           from: wallet.address,
           to: wallet.address,
           amount: selectedSingleSidedPosition.pendingRewards || '0',
-          formattedAmount: `${(parseInt(selectedSingleSidedPosition.pendingRewards || '0') / 1e18).toFixed(4)} pCHML`,
+          formattedAmount: `${(parseInt(selectedSingleSidedPosition.pendingRewards || '0') / 1e12).toFixed(4)} pCHML`,
           status: 'finalized',
           usedMEVProtection: false,
           type: 'claim_rewards',
@@ -306,7 +306,7 @@ export default function PowerScreen() {
                   from: wallet.address,
                   to: wallet.address,
                   amount: selectedSingleSidedPosition.amount,
-                  formattedAmount: `${(parseInt(selectedSingleSidedPosition.amount) / 1e18).toFixed(4)} ${selectedSingleSidedPosition.tokenSymbol}`,
+                  formattedAmount: `${(parseInt(selectedSingleSidedPosition.amount) / 1e12).toFixed(4)} ${selectedSingleSidedPosition.tokenSymbol}`,
                   status: 'finalized',
                   usedMEVProtection: false,
                   type: 'withdraw_liquidity',
@@ -871,7 +871,7 @@ export default function PowerScreen() {
                         </Text>
                         <Text style={[styles.lpSharePercent, { color: THEME.colors.success }]}>
                           {pos.pendingRewards && pos.pendingRewards !== '0'
-                            ? `Rewards: ${(parseInt(pos.pendingRewards) / 1e18).toFixed(4)} pCHML`
+                            ? `Rewards: ${(parseInt(pos.pendingRewards) / 1e12).toFixed(4)} pCHML`
                             : 'Rewards: Accumulating...'}
                         </Text>
                       </View>
@@ -1004,7 +1004,7 @@ export default function PowerScreen() {
                   <Text style={styles.ssDetailLabel}>Pending Rewards</Text>
                   <Text style={[styles.ssDetailValue, { color: THEME.colors.success }]}>
                     {parseInt(selectedSingleSidedPosition.pendingRewards || '0') > 0
-                      ? `${(parseInt(selectedSingleSidedPosition.pendingRewards || '0') / 1e18).toFixed(4)} pCHML`
+                      ? `${(parseInt(selectedSingleSidedPosition.pendingRewards || '0') / 1e12).toFixed(4)} pCHML`
                       : 'Accumulating...'}
                   </Text>
                 </View>
