@@ -364,10 +364,13 @@ export default function AddLiquidityScreen() {
             {/* Pool Info */}
             <View style={styles.poolInfoCard}>
               <Text style={styles.poolInfoTitle}>Pool Information</Text>
-              <View style={styles.poolInfoRow}>
+              <View style={styles.poolInfoRowColumn}>
                 <Text style={styles.poolInfoLabel}>Current Reserves</Text>
-                <Text style={styles.poolInfoValue}>
-                  {poolService.formatAmount(selectedPool.reserveA)} {getTokenSymbolA()} / {poolService.formatAmount(selectedPool.reserveB)} {getTokenSymbolB()}
+                <Text style={styles.poolInfoValueSmall}>
+                  {poolService.formatAmount(selectedPool.reserveA)} {getTokenSymbolA()}
+                </Text>
+                <Text style={styles.poolInfoValueSmall}>
+                  {poolService.formatAmount(selectedPool.reserveB)} {getTokenSymbolB()}
                 </Text>
               </View>
               <View style={styles.poolInfoRow}>
@@ -473,8 +476,10 @@ const styles = StyleSheet.create({
   },
   poolInfoTitle: { fontSize: THEME.fontSize.sm, fontWeight: THEME.fontWeight.bold, color: THEME.colors.text, marginBottom: THEME.spacing.sm },
   poolInfoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: THEME.spacing.xs },
+  poolInfoRowColumn: { paddingVertical: THEME.spacing.xs },
   poolInfoLabel: { fontSize: THEME.fontSize.sm, color: THEME.colors.textMuted },
   poolInfoValue: { fontSize: THEME.fontSize.sm, fontWeight: THEME.fontWeight.medium, color: THEME.colors.text },
+  poolInfoValueSmall: { fontSize: THEME.fontSize.sm, fontWeight: THEME.fontWeight.medium, color: THEME.colors.text, marginTop: 2 },
   addButton: {
     backgroundColor: THEME.colors.primary,
     marginHorizontal: THEME.spacing.md,

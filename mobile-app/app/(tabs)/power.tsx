@@ -18,7 +18,7 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -136,6 +136,16 @@ export default function PowerScreen() {
   useEffect(() => {
     loadLPData();
   }, [api, wallet?.address]);
+
+  // Refresh data when screen comes into focus (e.g., returning from single-sided provision)
+  useFocusEffect(
+    useCallback(() => {
+      if (api && wallet?.address) {
+        loadLPData();
+        refetchStaking();
+      }
+    }, [api, wallet?.address])
+  );
 
   const loadLPData = async () => {
     if (!api || !wallet?.address) return;
@@ -376,7 +386,7 @@ export default function PowerScreen() {
   const handleRegisterNode = async () => {
     Alert.alert(
       'Register vNode',
-      'Are you sure you want to register as a validator node? You will need to stake at least 1,750 CHML to activate.',
+      'Are you sure you want to register as a validator node? You will need to stake at least 1,750 pCHML to activate.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -631,7 +641,7 @@ export default function PowerScreen() {
                       <Ionicons name="checkmark-circle-outline" size={48} color={STATUS_COLORS.Registered} />
                       <Text style={styles.statusMessage}>Node Registered</Text>
                       <Text style={styles.statusSubMessage}>
-                        Stake at least 1,750 CHML to activate your node
+                        Stake at least 1,750 pCHML to activate your node
                       </Text>
                     </View>
                   )}
@@ -640,7 +650,7 @@ export default function PowerScreen() {
                     <View style={styles.statsGrid}>
                       <View style={styles.statItem}>
                         <Text style={styles.statLabel}>Staked</Text>
-                        <Text style={styles.statValue}>{stakingInfo?.staked || '0 CHML'}</Text>
+                        <Text style={styles.statValue}>{stakingInfo?.staked || '0 pCHML'}</Text>
                       </View>
                       <View style={styles.statItem}>
                         <Text style={styles.statLabel}>Rewards</Text>
@@ -665,7 +675,7 @@ export default function PowerScreen() {
                         <Ionicons name="time-outline" size={32} color={STATUS_COLORS.Unbonding} />
                         <Text style={styles.unbondingTitle}>Unbonding in Progress</Text>
                       </View>
-                      <Text style={styles.unbondingAmount}>{stakingInfo?.unbonding || '0 CHML'}</Text>
+                      <Text style={styles.unbondingAmount}>{stakingInfo?.unbonding || '0 pCHML'}</Text>
                       <View style={styles.progressContainer}>
                         <View style={styles.progressBar}>
                           <View style={[styles.progressFill, { width: `${unbondingInfo.progress}%` }]} />
@@ -787,7 +797,7 @@ export default function PowerScreen() {
               </View>
               <Text style={styles.infoText}>
                 Virtual Nodes (vNodes) let you participate in network validation using software.
-                Stake 1,750 CHML minimum to activate your node and earn rewards.
+                Stake 1,750 pCHML minimum to activate your node and earn rewards.
               </Text>
               <View style={styles.infoDetails}>
                 <View style={styles.infoRow}>

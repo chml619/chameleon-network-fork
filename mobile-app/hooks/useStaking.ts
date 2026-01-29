@@ -169,14 +169,14 @@ export function useStaking() {
   }, [api, wallet?.address, fetchStakingInfo]);
 
   const calculateEstimatedRewards = useCallback((amount: string, days: number = 365): string => {
-    if (!stakingInfo) return '0 CHML';
+    if (!stakingInfo) return '0 pCHML';
     
     try {
       const amountBN = chainService.parseBalance(amount);
       const rewards = stakingService.calculateEstimatedRewards(amountBN, stakingInfo.apy, days);
       return chainService.formatBalance(rewards.toString());
     } catch {
-      return '0 CHML';
+      return '0 pCHML';
     }
   }, [stakingInfo]);
 

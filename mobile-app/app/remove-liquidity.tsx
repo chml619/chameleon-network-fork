@@ -36,39 +36,83 @@ export default function RemoveLiquidityScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [userPositions, setUserPositions] = useState<Array<{ pool: PoolInfo; position: UserLPPosition }>>([]);
+  const [selectedPoolId, setSelectedPoolId] = useState<number | null>(poolId ? parseInt(poolId as string) : null);
 
   useEffect(() => {
-    loadData();
-  }, [api, poolId, wallet?.address]);
+    if (poolId) {
+      setSelectedPoolId(parseInt(poolId as string));
+    }
+  }, [poolId]);
 
-  const loadData = async () => {
-    if (!api || !poolId || !wallet?.address) {
+  useEffect(() => {
+    if (selectedPoolId !== null) {
+      loadData(selectedPoolId);
+    } else {
+      loadAllPositions();
+    }
+  }, [api, selectedPoolId, wallet?.address]);
+
+  // Load all user LP positions across all pools when no poolId provided
+  const loadAllPositions = async () => {
+    if (!api || !wallet?.address) {
       setIsLoading(false);
       return;
     }
-    
+
+    setIsLoading(true);
+    try {
+      const positions: Array<{ pool: PoolInfo; position: UserLPPosition }> = [];
+
+      // Check pools 0, 1, 2
+      for (let i = 0; i < 3; i++) {
+        try {
+          const poolInfo = await poolService.getPool(api, i);
+          const userPos = await poolService.getUserPosition(api, i, wallet.address);
+
+          // Only include if user has LP tokens
+          if (userPos && userPos.lpTokens && parseFloat(userPos.lpTokens) > 0) {
+            positions.push({ pool: poolInfo, position: userPos });
+          }
+        } catch (e) {
+          console.log(`[RemoveLiquidity] Could not load pool ${i}:`, e);
+        }
+      }
+
+      setUserPositions(positions);
+    } catch (error) {
+      console.error('Error loading positions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadData = async (poolIdNum: number) => {
+    if (!api || !wallet?.address) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setLoadingTimeout(false);
-    
+
     // Set a timeout for loading
     const timeoutId = setTimeout(() => {
       setLoadingTimeout(true);
       setIsLoading(false);
     }, 10000); // 10 second timeout
-    
+
     try {
-      // Validate poolId is a valid number
-      const poolIdNum = parseInt(poolId as string);
       if (isNaN(poolIdNum) || poolIdNum < 0) {
         throw new Error('Invalid pool ID');
       }
-      
+
       const poolInfo = await poolService.getPool(api, poolIdNum);
       setPool(poolInfo);
-      
+
       const userPosition = await poolService.getUserPosition(api, poolIdNum, wallet.address);
       setPosition(userPosition);
-      
+
       clearTimeout(timeoutId);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -191,13 +235,48 @@ export default function RemoveLiquidityScreen() {
         <View style={styles.noPositionCard}>
           <Ionicons name="time-outline" size={48} color={THEME.colors.textMuted} />
           <Text style={styles.noPositionText}>Loading timed out</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.retryButton}
-            onPress={loadData}
+            onPress={() => selectedPoolId !== null && loadData(selectedPoolId)}
           >
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
+      </LinearGradient>
+    );
+  }
+
+  // Show pool selection if no pool selected but user has positions
+  if (selectedPoolId === null && userPositions.length > 0) {
+    return (
+      <LinearGradient colors={GRADIENTS.background.colors} style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color={THEME.colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Select Pool</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <ScrollView style={styles.scrollView}>
+          <Text style={styles.sectionTitle}>Your LP Positions</Text>
+          {userPositions.map(({ pool: p, position: pos }) => (
+            <TouchableOpacity
+              key={p.id}
+              style={styles.poolCard}
+              onPress={() => setSelectedPoolId(p.id)}
+            >
+              <View>
+                <Text style={styles.poolName}>
+                  {poolService.getTokenSymbol(p.assetA)}/{poolService.getTokenSymbol(p.assetB)}
+                </Text>
+                <Text style={styles.positionInfo}>
+                  LP: {poolService.formatAmount(pos.lpTokens)} ({pos.sharePercent.toFixed(2)}% share)
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={THEME.colors.textMuted} />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </LinearGradient>
     );
   }
@@ -213,7 +292,13 @@ export default function RemoveLiquidityScreen() {
           <View style={{ width: 24 }} />
         </View>
         <View style={styles.noPositionCard}>
-          <Text style={styles.noPositionText}>You don't have liquidity in this pool</Text>
+          <Text style={styles.noPositionText}>You don't have liquidity in any pool</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => router.push('/add-liquidity' as any)}
+          >
+            <Text style={styles.retryButtonText}>Add Liquidity</Text>
+          </TouchableOpacity>
         </View>
       </LinearGradient>
     );
@@ -386,5 +471,13 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: THEME.spacing.md,
     color: THEME.colors.textSecondary,
+  },
+  sectionTitle: {
+    fontSize: THEME.fontSize.lg,
+    fontWeight: THEME.fontWeight.bold,
+    color: THEME.colors.text,
+    marginHorizontal: THEME.spacing.md,
+    marginBottom: THEME.spacing.sm,
+    marginTop: THEME.spacing.md,
   },
 });

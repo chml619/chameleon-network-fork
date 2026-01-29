@@ -150,9 +150,12 @@ class PoolService {
       if (!pool) return null;
       
       const lpBalance = await this.getUserLPBalance(api, poolId, address);
-      if (lpBalance === '0' || lpBalance === '0x0' || lpBalance === '0x00' || this.parseChainAmount(lpBalance) === 0) return null;
+      const lpRaw = this.parseChainAmount(lpBalance);
+      // Dust threshold: less than 0.000001 LP tokens (1e6 raw) is considered zero
+      const DUST_THRESHOLD = 1_000_000; // 10^6 raw units = 0.000001 LP
+      if (lpBalance === '0' || lpBalance === '0x0' || lpBalance === '0x00' || lpRaw === 0 || lpRaw < DUST_THRESHOLD) return null;
       const totalLp = this.parseChainAmount(pool.totalLpTokens) || 1;
-      const userLp = this.parseChainAmount(lpBalance);
+      const userLp = lpRaw; // Already parsed above
       const sharePercent = parseFloat(((userLp / totalLp) * 100).toFixed(6));
       // Calculate user's share of reserves
       const reserveA = this.parseChainAmount(pool.reserveA);

@@ -3,7 +3,7 @@
  * Full swap interface with privacy mode
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,9 @@ import {
   StyleSheet,
   Image,
   Modal,
+  RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -58,6 +60,7 @@ export default function TradeScreen() {
     setMaxAmount,
     validateSwap,
     executeSwap,
+    refetchBalances,
   } = usePDEX();
 
   const [activeTab, setActiveTab] = useState<TabType>('swap');
@@ -73,6 +76,7 @@ export default function TradeScreen() {
   const [showSlippageModal, setShowSlippageModal] = useState(false);
   const [showTxStatus, setShowTxStatus] = useState(false);
   const [txResult, setTxResult] = useState<any>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Load pool statistics
   const loadPoolStats = async () => {
@@ -116,6 +120,26 @@ export default function TradeScreen() {
       loadPoolStats();
     }
   }, [api, activeTab]);
+
+  // Refresh pool stats when screen comes into focus (e.g., navigating back from add-liquidity)
+  useFocusEffect(
+    useCallback(() => {
+      if (api && activeTab === 'liquidity') {
+        loadPoolStats();
+      }
+    }, [api, activeTab])
+  );
+
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    if (activeTab === 'liquidity') {
+      await loadPoolStats();
+    } else {
+      await refetchBalances();
+    }
+    setIsRefreshing(false);
+  }, [activeTab, refetchBalances]);
 
   const handleSwap = async () => {
     const validationError = validateSwap();
@@ -171,6 +195,8 @@ export default function TradeScreen() {
                 );
                 refreshBalances();
                 refreshPCHMLBalance();
+                // Refresh all pToken balances in the swap UI
+                await refetchBalances();
               } else {
                 await notificationService.notifyTransactionFailed(
                   `${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
@@ -269,7 +295,12 @@ export default function TradeScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
+      >
         {activeTab === 'swap' ? (
           <>
             {/* MEV Protection Toggle */}
