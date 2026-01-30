@@ -193,10 +193,16 @@ export default function TradeScreen() {
                   wallet?.address || '',
                   txHash
                 );
-                refreshBalances();
-                refreshPCHMLBalance();
-                // Refresh all pToken balances in the swap UI
-                await refetchBalances();
+                // Clear cache and refresh ALL token balances (both tokenIn and tokenOut)
+                // Use single refresh path to avoid race conditions
+                console.log('[Trade] Swap success, refreshing all balances...');
+                try {
+                  await refetchBalances(); // Refresh pToken balances in swap UI
+                  await refreshBalances(); // Refresh wallet context balances
+                  console.log('[Trade] Balance refresh complete');
+                } catch (refreshError) {
+                  console.error('[Trade] Balance refresh error:', refreshError);
+                }
               } else {
                 await notificationService.notifyTransactionFailed(
                   `${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,

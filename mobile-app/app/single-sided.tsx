@@ -120,8 +120,14 @@ export default function SingleSidedScreen() {
                   type: 'add_liquidity',
                 });
                 notificationService.addNotification('success', `Provided ${amount} ${selectedToken.symbol} single-sided liquidity!`);
-                if (refreshBalances) await refreshBalances();
-                Alert.alert('Success', 'Single-sided liquidity provided!', [
+                // Refresh balances in try-catch to ensure Alert shows even if refresh fails
+                try {
+                  if (refreshBalances) await refreshBalances();
+                } catch (refreshError) {
+                  console.error('[SingleSided] Balance refresh error:', refreshError);
+                }
+                // Show success Alert AFTER balance refresh attempt
+                Alert.alert('Success', `Successfully provided ${amount} ${selectedToken.symbol} with ${LOCK_TIER_INFO[selectedTier].label} lock!`, [
                   { text: 'OK', onPress: () => router.back() }
                 ]);
               } else {

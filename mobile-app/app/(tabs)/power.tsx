@@ -64,7 +64,7 @@ interface LPPosition {
 export default function PowerScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { wallet } = useWallet();
+  const { wallet, refreshBalances: refreshWalletBalances } = useWallet();
   const { api, connectionState } = useApi();
   
   // Section state
@@ -442,6 +442,14 @@ export default function PowerScreen() {
     }
     const result = await claimStakingRewards();
     if (result.success) {
+      // Refresh staking info, LP data, and wallet balances after claiming
+      try {
+        await refetchStaking();
+        await loadLPData();
+        if (refreshWalletBalances) await refreshWalletBalances();
+      } catch (refreshError) {
+        console.error('[Power] Error refreshing after claim:', refreshError);
+      }
       Alert.alert('Success', 'Rewards claimed successfully!');
     } else {
       Alert.alert('Error', result.error || 'Claim failed');

@@ -90,7 +90,7 @@ export function parseAmount(userInput: string): BN {
  * @returns Formatted balance with unit (e.g., "1,234.56 CHML")
  */
 export function formatBalanceWithUnit(rawBalance: string | BN | null | undefined): string {
-  return `${formatBalance(rawBalance)} CHML`;
+  return `${formatBalance(rawBalance)} pCHML`;
 }
 
 /**
