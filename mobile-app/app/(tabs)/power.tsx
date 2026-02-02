@@ -442,6 +442,8 @@ export default function PowerScreen() {
     }
     const result = await claimStakingRewards();
     if (result.success) {
+      // Wait for chain state to propagate after transaction finalizes
+      await new Promise(resolve => setTimeout(resolve, 1500));
       // Refresh staking info, LP data, and wallet balances after claiming
       try {
         await refetchStaking();

@@ -108,18 +108,28 @@ export default function SingleSidedScreen() {
                 selectedTier
               );
               if (result.success) {
-                // Save to transaction history
-                transactionHistoryService.saveTransaction(wallet.address, {
-                  hash: `ss_provision_${Date.now()}`,
-                  from: wallet.address,
-                  to: 'Single-Sided Pool',
-                  amount: amountBN.toString(),
-                  formattedAmount: `${amount} ${selectedToken.symbol}`,
-                  status: 'finalized',
-                  usedMEVProtection: false,
-                  type: 'add_liquidity',
-                });
-                notificationService.addNotification('success', `Provided ${amount} ${selectedToken.symbol} single-sided liquidity!`);
+                // Save to transaction history (wrapped in try-catch to ensure Alert shows)
+                try {
+                  transactionHistoryService.saveTransaction(wallet.address, {
+                    hash: `ss_provision_${Date.now()}`,
+                    from: wallet.address,
+                    to: 'Single-Sided Pool',
+                    amount: amountBN.toString(),
+                    formattedAmount: `${amount} ${selectedToken.symbol}`,
+                    status: 'finalized',
+                    usedMEVProtection: false,
+                    type: 'add_liquidity',
+                  });
+                } catch (historyError) {
+                  console.error('[SingleSided] Failed to save transaction history:', historyError);
+                }
+                try {
+                  notificationService.addNotification('success', `Provided ${amount} ${selectedToken.symbol} single-sided liquidity!`);
+                } catch (notifError) {
+                  console.error('[SingleSided] Failed to add notification:', notifError);
+                }
+                // Wait for chain state to propagate before refreshing balances
+                await new Promise(resolve => setTimeout(resolve, 1500));
                 // Refresh balances in try-catch to ensure Alert shows even if refresh fails
                 try {
                   if (refreshBalances) await refreshBalances();

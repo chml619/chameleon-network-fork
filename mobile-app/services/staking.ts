@@ -17,7 +17,7 @@ import type { KeyringPair } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
 import { chainService } from './chain';
 
-// Minimum stake required (1,750 CHML in planck units - 12 decimals)
+// Minimum stake required (1,750 pCHML in planck units - 12 decimals)
 const MINIMUM_STAKE = new BN('1750000000000000');
 
 // Unbonding period in blocks (~7 days at 6 sec blocks)
@@ -734,7 +734,7 @@ class StakingService {
             address: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
             name: 'Chameleon Foundation',
             commission: 5,
-            totalStaked: '1,250,000 CHML',
+            totalStaked: '1,250,000 pCHML',
             nominators: 45,
             isActive: true,
             status: 'Active',
@@ -743,7 +743,7 @@ class StakingService {
             address: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
             name: 'Validator Node Alpha',
             commission: 8,
-            totalStaked: '850,000 CHML',
+            totalStaked: '850,000 pCHML',
             nominators: 32,
             isActive: true,
             status: 'Active',
@@ -752,7 +752,7 @@ class StakingService {
             address: '5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y',
             name: 'Community Validator',
             commission: 10,
-            totalStaked: '620,000 CHML',
+            totalStaked: '620,000 pCHML',
             nominators: 28,
             isActive: true,
             status: 'Active',
@@ -761,7 +761,7 @@ class StakingService {
             address: '5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy',
             name: 'Secure Staking Co',
             commission: 7,
-            totalStaked: '480,000 CHML',
+            totalStaked: '480,000 pCHML',
             nominators: 19,
             isActive: true,
             status: 'Waiting',
@@ -770,7 +770,7 @@ class StakingService {
             address: '5HGjWAeFDfFCWPsjFQdVV2Msvz2XtMktvgocEZcCj68kUMaw',
             name: 'Decentralized Node',
             commission: 12,
-            totalStaked: '320,000 CHML',
+            totalStaked: '320,000 pCHML',
             nominators: 15,
             isActive: false,
             status: 'Unbonding',
