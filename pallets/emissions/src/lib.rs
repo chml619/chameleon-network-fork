@@ -444,10 +444,10 @@ pub mod pallet {
         /// - After Year 20: emissions STOP
         pub fn calculate_emission_rate(current_block: BlockNumberFor<T>) -> BalanceOf<T> {
             const BLOCKS_PER_YEAR: u32 = 5_259_600;
-            
+
             // Year 1 per-block emission: 7,400,000 CHML / 5,259,600 blocks = 1.407 CHML/block
-            // With 18 decimals: 1_407_000_000_000_000_000
-            const YEAR_1_PER_BLOCK: u128 = 1_407_000_000_000_000_000;
+            // Chain uses 12 decimals (UNIT = 10^12), so: 1.407 * 10^12 = 1_407_000_000_000
+            const YEAR_1_PER_BLOCK: u128 = 1_407_000_000_000;
             
             let current_block_u32: u32 = current_block.saturated_into();
             let year = current_block_u32 / BLOCKS_PER_YEAR;
