@@ -181,10 +181,12 @@ export function usePDEX() {
       );
       
       if (result.success) {
-        // Clear cache and wait for chain state to propagate before fetching new balances
-        pdexService.clearBalanceCache();
-        // Add delay to ensure chain state is updated after transaction finalizes
+        // Wait for chain state to propagate after transaction finalizes
+        // The delay ensures the new balances are available on-chain
         await new Promise(resolve => setTimeout(resolve, 1500));
+        // Clear cache IMMEDIATELY before fetching to ensure fresh data
+        // This prevents stale data from being cached during the delay
+        pdexService.clearBalanceCache();
         await fetchTokenBalances();
         setAmountIn('');
         setQuote(null);

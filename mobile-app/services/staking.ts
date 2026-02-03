@@ -139,15 +139,10 @@ class StakingService {
         
         // Extract fields from StakeInfo { amount, rewards_accumulated, last_claim_block, status, unbonding_block }
         staked = new BN(info.amount?.toString() || '0');
+        // IMPORTANT: Only show rewards_accumulated from staking pallet
+        // These are the rewards that can be claimed via claimRewards()
+        // Do NOT show emissions.validatorRewards as they require a different claim mechanism
         rewards = new BN(info.rewards_accumulated?.toString() || info.rewardsAccumulated?.toString() || '0');
-        // Also check emissions pallet for validator rewards (primary source)
-        try {
-          const emissionsRewards = await (api.query.emissions as any).validatorRewards(address);
-          if (emissionsRewards && !emissionsRewards.isEmpty) {
-            const emRewards = new BN(emissionsRewards.toString());
-            if (emRewards.gt(rewards)) rewards = emRewards;
-          }
-        } catch (e) { console.log("[Staking] Emissions rewards query failed:", e); }
         
         // Parse status enum
         const rawStatus = info.status;
@@ -231,17 +226,18 @@ class StakingService {
         totalValidators = stakerEntries.filter((e: any) => e[1].toJSON()?.status === "Active").length;
       } catch (e) { console.log("[Staking] Could not get validator count:", e); }
       
+      // Use 'pCHML' symbol for staking UI since we stake pCHML tokens (not native CHML)
       return {
-        staked: chainService.formatBalance(staked.toString()),
+        staked: chainService.formatBalance(staked.toString(), 12, 'pCHML'),
         stakedRaw: staked,
-        available: chainService.formatBalance(freeBalance.toString()),
+        available: chainService.formatBalance(freeBalance.toString(), 12, 'pCHML'),
         availableRaw: freeBalance,
-        rewards: chainService.formatBalance(rewards.toString()),
+        rewards: chainService.formatBalance(rewards.toString(), 12, 'pCHML'),
         rewardsRaw: rewards,
-        unbonding: chainService.formatBalance(unbonding.toString()),
+        unbonding: chainService.formatBalance(unbonding.toString(), 12, 'pCHML'),
         unbondingRaw: unbonding,
         apy,
-        minStake: chainService.formatBalance(MINIMUM_STAKE.toString()),
+        minStake: chainService.formatBalance(MINIMUM_STAKE.toString(), 12, 'pCHML'),
         totalValidators,
         status,
         unbondingBlock,
@@ -268,17 +264,18 @@ class StakingService {
     // Simulate reward accumulation if staked
     this.updateMockRewards();
     
+    // Use 'pCHML' symbol for staking UI since we stake pCHML tokens (not native CHML)
     return {
-      staked: chainService.formatBalance(this.mockStakingData.staked.toString()),
+      staked: chainService.formatBalance(this.mockStakingData.staked.toString(), 12, 'pCHML'),
       stakedRaw: this.mockStakingData.staked,
-      available: chainService.formatBalance(availableRaw.toString()),
+      available: chainService.formatBalance(availableRaw.toString(), 12, 'pCHML'),
       availableRaw,
-      rewards: chainService.formatBalance(this.mockStakingData.rewards.toString()),
+      rewards: chainService.formatBalance(this.mockStakingData.rewards.toString(), 12, 'pCHML'),
       rewardsRaw: this.mockStakingData.rewards,
-      unbonding: chainService.formatBalance(this.mockStakingData.unbonding.toString()),
+      unbonding: chainService.formatBalance(this.mockStakingData.unbonding.toString(), 12, 'pCHML'),
       unbondingRaw: this.mockStakingData.unbonding,
       apy: 12.5,
-      minStake: chainService.formatBalance(MINIMUM_STAKE.toString()),
+      minStake: chainService.formatBalance(MINIMUM_STAKE.toString(), 12, 'pCHML'),
       totalValidators: 2,
       status: this.mockStakingData.status,
       unbondingBlock: this.mockStakingData.unbondingBlock,

@@ -274,12 +274,16 @@ class PDEXService {
   async getTokensWithBalances(api: ApiPromise, address: string): Promise<TokenInfo[]> {
     // Create fresh copies to avoid mutation
     const tokens = PDEX_TOKENS.map(t => ({ ...t, balance: '0', balanceRaw: new BN(0) }));
-    
+
     try {
+      // Clear cache before fetching to ensure fresh data
+      // This prevents stale cached values from being returned
+      this.clearBalanceCache();
+
       // Fetch all token balances in parallel from pDEX pallet
       const balancePromises = tokens.map(async (token) => {
         try {
-          // Use cached getTokenBalance method
+          // Fetch directly from chain (cache was just cleared)
           const balance = await this.getTokenBalance(token.tokenId ?? 0, address);
           return { symbol: token.symbol, balance };
         } catch (e) {
@@ -287,9 +291,9 @@ class PDEXService {
           return { symbol: token.symbol, balance: new BN(0) };
         }
       });
-      
+
       const balances = await Promise.all(balancePromises);
-      
+
       // Update tokens with fetched balances
       tokens.forEach(token => {
         const found = balances.find(b => b.symbol === token.symbol);
@@ -301,7 +305,7 @@ class PDEXService {
     } catch (error) {
       console.error('[pDEX] Error fetching token balances:', error);
     }
-    
+
     return tokens;
   }
 

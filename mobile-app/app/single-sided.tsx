@@ -99,6 +99,9 @@ export default function SingleSidedScreen() {
           text: 'Confirm',
           onPress: async () => {
             setIsSubmitting(true);
+            let provisionSuccess = false;
+            let provisionError = '';
+
             try {
               const result = await singleSidedService.provisionSingleSided(
                 api,
@@ -107,7 +110,9 @@ export default function SingleSidedScreen() {
                 amountBN,
                 selectedTier
               );
+
               if (result.success) {
+                provisionSuccess = true;
                 // Save to transaction history (wrapped in try-catch to ensure Alert shows)
                 try {
                   transactionHistoryService.saveTransaction(wallet.address, {
@@ -136,20 +141,30 @@ export default function SingleSidedScreen() {
                 } catch (refreshError) {
                   console.error('[SingleSided] Balance refresh error:', refreshError);
                 }
-                // Show success Alert AFTER balance refresh attempt
-                Alert.alert('Success', `Successfully provided ${amount} ${selectedToken.symbol} with ${LOCK_TIER_INFO[selectedTier].label} lock!`, [
-                  { text: 'OK', onPress: () => router.back() }
-                ]);
               } else {
-                notificationService.addNotification('error', result.error || 'Provision failed');
-                Alert.alert('Error', result.error || 'Failed to provision');
+                provisionError = result.error || 'Failed to provision';
+                notificationService.addNotification('error', provisionError);
               }
             } catch (error) {
+              provisionError = 'Transaction failed';
               notificationService.addNotification('error', 'Single-sided provision failed');
-              Alert.alert('Error', 'Transaction failed');
             } finally {
               setIsSubmitting(false);
             }
+
+            // Show Alert OUTSIDE the try-finally block with a small delay
+            // to ensure the confirmation dialog has fully dismissed
+            setTimeout(() => {
+              if (provisionSuccess) {
+                Alert.alert(
+                  'Success',
+                  `Successfully provided ${amount} ${selectedToken.symbol} with ${LOCK_TIER_INFO[selectedTier].label} lock!`,
+                  [{ text: 'OK', onPress: () => router.back() }]
+                );
+              } else if (provisionError) {
+                Alert.alert('Error', provisionError);
+              }
+            }, 100);
           },
         },
       ]

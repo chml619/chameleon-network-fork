@@ -352,14 +352,18 @@ export default function PowerScreen() {
   }, [refetchStaking, refetchLiquidity]);
 
   // Calculate unbonding progress
+  // NOTE: stakingInfo.unbondingBlock is the END block (when unbonding completes),
+  // NOT the start block. The pallet stores: unbonding_block = current_block + UnbondingPeriod
   const getUnbondingProgress = (): { progress: number; blocksRemaining: number; canComplete: boolean } => {
     if (!stakingInfo?.unbondingBlock || stakingInfo.status !== 'Unbonding') {
       return { progress: 0, blocksRemaining: 0, canComplete: false };
     }
 
-    const unbondingEndBlock = stakingInfo.unbondingBlock + UNBONDING_PERIOD;
+    // unbondingBlock is already the completion block, NOT the start block
+    const unbondingEndBlock = stakingInfo.unbondingBlock;
+    const unbondingStartBlock = stakingInfo.unbondingBlock - UNBONDING_PERIOD;
     const blocksRemaining = Math.max(0, unbondingEndBlock - currentBlock);
-    const blocksPassed = currentBlock - stakingInfo.unbondingBlock;
+    const blocksPassed = Math.max(0, currentBlock - unbondingStartBlock);
     const progress = Math.min(100, (blocksPassed / UNBONDING_PERIOD) * 100);
     const canComplete = blocksRemaining === 0;
 
