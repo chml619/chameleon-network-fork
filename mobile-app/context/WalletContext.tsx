@@ -11,6 +11,7 @@ import { multiWalletService } from '../services/multiWallet';
 import { privacyService, generateStealthMetaAddress, generateStealthHash } from '../services/privacy';
 import { apiService } from '../services/api';
 import { pdexService } from '../services/pdex';
+import { notificationService } from '../services/notifications';
 import BN from 'bn.js';
 import { formatBalance } from '../utils/balance';
 import { transactionHistoryService } from '../services/transactionHistory';
@@ -69,6 +70,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
   useEffect(() => {
     const unsubscribe = walletService.onWalletStateChange((state) => {
       setWallet(state);
+      // Update notification service with current wallet
+      notificationService.setCurrentWallet(state?.address || null);
       // Generate stealth address when wallet changes
       if (state && !state.isLocked) {
         generateStealthAddressForWallet(state);
@@ -160,6 +163,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
             name: metadata.name,
             isLocked: true,
           });
+          // Set notification service current wallet
+          notificationService.setCurrentWallet(metadata.address);
 
           // Update multi-wallet service
           await multiWalletService.setActiveWallet(metadata.address);
@@ -369,13 +374,16 @@ export function WalletProvider({ children }: WalletProviderProps) {
     try {
       // Clear wallet service state
       walletService.clearWallet();
-      
+
       // Clear secure storage
       await storageService.deleteWallet();
-      
+
       // Clear active wallet (but keep saved wallets list)
       await multiWalletService.clearActiveWallet();
-      
+
+      // Clear notification service current wallet
+      notificationService.setCurrentWallet(null);
+
       setWallet(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to logout';

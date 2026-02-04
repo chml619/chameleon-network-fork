@@ -207,25 +207,30 @@ class PDEXService {
     const cacheKey = `${address}-${tokenId}`;
     const cached = this.balanceCache.get(cacheKey);
     if (cached && (Date.now() - cached.timestamp) < this.CACHE_TTL_MS) {
+      console.log(`[BALANCE DEBUG] Cache HIT for token ${tokenId}: ${cached.balance.toString()}`);
       return cached.balance;
     }
+    console.log(`[BALANCE DEBUG] Cache MISS for token ${tokenId}, fetching from chain...`);
 
     const api = apiService.getApi();
     if (!api) {
+      console.log('[BALANCE DEBUG] No API connection');
       return new BN(0);
     }
 
     try {
       if (!api.query.pdex || !(api.query.pdex as any).tokenBalances) {
+        console.log('[BALANCE DEBUG] pdex.tokenBalances not available');
         return new BN(0);
       }
 
       const balance = await (api.query.pdex as any).tokenBalances(address, tokenId);
       const result = new BN(balance.toString());
-      
+      console.log(`[BALANCE DEBUG] Chain returned token ${tokenId} balance: ${result.toString()}`);
+
       // Update cache
       this.balanceCache.set(cacheKey, { balance: result, timestamp: Date.now() });
-      
+
       return result;
     } catch (error) {
       console.error('[pDEX] Error getting token balance:', error);

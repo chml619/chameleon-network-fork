@@ -7,8 +7,12 @@ import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-const NOTIFICATION_HISTORY_KEY = 'notification_history';
+const NOTIFICATION_HISTORY_KEY_PREFIX = 'notification_history_';
+const GLOBAL_NOTIFICATION_HISTORY_KEY = 'notification_history'; // Legacy key for migration
 const MAX_NOTIFICATIONS = 100;
+
+// Current wallet address for wallet-specific notifications
+let currentWalletAddress: string | null = null;
 
 export interface StoredNotification {
   id: string;
@@ -36,6 +40,32 @@ class NotificationService {
       NotificationService.instance = new NotificationService();
     }
     return NotificationService.instance;
+  }
+
+  /**
+   * Set the current wallet address for wallet-specific notifications
+   */
+  public setCurrentWallet(address: string | null): void {
+    currentWalletAddress = address;
+  }
+
+  /**
+   * Get the storage key for the current wallet
+   */
+  private getStorageKey(): string {
+    if (currentWalletAddress) {
+      return `${NOTIFICATION_HISTORY_KEY_PREFIX}${currentWalletAddress}`;
+    }
+    return GLOBAL_NOTIFICATION_HISTORY_KEY;
+  }
+
+  /**
+   * Add a simple notification (for success/error messages)
+   * This is a convenience method for simple notifications
+   */
+  public async addNotification(type: 'success' | 'error' | 'info', message: string): Promise<string> {
+    const title = type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info';
+    return this.sendNotification(title, message, 'info');
   }
 
   /**
@@ -192,10 +222,11 @@ class NotificationService {
   }
 
   /**
-   * Save notification to history
+   * Save notification to history (wallet-specific)
    */
   private async saveToHistory(notification: StoredNotification): Promise<void> {
     try {
+      const storageKey = this.getStorageKey();
       const history = await this.getHistory();
       history.unshift(notification);
 
@@ -204,18 +235,19 @@ class NotificationService {
         history.splice(MAX_NOTIFICATIONS);
       }
 
-      await AsyncStorage.setItem(NOTIFICATION_HISTORY_KEY, JSON.stringify(history));
+      await AsyncStorage.setItem(storageKey, JSON.stringify(history));
     } catch (error) {
       console.error('[Notifications] Save history error:', error);
     }
   }
 
   /**
-   * Get notification history
+   * Get notification history (wallet-specific)
    */
   public async getHistory(): Promise<StoredNotification[]> {
     try {
-      const data = await AsyncStorage.getItem(NOTIFICATION_HISTORY_KEY);
+      const storageKey = this.getStorageKey();
+      const data = await AsyncStorage.getItem(storageKey);
       return data ? JSON.parse(data) : [];
     } catch (error) {
       console.error('[Notifications] Get history error:', error);
@@ -232,15 +264,16 @@ class NotificationService {
   }
 
   /**
-   * Mark notification as read
+   * Mark notification as read (wallet-specific)
    */
   public async markAsRead(id: string): Promise<void> {
     try {
+      const storageKey = this.getStorageKey();
       const history = await this.getHistory();
       const index = history.findIndex(n => n.id === id);
       if (index !== -1) {
         history[index].read = true;
-        await AsyncStorage.setItem(NOTIFICATION_HISTORY_KEY, JSON.stringify(history));
+        await AsyncStorage.setItem(storageKey, JSON.stringify(history));
       }
     } catch (error) {
       console.error('[Notifications] Mark read error:', error);
@@ -248,38 +281,41 @@ class NotificationService {
   }
 
   /**
-   * Mark all as read
+   * Mark all as read (wallet-specific)
    */
   public async markAllAsRead(): Promise<void> {
     try {
+      const storageKey = this.getStorageKey();
       const history = await this.getHistory();
       history.forEach(n => n.read = true);
-      await AsyncStorage.setItem(NOTIFICATION_HISTORY_KEY, JSON.stringify(history));
+      await AsyncStorage.setItem(storageKey, JSON.stringify(history));
     } catch (error) {
       console.error('[Notifications] Mark all read error:', error);
     }
   }
 
   /**
-   * Clear notification history
+   * Clear notification history (wallet-specific)
    */
   public async clearHistory(): Promise<void> {
     try {
-      await AsyncStorage.removeItem(NOTIFICATION_HISTORY_KEY);
-      console.log('[Notifications] History cleared');
+      const storageKey = this.getStorageKey();
+      await AsyncStorage.removeItem(storageKey);
+      console.log('[Notifications] History cleared for', storageKey);
     } catch (error) {
       console.error('[Notifications] Clear history error:', error);
     }
   }
 
   /**
-   * Delete single notification
+   * Delete single notification (wallet-specific)
    */
   public async deleteNotification(id: string): Promise<void> {
     try {
+      const storageKey = this.getStorageKey();
       const history = await this.getHistory();
       const filtered = history.filter(n => n.id !== id);
-      await AsyncStorage.setItem(NOTIFICATION_HISTORY_KEY, JSON.stringify(filtered));
+      await AsyncStorage.setItem(storageKey, JSON.stringify(filtered));
     } catch (error) {
       console.error('[Notifications] Delete error:', error);
     }

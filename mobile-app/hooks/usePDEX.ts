@@ -42,15 +42,21 @@ export function usePDEX() {
 
   const fetchTokenBalances = useCallback(async () => {
     if (!api || !wallet?.address) return;
-    
+
     try {
+      console.log('[SWAP DEBUG] fetchTokenBalances called');
+      console.log('[SWAP DEBUG] Fetching for address:', wallet.address);
       const tokensWithBalances = await pdexService.getTokensWithBalances(api, wallet.address);
+      console.log('[SWAP DEBUG] Fetched balances:', tokensWithBalances.map(t => `${t.symbol}: ${t.balance}`).join(', '));
       setTokens(tokensWithBalances);
-      
+
       // Update selected tokens with new balances
       const updatedTokenIn = tokensWithBalances.find(t => t.symbol === selectedTokenIn.symbol);
       const updatedTokenOut = tokensWithBalances.find(t => t.symbol === selectedTokenOut.symbol);
-      
+
+      console.log('[SWAP DEBUG] Updated tokenIn:', updatedTokenIn?.symbol, updatedTokenIn?.balance);
+      console.log('[SWAP DEBUG] Updated tokenOut:', updatedTokenOut?.symbol, updatedTokenOut?.balance);
+
       if (updatedTokenIn) setSelectedTokenIn(updatedTokenIn);
       if (updatedTokenOut) setSelectedTokenOut(updatedTokenOut);
     } catch (err) {
@@ -181,13 +187,20 @@ export function usePDEX() {
       );
       
       if (result.success) {
+        console.log('[SWAP DEBUG] Swap succeeded, txHash:', result.txHash);
+        console.log('[SWAP DEBUG] TokenIn:', selectedTokenIn.symbol, 'TokenOut:', selectedTokenOut.symbol);
+        console.log('[SWAP DEBUG] Balances BEFORE refresh - TokenIn:', selectedTokenIn.balance, 'TokenOut:', selectedTokenOut.balance);
         // Wait for chain state to propagate after transaction finalizes
         // The delay ensures the new balances are available on-chain
+        console.log('[SWAP DEBUG] Waiting 1.5s for chain state propagation...');
         await new Promise(resolve => setTimeout(resolve, 1500));
         // Clear cache IMMEDIATELY before fetching to ensure fresh data
         // This prevents stale data from being cached during the delay
+        console.log('[SWAP DEBUG] Clearing balance cache...');
         pdexService.clearBalanceCache();
+        console.log('[SWAP DEBUG] Calling fetchTokenBalances...');
         await fetchTokenBalances();
+        console.log('[SWAP DEBUG] Balance refresh complete');
         setAmountIn('');
         setQuote(null);
       } else {
