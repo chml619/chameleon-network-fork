@@ -160,11 +160,10 @@ class PDEXService {
   private static instance: PDEXService;
   private mevProtectionEnabled: boolean = true;
   
-  // Add balance cache - longer TTL to reduce query frequency
-  // Note: If pCHML balance is growing every block, this is a blockchain-side issue
-  // The emissions pallet should credit to a claimable accumulator, not pCHML balance directly
+  // Balance cache disabled (TTL=0) to ensure fresh data after swaps
+  // Cache was causing stale balance display after transactions
   private balanceCache: Map<string, { balance: BN; timestamp: number }> = new Map();
-  private CACHE_TTL_MS = 10000; // 10 second cache to reduce query frequency
+  private CACHE_TTL_MS = 0; // Disabled - always query fresh from chain
   clearBalanceCache(): void { this.balanceCache.clear(); }
 
   private constructor() {}
@@ -342,6 +341,7 @@ class PDEXService {
 
   /**
    * Get real quote from pDEX pallet
+   * Uses direct pool ID mapping to avoid poolIdByAssets query failures
    */
   private async getRealQuote(
     api: ApiPromise,
@@ -357,21 +357,27 @@ class PDEXService {
       const tokenInId = this.getTokenId(tokenIn);
       const tokenOutId = this.getTokenId(tokenOut);
 
-      // Get pool ID for this pair
-      const poolId = await api.query.pdex.poolIdByAssets(tokenInId, tokenOutId) as any;
-      if (!poolId || poolId.isNone) {
+      // Use direct pool ID mapping (same as executeSwap uses)
+      // This avoids poolIdByAssets which may return None
+      const poolId = this.getPoolIdForPair(tokenInId, tokenOutId);
+      if (poolId === null) {
+        console.log('[pDEX] No pool for pair:', tokenIn, tokenOut);
         return this.getMockQuote(tokenIn, tokenOut, amountIn);
       }
 
-      // Get pool info
-      const pool = await api.query.pdex.pools(poolId.unwrap()) as any;
-      if (!pool || pool.isNone) {
+      // Get pool info directly by pool ID
+      const pool = await (api.query.pdex as any).pools(poolId);
+      if (!pool || pool.isEmpty || pool.isNone) {
+        console.log('[pDEX] Pool', poolId, 'not found or empty');
         return this.getMockQuote(tokenIn, tokenOut, amountIn);
       }
 
-      const poolData = pool.unwrap();
+      // Handle both wrapped and unwrapped pool data
+      const poolData = pool.unwrap ? pool.unwrap() : pool;
       const reserveA = parseFloat(poolData.reserveA.toString()) / 1e12;
       const reserveB = parseFloat(poolData.reserveB.toString()) / 1e12;
+
+      console.log('[pDEX] Pool', poolId, 'reserves - A:', reserveA, 'B:', reserveB);
 
       // Determine reserves based on swap direction
       const isAtoB = poolData.assetA.toNumber() === tokenInId;

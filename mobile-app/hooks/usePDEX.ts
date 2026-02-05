@@ -4,7 +4,6 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { Alert } from 'react-native';
 import { useApi } from './useApi';
 import { useWallet } from '@/context/WalletContext';
 import { pdexService, TokenInfo, SwapQuote, SwapResult, PDEX_TOKENS } from '@/services/pdex';
@@ -166,12 +165,6 @@ export function usePDEX() {
     setIsSwapping(true);
     setError(null);
 
-    // BEFORE swap - capture current balances from React state
-    const beforeBalances: Record<string, string> = {};
-    for (const token of tokens) {
-      beforeBalances[token.symbol] = token.balance || '0';
-    }
-
     try {
       // Get or derive keyPair (handles wallet restore from storage)
       const keyPair = await walletService.getOrDeriveKeyPair();
@@ -202,15 +195,6 @@ export function usePDEX() {
         console.log('[SWAP DEBUG] Waiting 2s for chain state propagation...');
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Get current block for reference
-        let blockNum = 0;
-        try {
-          const header = await api.rpc.chain.getHeader();
-          blockNum = header.number.toNumber();
-        } catch (e) {
-          console.log('[SWAP DEBUG] Could not get block number');
-        }
-
         // Query chain DIRECTLY using the SAME api instance used for swap
         // This bypasses pdexService which might have a different api instance
         const tokenInId = selectedTokenIn.tokenId ?? 0;
@@ -237,38 +221,11 @@ export function usePDEX() {
         await fetchTokenBalances();
         console.log('[SWAP DEBUG] Balance refresh complete');
 
-        // AFTER swap - capture balances from React state (after refresh)
-        const afterBalances: Record<string, string> = {};
-        for (const token of tokens) {
-          afterBalances[token.symbol] = token.balance || '0';
-        }
-
-        // Show Debug Alert with comprehensive diagnostic info
-        const debugLines = [
-          `Swap: ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
-          `Amount: ${amountIn}`,
-          `TxHash: ${result.txHash?.slice(0, 16)}...`,
-          `Block: ${blockNum}`,
-          `Address: ${wallet.address.slice(0, 8)}...`,
-          '',
-          '─── BEFORE (React state) ───',
-          `  ${selectedTokenIn.symbol}: ${beforeBalances[selectedTokenIn.symbol]}`,
-          `  ${selectedTokenOut.symbol}: ${beforeBalances[selectedTokenOut.symbol]}`,
-          '',
-          '─── AFTER (Direct API query) ───',
-          `  ${selectedTokenIn.symbol}: ${chainTokenInFormatted}`,
-          `  ${selectedTokenOut.symbol}: ${chainTokenOutFormatted}`,
-          `  (raw: ${chainTokenInRaw.slice(0, 12)}...)`,
-          '',
-          '─── AFTER (React state) ───',
-          `  ${selectedTokenIn.symbol}: ${afterBalances[selectedTokenIn.symbol]}`,
-          `  ${selectedTokenOut.symbol}: ${afterBalances[selectedTokenOut.symbol]}`,
-          '',
-          'Chain correct + state wrong = closure issue',
-          'Both wrong = API/timing issue',
-        ];
-
-        Alert.alert('Swap Debug Info', debugLines.join('\n'));
+        // Log post-swap balance info for debugging
+        console.log('[SWAP DEBUG] Chain balances after swap:', {
+          [selectedTokenIn.symbol]: chainTokenInFormatted,
+          [selectedTokenOut.symbol]: chainTokenOutFormatted,
+        });
 
         setAmountIn('');
         setQuote(null);
@@ -284,7 +241,7 @@ export function usePDEX() {
     } finally {
       setIsSwapping(false);
     }
-  }, [api, wallet?.address, quote, amountIn, selectedTokenIn, selectedTokenOut, tokens, fetchTokenBalances]);
+  }, [api, wallet?.address, quote, amountIn, selectedTokenIn, selectedTokenOut, fetchTokenBalances]);
 
   return {
     tokens,
