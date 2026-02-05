@@ -197,22 +197,41 @@ export function usePDEX() {
         console.log('[SWAP DEBUG] Swap succeeded, txHash:', result.txHash);
         console.log('[SWAP DEBUG] TokenIn:', selectedTokenIn.symbol, 'TokenOut:', selectedTokenOut.symbol);
         console.log('[SWAP DEBUG] Balances BEFORE refresh - TokenIn:', selectedTokenIn.balance, 'TokenOut:', selectedTokenOut.balance);
-        // Wait for chain state to propagate after transaction finalizes
-        // The delay ensures the new balances are available on-chain
-        console.log('[SWAP DEBUG] Waiting 1.5s for chain state propagation...');
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        // Clear cache IMMEDIATELY before fetching to ensure fresh data
-        // This prevents stale data from being cached during the delay
-        console.log('[SWAP DEBUG] Clearing balance cache...');
-        pdexService.clearBalanceCache();
 
-        // Query chain DIRECTLY for debug (bypass React state)
+        // Wait for chain state to propagate after transaction finalizes
+        console.log('[SWAP DEBUG] Waiting 2s for chain state propagation...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Get current block for reference
+        let blockNum = 0;
+        try {
+          const header = await api.rpc.chain.getHeader();
+          blockNum = header.number.toNumber();
+        } catch (e) {
+          console.log('[SWAP DEBUG] Could not get block number');
+        }
+
+        // Query chain DIRECTLY using the SAME api instance used for swap
+        // This bypasses pdexService which might have a different api instance
         const tokenInId = selectedTokenIn.tokenId ?? 0;
         const tokenOutId = selectedTokenOut.tokenId ?? 0;
-        const chainTokenInBal = await pdexService.getTokenBalance(tokenInId, wallet.address);
-        const chainTokenOutBal = await pdexService.getTokenBalance(tokenOutId, wallet.address);
-        const chainTokenInFormatted = chainService.formatBalance(chainTokenInBal.toString(), 12, selectedTokenIn.symbol);
-        const chainTokenOutFormatted = chainService.formatBalance(chainTokenOutBal.toString(), 12, selectedTokenOut.symbol);
+
+        let chainTokenInRaw = '0';
+        let chainTokenOutRaw = '0';
+        try {
+          const balIn = await (api.query.pdex as any).tokenBalances(wallet.address, tokenInId);
+          chainTokenInRaw = balIn.toString();
+          const balOut = await (api.query.pdex as any).tokenBalances(wallet.address, tokenOutId);
+          chainTokenOutRaw = balOut.toString();
+        } catch (e) {
+          console.log('[SWAP DEBUG] Direct chain query failed:', e);
+        }
+
+        const chainTokenInFormatted = chainService.formatBalance(chainTokenInRaw, 12, selectedTokenIn.symbol);
+        const chainTokenOutFormatted = chainService.formatBalance(chainTokenOutRaw, 12, selectedTokenOut.symbol);
+
+        console.log('[SWAP DEBUG] Clearing balance cache...');
+        pdexService.clearBalanceCache();
 
         console.log('[SWAP DEBUG] Calling fetchTokenBalances...');
         await fetchTokenBalances();
@@ -224,26 +243,29 @@ export function usePDEX() {
           afterBalances[token.symbol] = token.balance || '0';
         }
 
-        // Show Debug Alert with comprehensive info
+        // Show Debug Alert with comprehensive diagnostic info
         const debugLines = [
           `Swap: ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
           `Amount: ${amountIn}`,
           `TxHash: ${result.txHash?.slice(0, 16)}...`,
+          `Block: ${blockNum}`,
+          `Address: ${wallet.address.slice(0, 8)}...`,
           '',
           '─── BEFORE (React state) ───',
           `  ${selectedTokenIn.symbol}: ${beforeBalances[selectedTokenIn.symbol]}`,
           `  ${selectedTokenOut.symbol}: ${beforeBalances[selectedTokenOut.symbol]}`,
           '',
-          '─── AFTER (Chain query) ───',
+          '─── AFTER (Direct API query) ───',
           `  ${selectedTokenIn.symbol}: ${chainTokenInFormatted}`,
           `  ${selectedTokenOut.symbol}: ${chainTokenOutFormatted}`,
+          `  (raw: ${chainTokenInRaw.slice(0, 12)}...)`,
           '',
           '─── AFTER (React state) ───',
           `  ${selectedTokenIn.symbol}: ${afterBalances[selectedTokenIn.symbol]}`,
           `  ${selectedTokenOut.symbol}: ${afterBalances[selectedTokenOut.symbol]}`,
           '',
-          'If chain correct but state wrong = React state issue',
-          'If chain also wrong = timing/query issue',
+          'Chain correct + state wrong = closure issue',
+          'Both wrong = API/timing issue',
         ];
 
         Alert.alert('Swap Debug Info', debugLines.join('\n'));

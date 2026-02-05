@@ -433,7 +433,7 @@ export default function SendScreen() {
         transferType,
       };
       
-      // Save to transaction history
+      // Save to transaction history for SENDER (current wallet)
       if (wallet.address) {
         await transactionHistoryService.saveTransaction(wallet.address, {
           hash: txHash,
@@ -444,6 +444,21 @@ export default function SendScreen() {
           fee: feeEstimate.partialFee,
           status: 'finalized',
           usedMEVProtection: false,
+          type: 'send',
+        });
+
+        // Also save to transaction history for RECIPIENT wallet
+        // This ensures recipients see the transaction when they view their history
+        await transactionHistoryService.saveTransaction(recipient, {
+          hash: txHash,
+          from: wallet.address,
+          to: recipient,
+          amount: amountBN.toString(),
+          formattedAmount,
+          fee: '0', // Recipient doesn't pay fee
+          status: 'finalized',
+          usedMEVProtection: false,
+          type: 'receive',
         });
       }
       
