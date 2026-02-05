@@ -247,7 +247,9 @@ export default function SingleSidedScreen() {
                 )}
               </View>
               <Text style={styles.tierShare}>{info.share} reward share</Text>
-              <Text style={styles.tierMultiplier}>{info.multiplier}x vs no lock</Text>
+              {tier !== 'NoLock' && (
+                <Text style={styles.tierMultiplier}>{info.multiplier}x vs no lock</Text>
+              )}
             </TouchableOpacity>
           ))}
         </View>

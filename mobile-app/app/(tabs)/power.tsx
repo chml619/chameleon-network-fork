@@ -444,10 +444,38 @@ export default function PowerScreen() {
       Alert.alert('No Rewards', 'You have no rewards to claim.');
       return;
     }
+
+    // Capture reward amount before claiming
+    const claimedAmount = formatBalanceWithUnit(stakingInfo.rewardsRaw);
+
     const result = await claimStakingRewards();
     if (result.success) {
       // Wait for chain state to propagate after transaction finalizes
       await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Save to transaction history
+      try {
+        transactionHistoryService.saveTransaction(wallet.address, {
+          hash: `staking_claim_${Date.now()}`,
+          from: 'vNode Rewards',
+          to: wallet.address,
+          amount: stakingInfo.rewardsRaw.toString(),
+          formattedAmount: claimedAmount,
+          status: 'finalized',
+          usedMEVProtection: false,
+          type: 'claim_rewards',
+        });
+      } catch (historyError) {
+        console.error('[Power] Failed to save transaction history:', historyError);
+      }
+
+      // Add notification
+      try {
+        notificationService.addNotification('success', `Claimed ${claimedAmount} from vNode rewards!`);
+      } catch (notifError) {
+        console.error('[Power] Failed to add notification:', notifError);
+      }
+
       // Refresh staking info, LP data, and wallet balances after claiming
       try {
         await refetchStaking();
@@ -1035,17 +1063,24 @@ export default function PowerScreen() {
 
                 {/* Action Buttons */}
                 <View style={{ marginTop: THEME.spacing.lg, gap: THEME.spacing.sm }}>
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.primaryButton]}
-                    onPress={handleClaimSingleSidedRewards}
-                    disabled={isClaimingSSRewards || parseInt(selectedSingleSidedPosition.pendingRewards || '0') === 0}
-                  >
-                    {isClaimingSSRewards ? (
-                      <ActivityIndicator size="small" color={THEME.colors.white} />
-                    ) : (
-                      <Text style={styles.actionButtonText}>Claim Rewards</Text>
-                    )}
-                  </TouchableOpacity>
+                  {(() => {
+                    const canClaimRewards = !isClaimingSSRewards && parseInt(selectedSingleSidedPosition.pendingRewards || '0') > 0;
+                    return (
+                      <TouchableOpacity
+                        style={[styles.actionButton, canClaimRewards ? styles.successButton : styles.disabledButton]}
+                        onPress={handleClaimSingleSidedRewards}
+                        disabled={!canClaimRewards}
+                      >
+                        {isClaimingSSRewards ? (
+                          <ActivityIndicator size="small" color={THEME.colors.white} />
+                        ) : (
+                          <Text style={[styles.actionButtonText, !canClaimRewards && styles.disabledText]}>
+                            Claim Rewards
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })()}
 
                   <TouchableOpacity
                     style={[

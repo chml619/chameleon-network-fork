@@ -277,6 +277,7 @@ class PoolService {
 
   /**
    * Remove liquidity from a pool
+   * @param isRawLp - If true, lpTokens is already in raw format (no conversion needed)
    */
   async removeLiquidity(
     api: ApiPromise,
@@ -284,13 +285,19 @@ class PoolService {
     poolId: number,
     lpTokens: string,
     minAmountA: string = '0',
-    minAmountB: string = '0'
+    minAmountB: string = '0',
+    isRawLp: boolean = false
   ): Promise<LiquidityResult> {
     try {
-      const lpBN = BigInt(Math.floor(parseFloat(lpTokens) * Math.pow(10, 12)));
+      // For 100% removal, use raw LP value directly to avoid floating point precision loss
+      const lpBN = isRawLp
+        ? BigInt(lpTokens)
+        : BigInt(Math.floor(parseFloat(lpTokens) * Math.pow(10, 12)));
       const minABN = BigInt(Math.floor(parseFloat(minAmountA) * Math.pow(10, 12)));
       const minBBN = BigInt(Math.floor(parseFloat(minAmountB) * Math.pow(10, 12)));
-      
+
+      console.log('[Pool] Removing liquidity:', { poolId, lpBN: lpBN.toString(), isRawLp });
+
       const tx = api.tx.pdex.removeLiquidity(poolId, lpBN.toString(), minABN.toString(), minBBN.toString());
       
       return new Promise((resolve) => {

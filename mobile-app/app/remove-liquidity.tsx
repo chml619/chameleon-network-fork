@@ -124,9 +124,16 @@ export default function RemoveLiquidityScreen() {
 
   const getLpToRemove = () => {
     if (!position) return '0';
+    // For 100% removal, return exact raw LP balance to avoid precision loss
+    if (percentage === 100) {
+      return position.lpTokens; // Raw value from chain
+    }
     const lpTokens = parseFloat(position.lpTokens) / Math.pow(10, 12);
     return ((lpTokens * percentage) / 100).toFixed(6);
   };
+
+  // Check if removal is using raw LP value (100% removal)
+  const isRawLpRemoval = percentage === 100;
 
   const getExpectedA = () => {
     if (!position) return '0';
@@ -169,7 +176,10 @@ export default function RemoveLiquidityScreen() {
                 api,
                 keyPair,
                 pool.id,
-                getLpToRemove()
+                getLpToRemove(),
+                '0',
+                '0',
+                isRawLpRemoval // Pass true for 100% removal to use raw LP value
               );
 
               if (result.success) {
