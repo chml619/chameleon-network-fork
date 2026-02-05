@@ -136,14 +136,29 @@ class StakingService {
       // Parse StakeInfo struct if it exists
       if (stakerInfo && !stakerInfo.isEmpty) {
         const info = stakerInfo.toJSON ? stakerInfo.toJSON() : stakerInfo;
-        
+
         // Extract fields from StakeInfo { amount, rewards_accumulated, last_claim_block, status, unbonding_block }
         staked = new BN(info.amount?.toString() || '0');
-        // IMPORTANT: Only show rewards_accumulated from staking pallet
-        // These are the rewards that can be claimed via claimRewards()
-        // Do NOT show emissions.validatorRewards as they require a different claim mechanism
+
+        // First try staking pallet's rewards_accumulated
         rewards = new BN(info.rewards_accumulated?.toString() || info.rewardsAccumulated?.toString() || '0');
-        
+
+        // If staking rewards are zero, also check emissions pallet's ValidatorRewards
+        // Emissions pallet credits validator rewards separately (claimable via emissions.claimValidatorRewards)
+        if (rewards.isZero()) {
+          try {
+            if ((api.query as any).emissions?.validatorRewards) {
+              const emissionsRewards = await (api.query as any).emissions.validatorRewards(address);
+              if (emissionsRewards && !emissionsRewards.isEmpty) {
+                rewards = new BN(emissionsRewards.toString());
+                console.log('[Staking] Found emissions validator rewards:', rewards.toString());
+              }
+            }
+          } catch (e) {
+            console.log('[Staking] Could not query emissions.validatorRewards:', e);
+          }
+        }
+
         // Parse status enum
         const rawStatus = info.status;
         if (rawStatus) {
@@ -157,7 +172,7 @@ class StakingService {
             }
           }
         }
-        
+
         // Parse unbonding_block
         const rawUnbondingBlock = info.unbonding_block ?? info.unbondingBlock;
         if (rawUnbondingBlock && rawUnbondingBlock !== 0) {
@@ -384,7 +399,8 @@ class StakingService {
 
   /**
    * Claim staking rewards using our custom pallet
-   * Uses api.tx.staking.claimRewards() - NO arguments
+   * Tries emissions.claimValidatorRewards() first (where most rewards are),
+   * then falls back to staking.claimRewards() if needed
    */
   async claimRewards(
     api: ApiPromise,
@@ -392,19 +408,43 @@ class StakingService {
   ): Promise<StakingResult> {
     try {
       if (this.hasCustomStakingPallet(api)) {
-        // Use our custom staking pallet's claimRewards extrinsic (no arguments)
+        // Check if emissions pallet has claimable rewards
+        const address = keyPair.address;
+        let hasEmissionsRewards = false;
+
+        try {
+          if ((api.query as any).emissions?.validatorRewards) {
+            const emissionsRewards = await (api.query as any).emissions.validatorRewards(address);
+            if (emissionsRewards && !emissionsRewards.isEmpty) {
+              const rewardsAmount = new BN(emissionsRewards.toString());
+              hasEmissionsRewards = !rewardsAmount.isZero();
+            }
+          }
+        } catch (e) {
+          console.log('[Staking] Could not check emissions rewards:', e);
+        }
+
+        // If emissions has rewards, claim from emissions pallet
+        if (hasEmissionsRewards && (api.tx as any).emissions?.claimValidatorRewards) {
+          console.log('[Staking] Claiming from emissions.claimValidatorRewards()');
+          const tx = (api.tx as any).emissions.claimValidatorRewards();
+          return this.signAndSend(tx, keyPair);
+        }
+
+        // Otherwise use staking pallet's claimRewards
+        console.log('[Staking] Claiming from staking.claimRewards()');
         const tx = api.tx.staking.claimRewards();
         return this.signAndSend(tx, keyPair);
       } else {
         // Mock claim
         console.log('[Staking] Custom pallet not deployed, using mock');
-        
+
         // Add some rewards to available balance (simulate claiming)
         const claimedAmount = this.mockStakingData.rewards;
         this.mockStakingData.rewards = new BN(0);
-        
+
         await new Promise(resolve => setTimeout(resolve, 1500));
-        
+
         return {
           success: true,
           txHash: '0x' + Math.random().toString(16).slice(2, 66),

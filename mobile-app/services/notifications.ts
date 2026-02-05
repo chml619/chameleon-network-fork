@@ -242,6 +242,48 @@ class NotificationService {
   }
 
   /**
+   * Save notification to a specific wallet's history (for recipient notifications)
+   * This allows creating notifications for wallets other than the current one
+   */
+  public async saveNotificationForWallet(
+    walletAddress: string,
+    title: string,
+    body: string,
+    type: StoredNotification['type'],
+    data?: StoredNotification['data']
+  ): Promise<void> {
+    const id = `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    try {
+      const storageKey = `${NOTIFICATION_HISTORY_KEY_PREFIX}${walletAddress}`;
+      const existingData = await AsyncStorage.getItem(storageKey);
+      const history: StoredNotification[] = existingData ? JSON.parse(existingData) : [];
+
+      const notification: StoredNotification = {
+        id,
+        title,
+        body,
+        type,
+        timestamp: Date.now(),
+        read: false,
+        data,
+      };
+
+      history.unshift(notification);
+
+      // Limit history size
+      if (history.length > MAX_NOTIFICATIONS) {
+        history.splice(MAX_NOTIFICATIONS);
+      }
+
+      await AsyncStorage.setItem(storageKey, JSON.stringify(history));
+      console.log('[Notifications] Saved notification for wallet:', walletAddress.substring(0, 8));
+    } catch (error) {
+      console.error('[Notifications] Save for wallet error:', error);
+    }
+  }
+
+  /**
    * Get notification history (wallet-specific)
    */
   public async getHistory(): Promise<StoredNotification[]> {

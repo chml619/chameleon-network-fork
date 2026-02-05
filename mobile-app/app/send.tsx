@@ -455,11 +455,21 @@ export default function SendScreen() {
       refreshBalances();
       refreshPCHMLBalance();
 
-      // Send success notification
+      // Send success notification for sender (current wallet)
       await notificationService.notifyTransactionConfirmed(
         formattedAmount,
         recipient,
         txHash
+      );
+
+      // Also create notification for recipient wallet (so they see it when they open app)
+      const truncatedSender = `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+      await notificationService.saveNotificationForWallet(
+        recipient,
+        'Funds Received',
+        `Received ${formattedAmount} from ${truncatedSender}`,
+        'tx_received',
+        { amount: formattedAmount, address: wallet.address, txHash }
       );
     } catch (error) {
       console.error('Error sending transaction:', error);
