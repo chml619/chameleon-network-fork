@@ -69,6 +69,19 @@ class NotificationService {
   }
 
   /**
+   * Send a custom notification with specific title and body
+   * Use this for action-specific notifications (Swap, Shield, Unshield, etc.)
+   */
+  public async notify(
+    title: string,
+    body: string,
+    type: StoredNotification['type'] = 'tx_confirmed',
+    data?: StoredNotification['data']
+  ): Promise<string> {
+    return this.sendNotification(title, body, type, data);
+  }
+
+  /**
    * Initialize notification service
    */
   public async initialize(): Promise<boolean> {

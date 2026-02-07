@@ -151,9 +151,6 @@ export default function PowerScreen() {
     if (!api || !wallet?.address) return;
     setIsLoadingLP(true);
     try {
-      // Mock LP rewards for now - will connect to emissions pallet
-      setLpRewards('0.0000');
-      
       // Query LP positions from all pools
       const positions: LPPosition[] = [];
       const poolCount = await api.query.pdex.poolCount();
@@ -194,6 +191,13 @@ export default function PowerScreen() {
       // Load single-sided positions
       const ssPositions = await singleSidedService.getUserPositions(api, wallet.address);
       setSingleSidedPositions(ssPositions);
+
+      // Calculate total pending LP rewards from all single-sided positions
+      const totalRewards = ssPositions.reduce((sum, pos) => {
+        const rewards = parseInt(pos.pendingRewards || '0');
+        return sum + (isNaN(rewards) ? 0 : rewards);
+      }, 0);
+      setLpRewards(totalRewards > 0 ? (totalRewards / 1e12).toFixed(4) : '0.0000');
     } catch (error) {
       console.error('Error loading LP data:', error);
     } finally {

@@ -454,7 +454,7 @@ class PDEXService {
     }
     
     const amountOut = amount * rate;
-    const fee = amount * 0.003; // 0.3% fee
+    const fee = amount * 0.0025; // 0.25% fee
     
     // More realistic price impact calculation based on amount
     let priceImpact: string;
@@ -486,7 +486,7 @@ class PDEXService {
       amountOut: formatAmount(amountOut, tokenOut),
       amountOutMin: formatAmount(amountOut * 0.995, tokenOut), // 0.5% slippage
       priceImpact,
-      fee: '0.3%',
+      fee: '0.25%',
       feeAmount: formatAmount(fee, tokenIn),
       exchangeRate: `1 ${tokenIn} = ${rate.toFixed(6)} ${tokenOut}`,
       route: [tokenIn, tokenOut],
@@ -576,7 +576,7 @@ class PDEXService {
       reserveA: `125,000 ${tokenA}`,
       reserveB: `100,000 ${tokenB}`,
       totalLiquidity: '$215,000',
-      fee: '0.3%',
+      fee: '0.25%',
       apy: '24.5%',
     };
   }

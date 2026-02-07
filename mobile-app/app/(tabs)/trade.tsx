@@ -188,10 +188,11 @@ export default function TradeScreen() {
               });
 
               if (success) {
-                await notificationService.notifyTransactionConfirmed(
-                  `${amountIn} ${selectedTokenIn.symbol} → ${selectedTokenOut.symbol}`,
-                  wallet?.address || '',
-                  txHash
+                await notificationService.notify(
+                  'Swap Complete',
+                  `Swapped ${quote.amountIn} → ${result?.amountOut || quote.amountOut}`,
+                  'tx_confirmed',
+                  { txHash, amount: amountIn }
                 );
                 // Clear cache and refresh ALL token balances (both tokenIn and tokenOut)
                 // Use single refresh path to avoid race conditions

@@ -336,10 +336,11 @@ export default function UnshieldScreen() {
       });
 
       // Send success notification
-      await notificationService.notifyTransactionConfirmed(
-        `${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`,
-        destinationAddress,
-        txHash || ''
+      await notificationService.notify(
+        'Unshield Complete',
+        `Unshielded ${amount} ${selectedToken.symbol} → ${amount} ${selectedToken.outputSymbol}`,
+        'tx_confirmed',
+        { txHash: txHash || '', amount }
       );
 
       Alert.alert(

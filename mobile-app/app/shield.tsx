@@ -105,29 +105,35 @@ export default function ShieldScreen() {
     }
   };
 
-  // Estimate fee when amount changes (CHML only)
+  // Calculate shield fee when amount changes
+  // Shield fee: 0.02% OR 0.1 CHML minimum (whichever is greater)
   useEffect(() => {
-    if (selectedToken.id === 'CHML' && amount && wallet?.address && parseFloat(amount) > 0) {
-      estimateFee();
+    if (amount && wallet?.address && parseFloat(amount) > 0) {
+      calculateShieldFee();
     } else {
       setFeeEstimate(null);
     }
   }, [amount, wallet?.address, selectedToken]);
 
-  const estimateFee = async () => {
-    if (!wallet?.address || !amount) return;
+  const calculateShieldFee = () => {
+    if (!amount) return;
 
     setIsEstimatingFee(true);
     try {
-      const amountBN = parseAmount(amount);
-      const estimate = await transactionService.estimateFee(
-        wallet.address,
-        wallet.address,
-        amountBN
-      );
-      setFeeEstimate(estimate);
+      const amountValue = parseFloat(amount);
+      const SHIELD_FEE_PERCENT = 0.0002; // 0.02%
+      const SHIELD_FEE_MIN = 0.1; // 0.1 CHML minimum
+
+      const percentFee = amountValue * SHIELD_FEE_PERCENT;
+      const shieldFee = Math.max(percentFee, SHIELD_FEE_MIN);
+
+      const feeDisplay = percentFee >= SHIELD_FEE_MIN
+        ? `${shieldFee.toFixed(4)} ${selectedToken.symbol} (0.02%)`
+        : `0.1 ${selectedToken.symbol} (minimum)`;
+
+      setFeeEstimate({ formatted: feeDisplay, partialFee: parseAmount(shieldFee.toFixed(4)).toString() });
     } catch (error) {
-      console.error('Error estimating shield fee:', error);
+      console.error('Error calculating shield fee:', error);
       setFeeEstimate(null);
     } finally {
       setIsEstimatingFee(false);
@@ -315,10 +321,11 @@ export default function ShieldScreen() {
         }
       }
       // Send success notification
-      await notificationService.notifyTransactionConfirmed(
-        `${amount} ${selectedToken.symbol} → ${selectedToken.outputSymbol}`,
-        wallet.address,
-        txHash
+      await notificationService.notify(
+        'Shield Complete',
+        `Shielded ${amount} ${selectedToken.symbol} → ${amount} ${selectedToken.outputSymbol}`,
+        'tx_confirmed',
+        { txHash, amount }
       );
 
       Alert.alert(

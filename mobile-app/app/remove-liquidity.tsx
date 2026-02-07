@@ -21,6 +21,7 @@ import { useWallet } from '@/context/WalletContext';
 import { walletService } from '@/services/wallet';
 import { poolService, PoolInfo, UserLPPosition } from '@/services/pool';
 import { transactionHistoryService } from '@/services/transactionHistory';
+import { notificationService } from '@/services/notifications';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 export default function RemoveLiquidityScreen() {
@@ -196,6 +197,16 @@ export default function RemoveLiquidityScreen() {
 
                 if (refreshBalances) await refreshBalances();
                 if (refreshPCHMLBalance) await refreshPCHMLBalance();
+
+                // Send notification
+                try {
+                  await notificationService.addNotification(
+                    'success',
+                    `Removed ${percentage}% liquidity from ${poolService.getTokenSymbol(pool.assetA)}/${poolService.getTokenSymbol(pool.assetB)} pool`
+                  );
+                } catch (e) {
+                  console.error('[RemoveLiquidity] Failed to send notification:', e);
+                }
 
                 Alert.alert('Success', 'Liquidity removed successfully!', [
                   { text: 'OK', onPress: () => router.back() }

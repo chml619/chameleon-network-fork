@@ -23,6 +23,7 @@ import { walletService } from '@/services/wallet';
 import { poolService, PoolInfo } from '@/services/pool';
 import { pdexService } from '@/services/pdex';
 import { transactionHistoryService } from '@/services/transactionHistory';
+import { notificationService } from '@/services/notifications';
 import { THEME, GRADIENTS } from '@/constants/theme';
 
 export default function AddLiquidityScreen() {
@@ -247,7 +248,19 @@ export default function AddLiquidityScreen() {
       } catch (e) {
         console.error('[AddLiquidity] Failed to save to history:', e);
       }
-      
+
+      // Send notification
+      try {
+        if (success) {
+          await notificationService.addNotification(
+            'success',
+            `Added ${amountA} ${poolService.getTokenSymbol(selectedPool.assetA)} + ${amountB} ${poolService.getTokenSymbol(selectedPool.assetB)} to liquidity pool`
+          );
+        }
+      } catch (e) {
+        console.error('[AddLiquidity] Failed to send notification:', e);
+      }
+
       setIsAdding(false);
     }
   };
