@@ -133,36 +133,69 @@ export default function HistoryScreen() {
     });
   };
 
+  // Get display info based on transaction type
+  const getTransactionDisplay = (item: StoredTransaction) => {
+    const isSent = item.from.toLowerCase() === wallet?.address?.toLowerCase();
+
+    switch (item.type) {
+      case 'withdraw_liquidity':
+        return { label: 'Withdrew Liquidity', icon: 'water-outline' as const, color: '#F59E0B', bgColor: '#FEF3C7', prefix: '+' };
+      case 'add_liquidity':
+        return { label: 'Added Liquidity', icon: 'water' as const, color: '#6366F1', bgColor: '#EDE9FE', prefix: '-' };
+      case 'remove_liquidity':
+        return { label: 'Removed Liquidity', icon: 'water-outline' as const, color: '#F59E0B', bgColor: '#FEF3C7', prefix: '+' };
+      case 'claim_rewards':
+        return { label: 'Claimed Rewards', icon: 'gift' as const, color: '#10B981', bgColor: '#D1FAE5', prefix: '+' };
+      case 'swap':
+        return { label: 'Swapped', icon: 'swap-horizontal' as const, color: '#6366F1', bgColor: '#EDE9FE', prefix: '' };
+      case 'shield':
+        return { label: 'Shielded', icon: 'shield-checkmark' as const, color: '#6366F1', bgColor: '#EDE9FE', prefix: '' };
+      case 'unshield':
+        return { label: 'Unshielded', icon: 'shield-outline' as const, color: '#F59E0B', bgColor: '#FEF3C7', prefix: '' };
+      case 'receive':
+        return { label: 'Received', icon: 'arrow-down' as const, color: THEME.colors.success, bgColor: '#E8F5E9', prefix: '+' };
+      case 'send':
+        return { label: 'Sent', icon: 'arrow-up' as const, color: THEME.colors.error, bgColor: '#FFEBEE', prefix: '-' };
+      default:
+        // Fallback to from/to address comparison
+        if (isSent) {
+          return { label: 'Sent', icon: 'arrow-up' as const, color: THEME.colors.error, bgColor: '#FFEBEE', prefix: '-' };
+        }
+        return { label: 'Received', icon: 'arrow-down' as const, color: THEME.colors.success, bgColor: '#E8F5E9', prefix: '+' };
+    }
+  };
+
   // Render transaction item
   const renderTransaction = ({ item }: { item: StoredTransaction }) => {
     const isSent = item.from.toLowerCase() === wallet?.address?.toLowerCase();
     const otherAddress = isSent ? item.to : item.from;
-    
-    const statusColor = item.status === 'finalized' 
-      ? THEME.colors.success 
-      : item.status === 'failed' 
-        ? THEME.colors.error 
+    const display = getTransactionDisplay(item);
+
+    const statusColor = item.status === 'finalized'
+      ? THEME.colors.success
+      : item.status === 'failed'
+        ? THEME.colors.error
         : THEME.colors.warning;
-    
-    const statusText = item.status === 'finalized' 
-      ? 'Complete' 
-      : item.status === 'failed' 
-        ? 'Failed' 
+
+    const statusText = item.status === 'finalized'
+      ? 'Complete'
+      : item.status === 'failed'
+        ? 'Failed'
         : 'Pending';
 
     return (
       <View style={styles.transactionCard}>
         {/* Header */}
         <View style={styles.txHeader}>
-          <View style={[styles.txIcon, { backgroundColor: isSent ? '#FFEBEE' : '#E8F5E9' }]}>
-            <Ionicons 
-              name={isSent ? 'arrow-up' : 'arrow-down'} 
-              size={24} 
-              color={isSent ? THEME.colors.error : THEME.colors.success} 
+          <View style={[styles.txIcon, { backgroundColor: display.bgColor }]}>
+            <Ionicons
+              name={display.icon}
+              size={24}
+              color={display.color}
             />
           </View>
           <View style={styles.txHeaderInfo}>
-            <Text style={styles.txType}>{isSent ? 'Sent' : 'Received'}</Text>
+            <Text style={styles.txType}>{display.label}</Text>
             <Text style={styles.txTime}>{getRelativeTime(item.timestamp)}</Text>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
@@ -172,8 +205,8 @@ export default function HistoryScreen() {
 
         {/* Amount */}
         <View style={styles.txAmount}>
-          <Text style={[styles.amountText, { color: isSent ? THEME.colors.error : THEME.colors.success }]}>
-            {isSent ? '-' : '+'}{item.formattedAmount || 'CHML'}
+          <Text style={[styles.amountText, { color: display.color }]}>
+            {display.prefix}{item.formattedAmount || 'CHML'}
           </Text>
         </View>
 

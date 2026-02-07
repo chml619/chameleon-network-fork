@@ -688,32 +688,41 @@ export default function HomeScreen() {
   );
 }
 
-// Helper function to get transaction label based on type
-function getTransactionLabel(transaction: StoredTransaction, walletAddress: string): string {
-  if (transaction.type) {
-    switch (transaction.type) {
-      case 'swap':
-        return 'Swapped';
-      case 'shield':
-        return 'Shielded';
-      case 'unshield':
-        return 'Unshielded';
-      case 'add_liquidity':
-        return 'Added Liquidity';
-      case 'remove_liquidity':
-        return 'Removed Liquidity';
-      case 'send':
-        return 'Sent';
-      case 'receive':
-        return 'Received';
-      default:
-        break;
-    }
-  }
-  
-  // Fallback to old logic for transactions without type
+// Helper function to get transaction display info based on type
+function getTransactionDisplay(transaction: StoredTransaction, walletAddress: string): {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  bgColor: string;
+  prefix: string;
+} {
   const isSent = transaction.from.toLowerCase() === walletAddress.toLowerCase();
-  return isSent ? 'Sent' : 'Received';
+
+  switch (transaction.type) {
+    case 'withdraw_liquidity':
+      return { label: 'Withdrew Liquidity', icon: 'water-outline', color: '#F59E0B', bgColor: '#FEF3C7', prefix: '+' };
+    case 'add_liquidity':
+      return { label: 'Added Liquidity', icon: 'water', color: '#6366F1', bgColor: '#EDE9FE', prefix: '-' };
+    case 'remove_liquidity':
+      return { label: 'Removed Liquidity', icon: 'water-outline', color: '#F59E0B', bgColor: '#FEF3C7', prefix: '+' };
+    case 'claim_rewards':
+      return { label: 'Claimed Rewards', icon: 'gift', color: '#10B981', bgColor: '#D1FAE5', prefix: '+' };
+    case 'swap':
+      return { label: 'Swapped', icon: 'swap-horizontal', color: '#6366F1', bgColor: '#EDE9FE', prefix: '' };
+    case 'shield':
+      return { label: 'Shielded', icon: 'shield-checkmark', color: '#6366F1', bgColor: '#EDE9FE', prefix: '' };
+    case 'unshield':
+      return { label: 'Unshielded', icon: 'shield-outline', color: '#F59E0B', bgColor: '#FEF3C7', prefix: '' };
+    case 'receive':
+      return { label: 'Received', icon: 'arrow-down', color: THEME.colors.success, bgColor: '#E8F5E9', prefix: '+' };
+    case 'send':
+      return { label: 'Sent', icon: 'arrow-up', color: THEME.colors.error, bgColor: '#FFEBEE', prefix: '-' };
+    default:
+      if (isSent) {
+        return { label: 'Sent', icon: 'arrow-up', color: THEME.colors.error, bgColor: '#FFEBEE', prefix: '-' };
+      }
+      return { label: 'Received', icon: 'arrow-down', color: THEME.colors.success, bgColor: '#E8F5E9', prefix: '+' };
+  }
 }
 function getRelativeTime(timestamp: number): string {
   const now = Date.now();
@@ -745,42 +754,41 @@ function TransactionItem({ transaction, walletAddress, onPress }: TransactionIte
   const isSent = transaction.from.toLowerCase() === walletAddress.toLowerCase();
   const otherAddress = isSent ? transaction.to : transaction.from;
   const truncatedOther = truncateAddress(otherAddress, 4);
-  
-  const statusColor = transaction.status === 'finalized' 
-    ? THEME.colors.success 
-    : transaction.status === 'failed' 
-      ? THEME.colors.error 
+  const display = getTransactionDisplay(transaction, walletAddress);
+
+  const statusColor = transaction.status === 'finalized'
+    ? THEME.colors.success
+    : transaction.status === 'failed'
+      ? THEME.colors.error
       : THEME.colors.warning;
-  
-  const statusText = transaction.status === 'finalized' 
-    ? 'Complete' 
-    : transaction.status === 'failed' 
-      ? 'Failed' 
+
+  const statusText = transaction.status === 'finalized'
+    ? 'Complete'
+    : transaction.status === 'failed'
+      ? 'Failed'
       : 'Pending';
 
-  const transactionLabel = getTransactionLabel(transaction, walletAddress);
-
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.transactionItem}
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View style={[
         styles.transactionIcon,
-        { backgroundColor: isSent ? '#FFEBEE' : '#E8F5E9' }
+        { backgroundColor: display.bgColor }
       ]}>
-        <Ionicons 
-          name={isSent ? 'arrow-up' : 'arrow-down'} 
-          size={20} 
-          color={isSent ? THEME.colors.error : THEME.colors.success} 
+        <Ionicons
+          name={display.icon}
+          size={20}
+          color={display.color}
         />
       </View>
-      
+
       <View style={styles.transactionDetails}>
         <View style={styles.transactionRow}>
           <Text style={styles.transactionTitle}>
-            {transactionLabel} {transaction.formattedAmount || 'CHML'}
+            {display.label} {transaction.formattedAmount || 'CHML'}
           </Text>
           <Text style={[styles.transactionStatus, { color: statusColor }]}>
             {statusText}
@@ -828,20 +836,19 @@ function TransactionDetailModal({
 }: TransactionDetailModalProps) {
   const isSent = transaction.from.toLowerCase() === walletAddress.toLowerCase();
   const otherAddress = isSent ? transaction.to : transaction.from;
-  
-  const statusColor = transaction.status === 'finalized' 
-    ? THEME.colors.success 
-    : transaction.status === 'failed' 
-      ? THEME.colors.error 
-      : THEME.colors.warning;
-  
-  const statusText = transaction.status === 'finalized' 
-    ? 'Complete' 
-    : transaction.status === 'failed' 
-      ? 'Failed' 
-      : 'Pending';
+  const display = getTransactionDisplay(transaction, walletAddress);
 
-  const transactionLabel = getTransactionLabel(transaction, walletAddress);
+  const statusColor = transaction.status === 'finalized'
+    ? THEME.colors.success
+    : transaction.status === 'failed'
+      ? THEME.colors.error
+      : THEME.colors.warning;
+
+  const statusText = transaction.status === 'finalized'
+    ? 'Complete'
+    : transaction.status === 'failed'
+      ? 'Failed'
+      : 'Pending';
 
   return (
     <View style={styles.txDetailContainer}>
@@ -849,20 +856,20 @@ function TransactionDetailModal({
       <View style={styles.txDetailHeader}>
         <View style={[
           styles.txDetailIcon,
-          { backgroundColor: isSent ? '#FFEBEE' : '#E8F5E9' }
+          { backgroundColor: display.bgColor }
         ]}>
-          <Ionicons 
-            name={isSent ? 'arrow-up' : 'arrow-down'} 
-            size={32} 
-            color={isSent ? THEME.colors.error : THEME.colors.success} 
+          <Ionicons
+            name={display.icon}
+            size={32}
+            color={display.color}
           />
         </View>
-        <Text style={styles.txDetailType}>{transactionLabel}</Text>
+        <Text style={styles.txDetailType}>{display.label}</Text>
         <Text style={[
           styles.txDetailAmount,
-          { color: isSent ? THEME.colors.error : THEME.colors.success }
+          { color: display.color }
         ]}>
-          {isSent ? '-' : '+'}{transaction.formattedAmount || 'CHML'}
+          {display.prefix}{transaction.formattedAmount || 'CHML'}
         </Text>
         <View style={[styles.txDetailStatusBadge, { backgroundColor: `${statusColor}20` }]}>
           <Text style={[styles.txDetailStatusText, { color: statusColor }]}>{statusText}</Text>
