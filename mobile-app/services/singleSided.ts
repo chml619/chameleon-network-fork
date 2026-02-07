@@ -284,28 +284,22 @@ class SingleSidedService {
             unlockDate = new Date(Date.now() + secondsRemaining * 1000);
           }
 
-          // Get pending rewards - check both position data and emissions pallet
-          let pendingRewards = pos.pendingRewards?.toString() || '0';
-
-          // If no rewards in position data, try emissions pallet
-          if (pendingRewards === '0' || !pos.pendingRewards) {
-            try {
-              if (api.query.emissions && (api.query.emissions as any).singleSidedRewards) {
-                const emissionsRewards = await (api.query.emissions as any).singleSidedRewards(id);
-                if (emissionsRewards && !emissionsRewards.isEmpty) {
-                  pendingRewards = emissionsRewards.toString();
-                }
-              }
-            } catch (e) {
-              console.log('[SingleSided] Could not query emissions rewards for position', id);
-            }
-          }
+          // Get pending rewards from position's rewards_accumulated field
+          // Chain uses snake_case (rewards_accumulated) which serializes to camelCase (rewardsAccumulated)
+          // toJSON() may return hex strings for Balance types, so convert to decimal string
+          const rawRewards = pos.rewardsAccumulated ?? pos.rewards_accumulated ?? 0;
+          const rewardsNum = typeof rawRewards === 'string' && rawRewards.startsWith('0x')
+            ? BigInt(rawRewards).toString()
+            : rawRewards.toString();
+          let pendingRewards = rewardsNum === '0' ? '0' : rewardsNum;
 
           positions.push({
             positionId: id.toString(),
             tokenId: pos.tokenId,
             tokenSymbol: TOKEN_SYMBOLS[pos.tokenId] || `Token${pos.tokenId}`,
-            amount: pos.amount?.toString() || '0',
+            amount: typeof pos.amount === 'string' && pos.amount.startsWith('0x')
+              ? BigInt(pos.amount).toString()
+              : (pos.amount?.toString() || '0'),
             lockTier: pos.lockTier as LockTier,
             startBlock: pos.startBlock?.toString() || '0',
             endBlock: endBlock?.toString() || null,
