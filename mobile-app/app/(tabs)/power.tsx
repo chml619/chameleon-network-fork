@@ -208,22 +208,64 @@ export default function PowerScreen() {
   const handleClaimLPRewards = async () => {
     if (!api || !wallet) return;
 
-    // For now, we'll mock the keyPair requirement
-    // const keyPair = await walletService.getOrDeriveKeyPair();
-    // if (!keyPair) {
-    //   Alert.alert('Error', 'Wallet not unlocked');
-    //   return;
-    // }
+    // Filter positions that actually have claimable rewards
+    const positionsWithRewards = singleSidedPositions.filter(pos => {
+      const rewards = parseInt(pos.pendingRewards || '0');
+      return !isNaN(rewards) && rewards > 0;
+    });
+
+    if (positionsWithRewards.length === 0) {
+      Alert.alert('No Rewards', 'No rewards available to claim.');
+      return;
+    }
+
+    const keyPair = await walletService.getOrDeriveKeyPair();
+    if (!keyPair) {
+      Alert.alert('Error', 'Wallet not unlocked. Please re-import your wallet.');
+      return;
+    }
 
     setActionLoading('claimLP');
     try {
-      // Will connect to emissions.claimLpRewards() when pallet is ready
-      // For now, show success with mock
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let claimedCount = 0;
+      let totalClaimedRaw = 0;
 
-      // if (refreshPCHMLBalance) await refreshPCHMLBalance();
-      Alert.alert('Success', 'LP rewards claimed successfully!');
-      await loadLPData();
+      for (const pos of positionsWithRewards) {
+        const result = await singleSidedService.claimSingleSidedRewards(api, keyPair, pos.positionId);
+        if (result.success) {
+          claimedCount++;
+          totalClaimedRaw += parseInt(pos.pendingRewards || '0');
+        } else {
+          console.error(`[Power] Failed to claim position ${pos.positionId}:`, result.error);
+        }
+      }
+
+      if (claimedCount > 0) {
+        const totalClaimed = (totalClaimedRaw / 1e12).toFixed(4);
+
+        // Save to transaction history
+        try {
+          transactionHistoryService.saveTransaction(wallet.address, {
+            hash: `ss_claim_all_${Date.now()}`,
+            from: wallet.address,
+            to: wallet.address,
+            amount: totalClaimedRaw.toString(),
+            formattedAmount: `${totalClaimed} pCHML`,
+            status: 'finalized',
+            usedMEVProtection: false,
+            type: 'claim_rewards',
+          });
+        } catch (e) {
+          console.error('[Power] Failed to save claim to history:', e);
+        }
+
+        notificationService.addNotification('success', `Claimed ${totalClaimed} pCHML from ${claimedCount} position(s)`);
+        if (refreshWalletBalances) await refreshWalletBalances();
+        await loadLPData();
+        Alert.alert('Success', `Claimed ${totalClaimed} pCHML from ${claimedCount} position(s)!`);
+      } else {
+        Alert.alert('Error', 'Failed to claim rewards. Please try again.');
+      }
     } catch (error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'Claim failed');
     } finally {
