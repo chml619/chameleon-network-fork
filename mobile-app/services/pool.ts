@@ -4,6 +4,7 @@
  */
 import { ApiPromise } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { parseAmount } from '@/utils/balance';
 
 export interface PoolInfo {
   id: number;
@@ -227,10 +228,10 @@ class PoolService {
     minLpTokens: string = '0'
   ): Promise<LiquidityResult> {
     try {
-      // Convert human-readable amounts to raw values (12 decimals)
-      const rawAmountA = BigInt(Math.floor(parseFloat(amountA) * Math.pow(10, 12))).toString();
-      const rawAmountB = BigInt(Math.floor(parseFloat(amountB) * Math.pow(10, 12))).toString();
-      const rawMinLp = BigInt(Math.floor(parseFloat(minLpTokens) * Math.pow(10, 12))).toString();
+      // Convert human-readable amounts to raw values (12 decimals) using string-based parseAmount to avoid Number overflow
+      const rawAmountA = parseAmount(amountA).toString();
+      const rawAmountB = parseAmount(amountB).toString();
+      const rawMinLp = parseAmount(minLpTokens).toString();
       
       console.log('[Pool] Adding liquidity:', { poolId, rawAmountA, rawAmountB, rawMinLp });
       
@@ -292,9 +293,9 @@ class PoolService {
       // For 100% removal, use raw LP value directly to avoid floating point precision loss
       const lpBN = isRawLp
         ? BigInt(lpTokens)
-        : BigInt(Math.floor(parseFloat(lpTokens) * Math.pow(10, 12)));
-      const minABN = BigInt(Math.floor(parseFloat(minAmountA) * Math.pow(10, 12)));
-      const minBBN = BigInt(Math.floor(parseFloat(minAmountB) * Math.pow(10, 12)));
+        : BigInt(parseAmount(lpTokens).toString());
+      const minABN = BigInt(parseAmount(minAmountA).toString());
+      const minBBN = BigInt(parseAmount(minAmountB).toString());
 
       console.log('[Pool] Removing liquidity:', { poolId, lpBN: lpBN.toString(), isRawLp });
 

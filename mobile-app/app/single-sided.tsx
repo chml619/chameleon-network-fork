@@ -22,8 +22,6 @@ import {
 import {
   useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  BN } from '@polkadot/util';
-import {
   useWallet } from '@/context/WalletContext';
 import {
   useApi } from '@/hooks/useApi';
@@ -37,6 +35,7 @@ import {
   THEME, GRADIENTS } from '@/constants/theme';
 import { transactionHistoryService } from '@/services/transactionHistory';
 import { notificationService } from '@/services/notifications';
+import { parseAmount } from '@/utils/balance';
 
 const TOKENS = [
   { id: 0, symbol: 'pCHML', name: 'Privacy CHML', color: '#6366F1' },
@@ -84,7 +83,7 @@ export default function SingleSidedScreen() {
       return;
     }
 
-    const amountBN = new BN(parseFloat(amount) * 1e12);
+    const amountBN = parseAmount(amount);
     if (amountBN.isZero()) {
       Alert.alert('Error', 'Please enter a valid amount');
       return;
