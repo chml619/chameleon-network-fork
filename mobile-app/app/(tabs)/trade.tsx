@@ -74,6 +74,16 @@ export default function TradeScreen() {
 
   const [slippage, setSlippage] = useState('0.5');
   const [showSlippageModal, setShowSlippageModal] = useState(false);
+
+  // Calculate Min. Received based on current slippage setting
+  const minReceived = quote ? (() => {
+    const outputStr = quote.amountOut.split(' ')[0].replace(/,/g, '');
+    const output = parseFloat(outputStr);
+    if (isNaN(output) || output <= 0) return quote.amountOutMin;
+    const tokenOut = quote.amountOut.split(' ').slice(1).join(' ');
+    const slippageMultiplier = 1 - (parseFloat(slippage) / 100);
+    return (output * slippageMultiplier).toFixed(6) + (tokenOut ? ' ' + tokenOut : '');
+  })() : null;
   const [showTxStatus, setShowTxStatus] = useState(false);
   const [txResult, setTxResult] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -174,7 +184,7 @@ export default function TradeScreen() {
             let success = false;
 
             try {
-              result = await executeSwap();
+              result = await executeSwap(slippage);
               success = result?.success || false;
               txHash = result?.txHash || '';
 
@@ -441,8 +451,8 @@ export default function TradeScreen() {
                   <Text style={styles.quoteValue}>{quote.feeAmount}</Text>
                 </View>
                 <View style={styles.quoteRow}>
-                  <Text style={styles.quoteLabel}>Min. Received</Text>
-                  <Text style={styles.quoteValueHighlight}>{quote.amountOutMin}</Text>
+                  <Text style={styles.quoteLabel}>Min. Received ({slippage}%)</Text>
+                  <Text style={styles.quoteValueHighlight}>{minReceived}</Text>
                 </View>
               </View>
             )}

@@ -157,7 +157,7 @@ export function usePDEX() {
     return null;
   }, [amountIn, quote, selectedTokenIn.balance]);
 
-  const executeSwap = useCallback(async (): Promise<SwapResult> => {
+  const executeSwap = useCallback(async (slippagePercent: string = '0.5'): Promise<SwapResult> => {
     if (!api || !wallet?.address || !quote) {
       return { success: false, error: 'Missing requirements' };
     }
@@ -173,9 +173,10 @@ export function usePDEX() {
       }
 
       const amountInBN = chainService.parseBalance(amountIn);
-      // Calculate min amount out with 0.5% slippage
+      // Calculate min amount out with user-selected slippage
       const amountOutNum = parseFloat(quote.amountOut.split(' ')[0]);
-      const minAmountOut = chainService.parseBalance((amountOutNum * 0.995).toString());
+      const slippageMultiplier = 1 - (parseFloat(slippagePercent) / 100);
+      const minAmountOut = chainService.parseBalance((amountOutNum * slippageMultiplier).toString());
 
       const result = await pdexService.executeSwap(
         api,
