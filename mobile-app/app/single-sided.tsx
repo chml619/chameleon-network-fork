@@ -74,8 +74,20 @@ export default function SingleSidedScreen() {
     }
   };
 
+  // Balance validation
+  const availableBalance = parseFloat(balance.replace(/,/g, '') || '0');
+  const enteredAmount = parseFloat(amount || '0');
+  const hasInsufficientBalance = enteredAmount > 0 && enteredAmount > availableBalance;
+  const canProvide = enteredAmount > 0 && !hasInsufficientBalance && !isSubmitting;
+
   const handleProvision = async () => {
     if (!api || !wallet || !amount) return;
+
+    // Safety check for insufficient balance
+    if (hasInsufficientBalance) {
+      Alert.alert('Error', 'Insufficient balance');
+      return;
+    }
 
     const keyPair = await walletService.getOrDeriveKeyPair();
     if (!keyPair) {
@@ -89,9 +101,13 @@ export default function SingleSidedScreen() {
       return;
     }
 
+    const lockText = selectedTier === LockTier.NoLock
+      ? 'No Lock'
+      : `a ${LOCK_TIER_INFO[selectedTier].label.toLowerCase()} lock`;
+
     Alert.alert(
       'Confirm Provision',
-      `Provide ${amount} ${selectedToken.symbol} with ${LOCK_TIER_INFO[selectedTier].label} lock?\n\nReward share: ${LOCK_TIER_INFO[selectedTier].share} of single-sided pool`,
+      `Provide ${amount} ${selectedToken.symbol} with ${lockText}?\n\nReward share: ${LOCK_TIER_INFO[selectedTier].share} of single-sided pool`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -157,7 +173,7 @@ export default function SingleSidedScreen() {
               if (provisionSuccess) {
                 Alert.alert(
                   'Success',
-                  `Successfully provided ${amount} ${selectedToken.symbol} with ${LOCK_TIER_INFO[selectedTier].label} lock!`,
+                  `Successfully provided ${amount} ${selectedToken.symbol} with ${lockText}!`,
                   [{ text: 'OK', onPress: () => router.back() }]
                 );
               } else if (provisionError) {
@@ -277,11 +293,16 @@ export default function SingleSidedScreen() {
           </View>
         </View>
 
+        {/* Insufficient Balance Error */}
+        {hasInsufficientBalance && (
+          <Text style={styles.errorText}>Insufficient Balance</Text>
+        )}
+
         {/* Submit Button */}
         <TouchableOpacity
-          style={[styles.submitButton, (!amount || isSubmitting) && styles.submitButtonDisabled]}
+          style={[styles.submitButton, !canProvide && styles.submitButtonDisabled]}
           onPress={handleProvision}
-          disabled={!amount || isSubmitting}
+          disabled={!canProvide}
         >
           {isSubmitting ? (
             <ActivityIndicator color={THEME.colors.white} />
@@ -382,6 +403,13 @@ const styles = StyleSheet.create({
     borderRadius: THEME.borderRadius.small,
   },
   maxButtonText: { fontSize: THEME.fontSize.sm, fontWeight: THEME.fontWeight.bold, color: THEME.colors.primary },
+  errorText: {
+    color: '#EF4444',
+    fontSize: THEME.fontSize.sm,
+    fontWeight: THEME.fontWeight.semibold,
+    marginBottom: THEME.spacing.sm,
+    textAlign: 'center',
+  },
   submitButton: {
     flexDirection: 'row',
     alignItems: 'center',
