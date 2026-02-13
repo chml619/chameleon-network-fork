@@ -340,9 +340,18 @@ export default function PowerScreen() {
       return;
     }
 
+    const depositAmount = (parseInt(selectedSingleSidedPosition.amount) / 1e12).toFixed(4);
+    const pendingRewardsRaw = parseInt(selectedSingleSidedPosition.pendingRewards || '0');
+    const pendingRewardsFormatted = pendingRewardsRaw > 0 ? (pendingRewardsRaw / 1e12).toFixed(4) : '0';
+    const hasRewards = pendingRewardsRaw > 0;
+
+    const confirmMessage = hasRewards
+      ? `Withdraw ${depositAmount} ${selectedSingleSidedPosition.tokenSymbol} and claim ${pendingRewardsFormatted} pCHML in pending rewards?`
+      : `Withdraw ${depositAmount} ${selectedSingleSidedPosition.tokenSymbol}?`;
+
     Alert.alert(
       'Confirm Withdrawal',
-      `Withdraw ${(parseInt(selectedSingleSidedPosition.amount) / 1e12).toFixed(4)} ${selectedSingleSidedPosition.tokenSymbol}?`,
+      confirmMessage,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -350,6 +359,36 @@ export default function PowerScreen() {
           onPress: async () => {
             setIsWithdrawing(true);
             try {
+              // Auto-claim pending rewards before withdrawing
+              if (hasRewards) {
+                try {
+                  const claimResult = await singleSidedService.claimSingleSidedRewards(
+                    api,
+                    keyPair,
+                    selectedSingleSidedPosition.positionId
+                  );
+                  if (claimResult.success) {
+                    // Save claim to transaction history
+                    transactionHistoryService.saveTransaction(wallet.address, {
+                      hash: `ss_auto_claim_${Date.now()}`,
+                      from: wallet.address,
+                      to: wallet.address,
+                      amount: selectedSingleSidedPosition.pendingRewards || '0',
+                      formattedAmount: `${pendingRewardsFormatted} pCHML`,
+                      status: 'finalized',
+                      usedMEVProtection: false,
+                      type: 'claim_rewards',
+                    });
+                  } else {
+                    console.warn('[Power] Auto-claim before withdraw failed:', claimResult.error);
+                    // Continue with withdraw - blockchain withdraw also pays rewards
+                  }
+                } catch (claimError) {
+                  console.warn('[Power] Auto-claim error, continuing with withdraw:', claimError);
+                  // Continue with withdraw - blockchain withdraw also pays rewards
+                }
+              }
+
               const result = await singleSidedService.withdrawSingleSided(
                 api,
                 keyPair,
@@ -362,13 +401,19 @@ export default function PowerScreen() {
                   from: wallet.address,
                   to: wallet.address,
                   amount: selectedSingleSidedPosition.amount,
-                  formattedAmount: `${(parseInt(selectedSingleSidedPosition.amount) / 1e12).toFixed(4)} ${selectedSingleSidedPosition.tokenSymbol}`,
+                  formattedAmount: `${depositAmount} ${selectedSingleSidedPosition.tokenSymbol}`,
                   status: 'finalized',
                   usedMEVProtection: false,
                   type: 'withdraw_liquidity',
                 });
+                const successMsg = hasRewards
+                  ? `Withdrew ${depositAmount} ${selectedSingleSidedPosition.tokenSymbol} and claimed ${pendingRewardsFormatted} pCHML in rewards!`
+                  : 'Position withdrawn successfully!';
                 notificationService.addNotification('success', 'Single-sided position withdrawn!');
-                Alert.alert('Success', 'Position withdrawn successfully!');
+                Alert.alert('Success', successMsg);
+                // Wait for chain state to propagate before refreshing
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                if (refreshWalletBalances) await refreshWalletBalances();
                 await loadLPData();
                 setShowSingleSidedModal(false);
               } else {
